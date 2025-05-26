@@ -123,7 +123,9 @@ const SeparatorActions = ({
 		setSeparators(
 			[...separators].filter(fi => fi.identifier !== mod.identifier),
 		);
-		setInitReload(!init_reload);
+		setTimeout(() => {
+			setInitReload(!init_reload);
+		}, 200);
 	}, [separators, mod.identifier, init_reload]);
 
 	const handleEdit = useCallback(() => {

@@ -128,7 +128,11 @@ const RowComponent = ({
 
 	const rowClassName = useMemo(
 		() =>
-			`flex mod-row hover:bg-muted/50 py-1.5 min-h-[${PreviewImgSizeToRowHeight[preview_size as keyof typeof PreviewImgSizeToRowHeight]}px] border-b border-border/70 ${
+			`flex mod-row hover:bg-muted/50 py-1.5 min-h-[${
+				PreviewImgSizeToRowHeight[
+					preview_size as keyof typeof PreviewImgSizeToRowHeight
+				]
+			}px] border-b border-border/70 ${
 				isSelected ? '!ring-1 !ring-blue-800 !bg-blue-500/10' : ''
 			} ${
 				showViolation

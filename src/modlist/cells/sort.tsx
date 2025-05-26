@@ -21,7 +21,12 @@ export const Sort = memo(
 
 		const handlePointerDown = useCallback(
 			(_e: React.PointerEvent) => {
-				if (isSortingEnabled && selectedRows.size <= 1) {
+				if (
+					isSortingEnabled &&
+					selectedRows.size <= 1 &&
+					typeof id === 'string' &&
+					!id.startsWith('separator_')
+				) {
 					onSelect(id, false);
 					setLastSelectedId(id);
 				}
