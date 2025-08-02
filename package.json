@@ -3,10 +3,6 @@
 	"private": true,
 	"version": "0.8.4",
 	"description": "Mod manager tool for Total War: Warhammer 2 & 3 & Total War: Three Kingdom & Mount & Blade: Bannerlord",
-	"author": {
-		"name": "Burak KARTAL",
-		"email": "futuregnr@gmail.com"
-	},
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
