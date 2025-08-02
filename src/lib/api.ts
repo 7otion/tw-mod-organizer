@@ -318,7 +318,7 @@ class API {
 		});
 	}
 
-	async highlight_path(file_path: string): Promise<string[]> {
+	async highlight_path(file_path: string): Promise<void> {
 		return invoke('highlight_path', {
 			file_path,
 		});
