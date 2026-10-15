@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 resources
+
+# Personal design docs
+docs/
