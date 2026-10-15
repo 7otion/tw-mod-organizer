@@ -4,7 +4,6 @@ version = "0.1.0"
 publish = false
 description = "TW Mod Organizer"
 authors = ["Burak Kartal"]
-license = "MIT"
 edition = "2024"
 
 [lib]
