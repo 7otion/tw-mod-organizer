@@ -1,0 +1,48 @@
+{
+	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+	"productName": "TW Mod Organizer",
+	"version": "2.0.0",
+	"identifier": "com.tw-mod-organizer.v2",
+	"build": {
+		"frontendDist": "../build",
+		"devUrl": "http://localhost:2222",
+		"beforeDevCommand": "bun run dev",
+		"beforeBuildCommand": "bun run build"
+	},
+	"app": {
+		"windows": [
+			{
+				"title": "TW Mod Organizer",
+				"width": 1400,
+				"height": 860,
+				"minWidth": 1100,
+				"minHeight": 680,
+				"resizable": true,
+				"dragDropEnabled": true,
+				"useHttpsScheme": true,
+				"decorations": false,
+				"incognito": true,
+				"shadow": false,
+				"transparent": true
+			}
+		],
+		"security": {
+			"csp": "default-src 'self' ipc: https://ipc.localhost asset: asset.localhost; img-src 'self' https: http: asset: asset.localhost data:; media-src 'self' https: asset: asset.localhost; style-src 'self' 'unsafe-inline'; font-src 'self' data:;",
+			"assetProtocol": {
+				"enable": true,
+				"scope": ["**"]
+			}
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		]
+	}
+}
