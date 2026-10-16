@@ -14,7 +14,7 @@
 	bind:this={ref}
 	data-slot="card-title"
 	class={cn(
-		'font-engraved text-[11.5px] leading-normal font-bold tracking-[0.18em] text-foreground-2 uppercase',
+		'font-engraved text-xs leading-normal font-bold tracking-[0.18em] text-foreground-2 uppercase',
 		className
 	)}
 	{...restProps}

@@ -31,15 +31,15 @@
 		<Spinner class="size-3.5" />
 	{/snippet}
 	{#snippet successIcon()}
-		<CircleCheckIcon class="size-[18px] text-gem-emerald" />
+		<CircleCheckIcon class="size-5 text-gem-emerald" />
 	{/snippet}
 	{#snippet errorIcon()}
-		<OctagonXIcon class="size-[18px] text-gem-blood" />
+		<OctagonXIcon class="size-5 text-gem-blood" />
 	{/snippet}
 	{#snippet infoIcon()}
-		<InfoIcon class="size-[18px] text-gem-sapphire" />
+		<InfoIcon class="size-5 text-gem-sapphire" />
 	{/snippet}
 	{#snippet warningIcon()}
-		<TriangleAlertIcon class="size-[18px] text-gem-gold" />
+		<TriangleAlertIcon class="size-5 text-gem-gold" />
 	{/snippet}
 </Sonner>

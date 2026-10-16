@@ -13,7 +13,7 @@
 	bind:ref
 	data-slot="command-item"
 	class={cn(
-		"group/command-item relative flex h-[30px] cursor-default items-center gap-2 px-3 text-md outline-hidden select-none data-selected:bg-active data-selected:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:**:[svg]:text-foreground",
+		"group/command-item relative flex h-row-compact cursor-default items-center gap-2 px-3 text-md outline-hidden select-none data-selected:bg-active data-selected:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:**:[svg]:text-foreground",
 		'data-disabled:pointer-events-none data-disabled:text-muted-foreground',
 		className
 	)}

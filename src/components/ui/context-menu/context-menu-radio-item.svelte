@@ -21,7 +21,7 @@
 	data-slot="context-menu-radio-item"
 	data-inset={inset}
 	class={cn(
-		"relative flex h-[30px] cursor-default items-center gap-2 pr-8 pl-3 text-md outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-inset:pl-8 data-disabled:pointer-events-none data-disabled:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		"relative flex h-row-compact cursor-default items-center gap-2 pr-8 pl-3 text-md outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-inset:pl-8 data-disabled:pointer-events-none data-disabled:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		className
 	)}
 	{...restProps}

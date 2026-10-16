@@ -13,7 +13,7 @@
 	bind:ref
 	data-slot="dialog-title"
 	class={cn(
-		'font-engraved text-[17px] leading-tight font-bold tracking-[0.08em]',
+		'font-engraved text-lg leading-tight font-bold tracking-[0.08em]',
 		className
 	)}
 	{...restProps}

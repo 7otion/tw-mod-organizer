@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn-svelte/tailwind.css';
+@import '@fontsource-variable/cinzel';
+@import '@fontsource-variable/grenze-gotisch';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+	--bg-void: #050305;
+	--bg-app: #090609;
+	--bg-panel: #0e0a0e;
+	--bg-raised: #151015;
+	--bg-hover: #1b1219;
+	--bg-active: #241722;
+	--bg-input: #070507;
+	--line: #231820;
+	--line-strong: #382633;
+	--line-control: #4a3343;
+	--hairline-pink: rgba(255, 77, 148, 0.32);
+	--text-1: #f5edf2;
+	--text-2: #cbb9c5;
+	--text-3: #9e8797;
+	--pink: #ff4d94;
+	--pink-strong: #ff7ab0;
+	--pink-deep: #b3124f;
+	--pink-ink: #1c0311;
+	--pink-soft: #2b0c1b;
+	--pink-glow: rgba(255, 77, 148, 0.1);
+	--gem-emerald: #3ee8b5;
+	--gem-gold: #f3c55b;
+	--gem-amethyst: #b490ff;
+	--gem-sapphire: #62b6ff;
+	--gem-ember: #ff9a5c;
+	--gem-blood: #ff5d6c;
+	--gem-blood-deep: #5e020b;
+	--danger-fill: #c2334a;
+	--handle: #76636f;
+	--handle-link: #8a7bb0;
+	--sep-grey: #a99fa6;
+	--sep-red: #ff5d6c;
+	--sep-purple: #b490ff;
+	--sep-green: #3ee8b5;
+	--sep-blue: #62b6ff;
+	--sep-amber: #f3c55b;
+	--sep-teal: #5fd6e0;
+	--sep-rust: #ff9a5c;
+	--scrim: rgba(5, 3, 5, 0.78);
+	--z-base: 0;
+	--z-sticky: 10;
+	--z-drag: 50;
+	--z-overlay: 60;
+	--z-modal: 70;
+	--z-toast: 90;
+	--h-titlebar: 48px;
+	--w-rail: 60px;
+	--w-sidebar: 320px;
+	--row-compact: 32px;
+	--row-regular: 38px;
+	--row-large: 72px;
+	--row-sep: 38px;
+	--thumb-regular-w: 52px;
+	--thumb-regular-h: 29px;
+	--thumb-large-w: 112px;
+	--thumb-large-h: 63px;
+
+	--radius: 3px;
+	--background: var(--bg-app);
+	--foreground: var(--text-1);
+	--card: var(--bg-panel);
+	--card-foreground: var(--text-1);
+	--popover: var(--bg-raised);
+	--popover-foreground: var(--text-1);
+	--primary: var(--pink-deep);
+	--primary-foreground: var(--text-1);
+	--secondary: var(--bg-raised);
+	--secondary-foreground: var(--text-1);
+	--muted: var(--bg-hover);
+	--muted-foreground: var(--text-3);
+	--accent: var(--bg-active);
+	--accent-foreground: var(--text-1);
+	--destructive: var(--gem-blood-deep);
+	--border: var(--line);
+	--input: var(--line-strong);
+	--ring: var(--pink);
+}
+
+@theme {
+	--text-3xs: 10.5px;
+	--text-2xs: 11.5px;
+	--text-xs: 12px;
+	--text-sm: 13px;
+	--text-md: 14px;
+	--text-md--line-height: 1.45;
+	--text-lg: 17px;
+	--text-xl: 22px;
+	--text-title: 44px;
+	--text-title--line-height: 1;
+}
+
+@theme inline {
+	--font-sans: 'Segoe UI', system-ui, sans-serif;
+	--font-engraved: 'Cinzel Variable', serif;
+	--font-blackletter: 'Grenze Gotisch Variable', serif;
+	--font-mono: Consolas, 'Cascadia Mono', monospace;
+	--radius-sm: 2px;
+	--radius-md: var(--radius);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--radius-window: 0.45rem;
+	--spacing-titlebar: var(--h-titlebar);
+	--spacing-rail: var(--w-rail);
+	--spacing-sidebar: var(--w-sidebar);
+	--spacing-row-compact: var(--row-compact);
+	--spacing-row-regular: var(--row-regular);
+	--spacing-row-large: var(--row-large);
+	--spacing-row-sep: var(--row-sep);
+	--spacing-thumb-regular-w: var(--thumb-regular-w);
+	--spacing-thumb-regular-h: var(--thumb-regular-h);
+	--spacing-thumb-large-w: var(--thumb-large-w);
+	--spacing-thumb-large-h: var(--thumb-large-h);
+	--shadow-focus-ring: 0 0 0 2px var(--bg-void), 0 0 0 4px var(--pink);
+	--shadow-pop: 0 18px 44px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--line-strong);
+	--shadow-modal:
+		0 30px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--hairline-pink);
+	--shadow-seal:
+		0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+		0 0 24px rgba(255, 77, 148, 0.35);
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-void: var(--bg-void);
+	--color-panel: var(--bg-panel);
+	--color-raised: var(--bg-raised);
+	--color-hover: var(--bg-hover);
+	--color-active: var(--bg-active);
+	--color-field: var(--bg-input);
+	--color-line-strong: var(--line-strong);
+	--color-line-control: var(--line-control);
+	--color-hairline-pink: var(--hairline-pink);
+	--color-foreground-2: var(--text-2);
+	--color-pink-strong: var(--pink-strong);
+	--color-pink-deep: var(--pink-deep);
+	--color-pink-soft: var(--pink-soft);
+	--color-pink-glow: var(--pink-glow);
+	--color-gem-emerald: var(--gem-emerald);
+	--color-gem-gold: var(--gem-gold);
+	--color-gem-amethyst: var(--gem-amethyst);
+	--color-gem-sapphire: var(--gem-sapphire);
+	--color-gem-ember: var(--gem-ember);
+	--color-gem-blood: var(--gem-blood);
+	--color-danger-fill: var(--danger-fill);
+	--color-handle: var(--handle);
+	--color-handle-link: var(--handle-link);
+	--color-sep-grey: var(--sep-grey);
+	--color-sep-red: var(--sep-red);
+	--color-sep-purple: var(--sep-purple);
+	--color-sep-green: var(--sep-green);
+	--color-sep-blue: var(--sep-blue);
+	--color-sep-amber: var(--sep-amber);
+	--color-sep-teal: var(--sep-teal);
+	--color-sep-rust: var(--sep-rust);
+	--color-scrim: var(--scrim);
+}
+
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+	}
+	body {
+		@apply bg-transparent font-sans text-md text-foreground;
+	}
+}

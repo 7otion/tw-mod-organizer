@@ -6,11 +6,11 @@
 		variants: {
 			variant: {
 				default:
-					'h-[15px] bg-primary px-[5px] text-[9.5px] font-bold tracking-[0.06em] text-primary-foreground [a]:hover:bg-primary/80',
+					'h-4 bg-primary px-[5px] text-3xs font-bold tracking-[0.06em] text-primary-foreground [a]:hover:bg-primary/80',
 				secondary:
-					'h-[15px] bg-secondary px-[5px] text-[9.5px] font-bold tracking-[0.06em] text-secondary-foreground',
+					'h-4 bg-secondary px-[5px] text-3xs font-bold tracking-[0.06em] text-secondary-foreground',
 				destructive:
-					'h-[15px] bg-destructive px-[5px] text-[9.5px] font-bold tracking-[0.06em] text-primary-foreground',
+					'h-4 bg-destructive px-[5px] text-3xs font-bold tracking-[0.06em] text-primary-foreground',
 				outline:
 					'h-6 border-line-strong px-2 text-xs text-foreground-2 [a]:hover:bg-hover',
 				tag: 'h-6 border-[#5a2541] px-2 text-xs text-pink-strong [a]:hover:bg-hover',

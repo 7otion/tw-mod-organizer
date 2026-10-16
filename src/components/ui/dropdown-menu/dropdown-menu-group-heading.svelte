@@ -18,7 +18,7 @@
 	data-slot="dropdown-menu-group-heading"
 	data-inset={inset}
 	class={cn(
-		'px-3 py-1.5 font-engraved text-[10.5px] font-bold tracking-[0.2em] text-muted-foreground uppercase data-inset:pl-8',
+		'px-3 py-1.5 font-engraved text-2xs font-bold tracking-[0.2em] text-muted-foreground uppercase data-inset:pl-8',
 		className
 	)}
 	{...restProps}
