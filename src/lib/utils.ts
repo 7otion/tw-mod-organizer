@@ -17,11 +17,11 @@ export const cn = createCn({
 				'thumb-large-w',
 				'thumb-large-h',
 			],
-			radius: ['window'],
+			radius: ['shell', 'window'],
 		},
 		classGroups: {
 			'font-size': [{ text: ['3xs', '2xs', 'md', 'title'] }],
-			shadow: [{ shadow: ['focus-ring', 'pop', 'modal', 'seal'] }],
+			shadow: [{ shadow: ['pop', 'modal'] }],
 			'bg-image': [{ bg: ['fade-black'] }],
 		},
 	},

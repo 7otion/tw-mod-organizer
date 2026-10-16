@@ -15,7 +15,7 @@
 	{role}
 	aria-label={ariaLabel}
 	class={cn(
-		'inline-block size-3 shrink-0 animate-spin border-2 border-current/25 border-t-current border-r-current text-primary',
+		'inline-block size-3 shrink-0 animate-spin rounded-full border-2 border-fill-3 border-t-foreground',
 		className
 	)}
 	{...restProps}

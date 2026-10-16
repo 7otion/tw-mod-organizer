@@ -15,7 +15,7 @@
 	bind:ref
 	data-slot="input-group-control"
 	class={cn(
-		'h-full flex-1 rounded-none border-0 bg-transparent px-1.5 text-sm shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent',
+		'h-full flex-1 rounded-none border-0 bg-transparent px-1.5 text-md shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent',
 		className
 	)}
 	bind:value

@@ -15,7 +15,7 @@
 	bind:ref
 	data-slot="progress"
 	class={cn(
-		'relative flex h-1 w-full items-center overflow-x-hidden bg-[#1d1722]',
+		'relative flex h-1 w-full items-center overflow-x-hidden rounded-full bg-fill-2',
 		className
 	)}
 	{value}
@@ -24,7 +24,7 @@
 >
 	<div
 		data-slot="progress-indicator"
-		class="size-full flex-1 bg-gem-sapphire transition-all"
+		class="size-full flex-1 rounded-full bg-status-update transition-all"
 		style="transform: translateX(-{100 -
 			(100 * (value ?? 0)) / (max ?? 1)}%)"
 	></div>

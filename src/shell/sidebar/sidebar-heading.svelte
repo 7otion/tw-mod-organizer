@@ -22,7 +22,7 @@
 		<Tooltip.Trigger
 			class={cn(
 				buttonVariants({ variant: 'ghost', size: 'xs' }),
-				'h-auto gap-1 px-1 py-0.5 font-sans text-xs font-semibold tracking-normal text-pink-strong hover:text-pink-strong'
+				'h-auto gap-1 rounded-shell px-1 py-0.5 font-sans text-xs font-semibold tracking-normal text-pink-strong hover:bg-hover hover:text-pink-strong'
 			)}
 		>
 			{@render children()}

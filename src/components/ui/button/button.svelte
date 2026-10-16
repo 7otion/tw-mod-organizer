@@ -7,26 +7,26 @@
 	} from 'svelte/elements';
 
 	export const buttonVariants = tv({
-		base: "group/button inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-sm font-semibold whitespace-nowrap transition-all outline-none select-none focus-visible:shadow-focus-ring active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		base: "group/button inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-md font-semibold whitespace-nowrap transition-colors duration-120 outline-none select-none disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		variants: {
 			variant: {
-				default: 'bg-primary text-foreground hover:bg-primary/80',
+				default:
+					'bg-primary text-primary-foreground hover:bg-primary-hover',
 				outline:
-					'bg-transparent hover:bg-hover hover:text-foreground aria-expanded:bg-active aria-expanded:text-foreground',
+					'text-foreground shadow-[inset_0_0_0_1px_var(--line-2)] hover:bg-fill-1 active:bg-fill-2 aria-expanded:bg-fill-2',
 				secondary:
-					'bg-secondary text-secondary-foreground hover:bg-active aria-expanded:bg-active aria-expanded:text-secondary-foreground',
-				ghost: 'text-foreground-2 hover:bg-hover hover:text-foreground aria-expanded:bg-active aria-expanded:text-foreground',
-				destructive:
-					'bg-danger-fill text-white hover:bg-danger-fill/85',
+					'bg-secondary text-secondary-foreground hover:bg-fill-2 active:bg-fill-3 aria-expanded:bg-fill-2',
+				ghost: 'text-foreground-2 hover:bg-fill-1 hover:text-foreground active:bg-fill-2 aria-expanded:bg-fill-1 aria-expanded:text-foreground',
+				destructive: 'bg-danger text-white hover:bg-danger-hover',
 				'destructive-outline':
-					'bg-transparent text-destructive hover:bg-destructive/10',
-				link: 'text-pink-strong hover:text-[#ffa3c8]',
+					'text-status-missing hover:bg-fill-1 active:bg-fill-2',
+				link: 'text-foreground underline decoration-white/30 underline-offset-3 hover:decoration-white/60',
 			},
 			size: {
 				default:
-					'h-8 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
+					'h-8 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5',
 				xs: "h-6 gap-1 px-2 text-xs [&_svg:not([class*='size-'])]:size-3",
-				sm: "h-7 px-2 [&_svg:not([class*='size-'])]:size-3.5",
+				sm: "h-7 px-2 text-sm [&_svg:not([class*='size-'])]:size-3.5",
 				lg: 'h-9 px-5',
 				icon: 'size-8',
 				'icon-xs': "size-6 [&_svg:not([class*='size-'])]:size-3",

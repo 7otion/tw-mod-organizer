@@ -14,7 +14,7 @@
 	bind:this={ref}
 	data-slot="dropdown-menu-shortcut"
 	class={cn(
-		'ml-auto font-mono text-2xs text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground',
+		'ml-auto font-mono text-xs text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground',
 		className
 	)}
 	{...restProps}

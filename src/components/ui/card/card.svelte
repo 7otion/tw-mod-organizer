@@ -18,7 +18,7 @@
 	data-slot="card"
 	data-size={size}
 	class={cn(
-		'group/card flex flex-col overflow-hidden border bg-card text-md text-card-foreground [--card-spacing:--spacing(3)] data-[size=sm]:[--card-spacing:--spacing(2)]',
+		'group/card flex flex-col overflow-hidden rounded-lg bg-card text-md text-card-foreground [--card-spacing:--spacing(3)] data-[size=sm]:[--card-spacing:--spacing(2)]',
 		className
 	)}
 	{...restProps}

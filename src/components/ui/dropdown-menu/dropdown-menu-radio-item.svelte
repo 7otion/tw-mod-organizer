@@ -17,7 +17,7 @@
 	{closeOnSelect}
 	data-slot="dropdown-menu-radio-item"
 	class={cn(
-		"relative flex h-row-compact cursor-default items-center gap-2 pr-8 pl-3 text-md outline-hidden select-none focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-8 data-disabled:pointer-events-none data-disabled:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		"relative flex h-row-compact cursor-default items-center gap-2 rounded-md pr-8 pl-2 text-md outline-hidden select-none focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-8 data-disabled:pointer-events-none data-disabled:text-foreground-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		className
 	)}
 	{...restProps}

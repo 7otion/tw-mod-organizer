@@ -17,7 +17,7 @@
 	bind:ref
 	data-slot="checkbox"
 	class={cn(
-		'peer relative flex size-4 shrink-0 items-center justify-center rounded-sm border-[1.5px] border-[#6b5064] transition-shadow outline-none group-has-disabled/field:opacity-50 group-has-[:focus-visible]/field-label:ring-0 group-has-[:focus-visible]/field-label:not-data-checked:border-[#6b5064] after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:shadow-focus-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 aria-invalid:aria-checked:border-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-pink-soft data-[state=indeterminate]:text-primary dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground group-has-[:focus-visible]/field-label:data-checked:border-primary dark:data-checked:bg-primary',
+		'peer relative flex size-4 shrink-0 items-center justify-center rounded-sm border-[1.5px] border-[#5a5459] text-primary-foreground transition-colors duration-120 outline-none group-has-disabled/field:opacity-35 group-has-[:focus-visible]/field-label:ring-0 after:absolute after:-inset-x-3 after:-inset-y-2 hover:border-[#7a7379] disabled:cursor-not-allowed disabled:opacity-35 aria-invalid:border-status-missing data-[state=indeterminate]:border-foreground-2 data-[state=indeterminate]:bg-fill-3 data-[state=indeterminate]:text-foreground data-checked:border-primary data-checked:bg-primary',
 		className
 	)}
 	bind:checked

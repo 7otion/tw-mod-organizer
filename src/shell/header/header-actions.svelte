@@ -27,7 +27,12 @@
 		<Button
 			variant={action.isPrimary ? 'default' : 'secondary'}
 			aria-haspopup={action.opensDialog ? 'dialog' : undefined}
-			class="h-7 gap-1.5 px-3 text-sm font-semibold"
+			class={[
+				'h-7 gap-1.5 rounded-shell px-3 text-sm font-semibold',
+				action.isPrimary
+					? 'bg-bone text-bone-ink hover:bg-foreground'
+					: 'bg-raised hover:bg-active aria-expanded:bg-active',
+			]}
 		>
 			<action.icon class="size-3.5" />
 			{action.label}

@@ -2,12 +2,12 @@
 	import { type VariantProps, tv } from 'tailwind-variants';
 
 	export const toggleVariants = tv({
-		base: "group/toggle inline-flex items-center justify-center gap-1.5 rounded-none text-sm font-semibold whitespace-nowrap text-muted-foreground transition-[color,box-shadow] outline-none hover:text-foreground focus-visible:shadow-focus-ring disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-destructive aria-pressed:bg-pink-soft aria-pressed:text-foreground aria-pressed:shadow-[inset_0_-2px_0_var(--pink)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		base: "group/toggle inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-semibold whitespace-nowrap text-muted-foreground transition-colors duration-120 outline-none hover:text-foreground disabled:pointer-events-none disabled:opacity-40 aria-pressed:bg-fill-3 aria-pressed:text-foreground data-[state=on]:bg-fill-3 data-[state=on]:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		variants: {
 			variant: {
-				default: 'bg-transparent',
-				outline: 'border border-line-control bg-transparent',
-				filter: 'border-b border-transparent bg-transparent px-2 font-medium aria-pressed:border-primary aria-pressed:bg-transparent aria-pressed:shadow-none data-[state=on]:border-primary data-[state=on]:bg-transparent data-[state=on]:shadow-none',
+				default: 'bg-transparent hover:bg-fill-1',
+				outline: 'bg-fill-1 hover:bg-fill-2',
+				filter: 'rounded-full bg-fill-1 px-3 text-foreground-2 hover:bg-fill-2 aria-pressed:bg-primary aria-pressed:text-primary-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
 			},
 			size: {
 				default:

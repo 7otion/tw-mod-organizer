@@ -7,36 +7,42 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--bg-void: #050305;
 	--bg-app: #090609;
 	--bg-panel: #0e0a0e;
 	--bg-raised: #151015;
 	--bg-hover: #1b1219;
 	--bg-active: #241722;
-	--bg-input: #070507;
 	--line: #231820;
 	--line-strong: #382633;
-	--line-control: #4a3343;
-	--hairline-pink: rgba(255, 77, 148, 0.32);
-	--text-1: #f5edf2;
-	--text-2: #cbb9c5;
-	--text-3: #9e8797;
-	--pink: #ff4d94;
 	--pink-strong: #ff7ab0;
 	--pink-deep: #b3124f;
-	--pink-ink: #1c0311;
 	--pink-soft: #2b0c1b;
-	--pink-glow: rgba(255, 77, 148, 0.1);
-	--gem-emerald: #3ee8b5;
+	--bone: #ece4e9;
+	--bone-ink: #0b080a;
 	--gem-gold: #f3c55b;
-	--gem-amethyst: #b490ff;
-	--gem-sapphire: #62b6ff;
-	--gem-ember: #ff9a5c;
-	--gem-blood: #ff5d6c;
 	--gem-blood-deep: #5e020b;
-	--danger-fill: #c2334a;
-	--handle: #76636f;
-	--handle-link: #8a7bb0;
+
+	--bg-0: #08070a;
+	--bg-1: #0d0c0f;
+	--bg-2: #111013;
+	--surface-1: #18161a;
+	--surface-2: #1f1c21;
+	--fill-1: rgba(255, 255, 255, 0.045);
+	--fill-2: rgba(255, 255, 255, 0.075);
+	--fill-3: rgba(255, 255, 255, 0.11);
+	--line-1: rgba(255, 255, 255, 0.06);
+	--line-2: rgba(255, 255, 255, 0.1);
+	--text-1: #f3eff2;
+	--text-2: #bab3b9;
+	--text-3: #8b848a;
+	--text-4: #5f5a5e;
+	--primary-ink: #0d0b0e;
+	--primary-hover: #ffffff;
+	--pink: #ff4d94;
+	--pink-hover: #ff6aa6;
+	--pink-tint: rgba(255, 77, 148, 0.09);
+	--pink-tint-2: rgba(255, 77, 148, 0.16);
+	--pink-ink: #1a0410;
 	--sep-grey: #a99fa6;
 	--sep-red: #ff5d6c;
 	--sep-purple: #b490ff;
@@ -45,7 +51,16 @@
 	--sep-amber: #f3c55b;
 	--sep-teal: #5fd6e0;
 	--sep-rust: #ff9a5c;
-	--scrim: rgba(5, 3, 5, 0.78);
+	--st-update: #6cb8ff;
+	--st-win: #f0c35e;
+	--st-lose: #ff9f63;
+	--st-missing: #ff6b78;
+	--st-dep: #b79bff;
+	--st-ok: #4fdcae;
+	--st-warn: #f0c35e;
+	--danger: #e5484d;
+	--danger-hover: #ee5b60;
+	--scrim: rgba(0, 0, 0, 0.6);
 	--z-base: 0;
 	--z-sticky: 10;
 	--z-drag: 50;
@@ -64,24 +79,24 @@
 	--thumb-large-w: 112px;
 	--thumb-large-h: 63px;
 
-	--radius: 3px;
-	--background: var(--bg-app);
+	--radius: 8px;
+	--background: var(--bg-2);
 	--foreground: var(--text-1);
-	--card: var(--bg-panel);
+	--card: var(--bg-1);
 	--card-foreground: var(--text-1);
-	--popover: var(--bg-raised);
+	--popover: var(--surface-1);
 	--popover-foreground: var(--text-1);
-	--primary: var(--pink-deep);
-	--primary-foreground: var(--text-1);
-	--secondary: var(--bg-raised);
+	--primary: var(--text-1);
+	--primary-foreground: var(--primary-ink);
+	--secondary: var(--fill-1);
 	--secondary-foreground: var(--text-1);
-	--muted: var(--bg-hover);
+	--muted: var(--fill-1);
 	--muted-foreground: var(--text-3);
-	--accent: var(--bg-active);
+	--accent: var(--fill-2);
 	--accent-foreground: var(--text-1);
-	--destructive: var(--gem-blood-deep);
-	--border: var(--line);
-	--input: var(--line-strong);
+	--destructive: var(--danger);
+	--border: var(--line-1);
+	--input: var(--fill-1);
 	--ring: var(--pink);
 }
 
@@ -94,7 +109,7 @@
 	--text-md--line-height: 1.45;
 	--text-lg: 17px;
 	--text-xl: 22px;
-	--text-title: 44px;
+	--text-title: 40px;
 	--text-title--line-height: 1;
 }
 
@@ -103,10 +118,11 @@
 	--font-engraved: 'Cinzel Variable', serif;
 	--font-blackletter: 'Grenze Gotisch Variable', serif;
 	--font-mono: Consolas, 'Cascadia Mono', monospace;
-	--radius-sm: 2px;
-	--radius-md: var(--radius);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
+	--radius-shell: 3px;
 	--radius-window: 0.45rem;
 	--spacing-titlebar: var(--h-titlebar);
 	--spacing-rail: var(--w-rail);
@@ -119,13 +135,8 @@
 	--spacing-thumb-regular-h: var(--thumb-regular-h);
 	--spacing-thumb-large-w: var(--thumb-large-w);
 	--spacing-thumb-large-h: var(--thumb-large-h);
-	--shadow-focus-ring: 0 0 0 2px var(--bg-void), 0 0 0 4px var(--pink);
-	--shadow-pop: 0 18px 44px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--line-strong);
-	--shadow-modal:
-		0 30px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--hairline-pink);
-	--shadow-seal:
-		0 0 0 1px rgba(255, 255, 255, 0.12) inset,
-		0 0 24px rgba(255, 77, 148, 0.35);
+	--shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--line-2);
+	--shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--line-2);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -144,29 +155,46 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
-	--color-void: var(--bg-void);
 	--color-panel: var(--bg-panel);
 	--color-raised: var(--bg-raised);
 	--color-hover: var(--bg-hover);
 	--color-active: var(--bg-active);
-	--color-field: var(--bg-input);
 	--color-line-strong: var(--line-strong);
-	--color-line-control: var(--line-control);
-	--color-hairline-pink: var(--hairline-pink);
+	--color-line: var(--line);
+	--color-tone-0: var(--bg-0);
+	--color-tone-1: var(--bg-1);
+	--color-tone-2: var(--bg-2);
+	--color-surface-1: var(--surface-1);
+	--color-surface-2: var(--surface-2);
+	--color-fill-1: var(--fill-1);
+	--color-fill-2: var(--fill-2);
+	--color-fill-3: var(--fill-3);
+	--color-line-1: var(--line-1);
+	--color-line-2: var(--line-2);
 	--color-foreground-2: var(--text-2);
+	--color-foreground-4: var(--text-4);
+	--color-primary-hover: var(--primary-hover);
+	--color-pink: var(--pink);
+	--color-pink-ink: var(--pink-ink);
+	--color-pink-hover: var(--pink-hover);
+	--color-pink-tint: var(--pink-tint);
+	--color-pink-tint-2: var(--pink-tint-2);
+	--color-danger: var(--danger);
+	--color-danger-hover: var(--danger-hover);
+	--color-status-update: var(--st-update);
+	--color-status-win: var(--st-win);
+	--color-status-lose: var(--st-lose);
+	--color-status-missing: var(--st-missing);
+	--color-status-dep: var(--st-dep);
+	--color-status-ok: var(--st-ok);
+	--color-status-warn: var(--st-warn);
 	--color-pink-strong: var(--pink-strong);
 	--color-pink-deep: var(--pink-deep);
 	--color-pink-soft: var(--pink-soft);
-	--color-pink-glow: var(--pink-glow);
-	--color-gem-emerald: var(--gem-emerald);
+	--color-bone: var(--bone);
+	--color-bone-ink: var(--bone-ink);
 	--color-gem-gold: var(--gem-gold);
-	--color-gem-amethyst: var(--gem-amethyst);
-	--color-gem-sapphire: var(--gem-sapphire);
-	--color-gem-ember: var(--gem-ember);
-	--color-gem-blood: var(--gem-blood);
-	--color-danger-fill: var(--danger-fill);
-	--color-handle: var(--handle);
-	--color-handle-link: var(--handle-link);
+	--color-gem-blood-deep: var(--gem-blood-deep);
 	--color-sep-grey: var(--sep-grey);
 	--color-sep-red: var(--sep-red);
 	--color-sep-purple: var(--sep-purple);
@@ -180,7 +208,7 @@
 
 @layer base {
 	* {
-		@apply border-border outline-ring/50;
+		@apply border-border outline-none;
 	}
 	body {
 		@apply bg-transparent font-sans text-md text-foreground;
@@ -191,11 +219,11 @@
 	background:
 		radial-gradient(
 			900px 420px at 100% var(--h-titlebar),
-			var(--pink-glow),
+			#000,
 			transparent 70%
 		),
 		linear-gradient(
-			var(--bg-void) var(--h-titlebar),
+			var(--bg-0) var(--h-titlebar),
 			var(--bg-app) var(--h-titlebar)
 		);
 }

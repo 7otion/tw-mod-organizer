@@ -13,7 +13,7 @@
 	bind:ref
 	data-slot="radio-group-item"
 	class={cn(
-		'group/radio-group-item peer relative flex size-2.5 shrink-0 rotate-45 border-[1.5px] border-[#6b5064] outline-none group-has-[:focus-visible]/field-label:ring-0 group-has-[:focus-visible]/field-label:not-data-checked:border-[#6b5064] after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:shadow-focus-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 aria-invalid:aria-checked:border-primary dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground group-has-[:focus-visible]/field-label:data-checked:border-primary dark:data-checked:bg-primary',
+		'group/radio-group-item peer relative flex size-4 shrink-0 rounded-full border-[1.5px] border-[#5a5459] transition-colors outline-none group-has-[:focus-visible]/field-label:ring-0 after:absolute after:-inset-x-3 after:-inset-y-2 hover:border-[#7a7379] disabled:cursor-not-allowed disabled:opacity-35 aria-invalid:border-status-missing data-checked:border-foreground data-checked:bg-[radial-gradient(circle,var(--text-1)_0_3.5px,transparent_4px)]',
 		className
 	)}
 	{...restProps}

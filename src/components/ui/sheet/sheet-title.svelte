@@ -12,9 +12,6 @@
 <SheetPrimitive.Title
 	bind:ref
 	data-slot="sheet-title"
-	class={cn(
-		'font-engraved text-xs font-bold tracking-[0.22em] text-muted-foreground uppercase',
-		className
-	)}
+	class={cn('text-lg font-bold', className)}
 	{...restProps}
 />
