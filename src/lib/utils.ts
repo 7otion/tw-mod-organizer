@@ -38,6 +38,17 @@ export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & {
 	ref?: U | null;
 };
 
+export function oneOf<T extends string>(
+	values: readonly T[],
+	label: string
+): (value: T) => T {
+	return (value) => {
+		if (!values.includes(value))
+			throw new Error(`"${value}" is not a valid ${label}.`);
+		return value;
+	};
+}
+
 const REFUSED_ARGUMENT = /^invalid args `[^`]*` for command `[^`]*`: /;
 export function toastError(error: unknown): void {
 	toast.error('Error', {
