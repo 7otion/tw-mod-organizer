@@ -186,3 +186,42 @@
 		@apply bg-transparent font-sans text-md text-foreground;
 	}
 }
+
+[data-slot='app-shell'] {
+	background:
+		radial-gradient(
+			900px 420px at 100% var(--h-titlebar),
+			var(--pink-glow),
+			transparent 70%
+		),
+		linear-gradient(
+			var(--bg-void) var(--h-titlebar),
+			var(--bg-app) var(--h-titlebar)
+		);
+}
+
+@utility bg-fade-black {
+	background-image: linear-gradient(
+		to top,
+		#000 0%,
+		rgb(0 0 0 / 0.74) 19%,
+		rgb(0 0 0 / 0.54) 34%,
+		rgb(0 0 0 / 0.38) 47%,
+		rgb(0 0 0 / 0.28) 56.5%,
+		rgb(0 0 0 / 0.19) 65%,
+		rgb(0 0 0 / 0.13) 73%,
+		rgb(0 0 0 / 0.075) 80%,
+		rgb(0 0 0 / 0.04) 86%,
+		rgb(0 0 0 / 0.02) 91%,
+		rgb(0 0 0 / 0.008) 95%,
+		transparent 100%
+	);
+}
+
+.app-drag-region {
+	app-region: drag;
+}
+
+.clickable-content {
+	app-region: no-drag;
+}

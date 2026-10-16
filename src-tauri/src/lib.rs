@@ -1,3 +1,5 @@
+mod migrations;
+
 use tauri::{AppHandle, Emitter};
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::fmt;
@@ -34,6 +36,7 @@ pub fn run() {
         }))
         .plugin(
             tauri_plugin_7otion_sqlite::Builder::new()
+                .migrations("app", migrations::app())
                 .build(),
         )
         .setup(|app| {

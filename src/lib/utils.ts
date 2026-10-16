@@ -1,5 +1,31 @@
+import { createCn } from 'cn/config';
 import { toast } from 'svelte-sonner';
-export { cn } from 'cn';
+
+export const cn = createCn({
+	extend: {
+		theme: {
+			spacing: [
+				'titlebar',
+				'rail',
+				'sidebar',
+				'row-compact',
+				'row-regular',
+				'row-large',
+				'row-sep',
+				'thumb-regular-w',
+				'thumb-regular-h',
+				'thumb-large-w',
+				'thumb-large-h',
+			],
+			radius: ['window'],
+		},
+		classGroups: {
+			'font-size': [{ text: ['3xs', '2xs', 'md', 'title'] }],
+			shadow: [{ shadow: ['focus-ring', 'pop', 'modal', 'seal'] }],
+			'bg-image': [{ bg: ['fade-black'] }],
+		},
+	},
+});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T;
