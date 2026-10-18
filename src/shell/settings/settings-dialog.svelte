@@ -71,7 +71,7 @@
 
 <Dialog.Root bind:open>
 	<Dialog.Content
-		class="flex h-[min(720px,calc(100vh-var(--h-titlebar)-2rem))] w-[1000px] flex-row gap-0 overflow-hidden bg-tone-2 p-0 sm:max-w-[calc(100%-2rem)]"
+		class="flex h-[min(720px,calc(100vh-var(--h-titlebar)-2rem))] w-[1000px] flex-row gap-0 overflow-hidden p-0 sm:max-w-[calc(100%-2rem)]"
 	>
 		<nav
 			aria-label="Settings sections"

@@ -19,7 +19,7 @@
 	<Dialog.Content class="sm:max-w-[480px]">
 		<Dialog.Header>
 			<Dialog.Title>Licences</Dialog.Title>
-			<Dialog.Description>
+			<Dialog.Description class="text-pink-300">
 				TW Mod Organizer is free software under the GNU General Public
 				License v3.0. It's built on these open-source projects.
 			</Dialog.Description>
