@@ -39,10 +39,17 @@ export class ProfilesStore extends ConnectionStore {
 	): Promise<void> {
 		const game = this.#gamesStore.current;
 		if (!game) return;
-		const position = (this.list.at(-1)?.position ?? 0) + 1;
 		const profile = await Model.database.transaction(async (tx) => {
+			const last = await Profile.query()
+				.where('game_id', game.app_id)
+				.orderBy('position', 'desc')
+				.first(tx);
 			const created = await Profile.create(
-				{ game_id: game.app_id, name: name.trim(), position },
+				{
+					game_id: game.app_id,
+					name: name.trim(),
+					position: (last?.position ?? 0) + 1,
+				},
 				tx
 			);
 			if (copyOf) await this.copyContents(copyOf, created, tx);
@@ -72,10 +79,23 @@ export class ProfilesStore extends ConnectionStore {
 		});
 	}
 
+	async clone(profile: Profile): Promise<void> {
+		let name = `${profile.name} copy`;
+		for (let number = 2; this.isNameTaken(name); number++)
+			name = `${profile.name} copy ${number}`;
+		await this.create(name, profile, false);
+	}
+
 	async delete(profile: Profile): Promise<void> {
-		if (profile === this.active)
+		await this.deleteMany([profile]);
+	}
+
+	async deleteMany(profiles: readonly Profile[]): Promise<void> {
+		if (profiles.some((profile) => profile === this.active))
 			throw new Error("The active profile can't be deleted.");
-		await profile.delete();
+		await Model.database.transaction(async (tx) => {
+			for (const profile of profiles) await profile.delete(tx);
+		});
 	}
 
 	private async copyContents(

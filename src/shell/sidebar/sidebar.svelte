@@ -7,9 +7,11 @@
 
 	import LibrarySummary from './library-summary.svelte';
 	import LoadOrderOutline from './load-order-outline.svelte';
+	import ManageProfilesDialog from './manage-profiles-dialog.svelte';
 	import ManageTagsDialog from './manage-tags-dialog.svelte';
 	import ProfileList from './profile-list.svelte';
 
+	let isManagingProfiles = $state(false);
 	let isManagingTags = $state(false);
 </script>
 
@@ -35,6 +37,7 @@
 		<Button
 			variant="ghost"
 			class="h-7 justify-start gap-2 rounded-none px-4 text-md font-normal text-foreground-2 hover:bg-hover"
+			onclick={() => (isManagingProfiles = true)}
 		>
 			<Settings2Icon class="size-4" />
 			Manage profiles…
@@ -51,4 +54,5 @@
 	</div>
 </aside>
 
+<ManageProfilesDialog bind:open={isManagingProfiles} />
 <ManageTagsDialog bind:open={isManagingTags} />

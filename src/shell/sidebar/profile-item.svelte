@@ -1,41 +1,19 @@
 <script lang="ts">
 	import { Count } from '@7otion-tauri/orm';
-	import { createSortable } from '@dnd-kit/svelte/sortable';
 
 	import * as ContextMenu from '@/components/ui/context-menu';
 	import { Input } from '@/components/ui/input';
 
 	import { type Profile, ProfileEntry } from '@/lib/models';
+	import { ProfilesStore } from '@/lib/store';
 	import { cn, toastError } from '@/lib/utils';
 
-	type Props = {
-		profile: Profile;
-		index: number;
-		active: boolean;
-		isNameTaken: (name: string) => boolean;
-		onactivate: () => void;
-		onrename: (name: string) => Promise<void>;
-		ondelete: () => void;
-	};
+	let { profile, ondelete }: { profile: Profile; ondelete: () => void } =
+		$props();
 
-	let {
-		profile,
-		index,
-		active,
-		isNameTaken,
-		onactivate,
-		onrename,
-		ondelete,
-	}: Props = $props();
+	const profilesStore = ProfilesStore.get();
 
-	const sortable = createSortable({
-		get id() {
-			return profile.id;
-		},
-		get index() {
-			return index;
-		},
-	});
+	const active = $derived(profile === profilesStore.active);
 
 	const modCount = new Count(() =>
 		ProfileEntry.query()
@@ -50,7 +28,7 @@
 	const error = $derived(
 		!name.trim()
 			? 'A profile needs a name.'
-			: isNameTaken(name)
+			: profilesStore.isNameTaken(name, profile)
 				? 'A profile with this name already exists.'
 				: null
 	);
@@ -71,8 +49,12 @@
 		} else if (event.key === 'Enter' && !error) {
 			isRenaming = false;
 			if (name.trim() !== profile.name)
-				await onrename(name).catch(toastError);
+				await profilesStore.rename(profile, name).catch(toastError);
 		}
+	}
+
+	function activate(): void {
+		if (!active) profilesStore.activate(profile).catch(toastError);
 	}
 </script>
 
@@ -98,16 +80,14 @@
 				{#snippet child({ props })}
 					<button
 						{...props}
-						{@attach sortable.attach}
 						type="button"
 						aria-current={active}
 						class={cn(
 							'flex h-row-compact w-full items-center gap-2 px-4 text-left text-md text-foreground-2 hover:bg-hover',
 							active &&
-								'bg-linear-to-r from-pink-soft to-transparent text-foreground',
-							sortable.isDragging && 'bg-hover'
+								'bg-linear-to-r from-pink-soft to-transparent text-foreground'
 						)}
-						onclick={onactivate}
+						onclick={activate}
 					>
 						{#if active}
 							<span
