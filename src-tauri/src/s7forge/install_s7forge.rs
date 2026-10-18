@@ -1,25 +1,11 @@
 use std::io::Write;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tauri::{AppHandle, Emitter};
 
 use crate::error::AppError;
 
-const LATEST_RELEASE: &str = "https://api.github.com/repos/7otion/s7forge/releases/latest";
 const PROGRESS_EVENT: &str = "s7forge-download-progress";
-
-#[derive(Deserialize)]
-struct Release {
-    tag_name: String,
-    assets: Vec<Asset>,
-}
-
-#[derive(Deserialize)]
-struct Asset {
-    name: String,
-    size: u64,
-    browser_download_url: String,
-}
 
 #[derive(Clone, Serialize)]
 struct DownloadProgress {
@@ -29,17 +15,9 @@ struct DownloadProgress {
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn install_s7forge(app: AppHandle) -> Result<String, AppError> {
-    let client = reqwest::Client::builder()
-        .user_agent("tw-mod-organizer")
-        .build()?;
-    let release: Release = client
-        .get(LATEST_RELEASE)
-        .send()
-        .await?
-        .error_for_status()?
-        .json()
-        .await?;
-    let version = release.tag_name.trim_start_matches('v').to_owned();
+    let client = super::client()?;
+    let release = super::latest_release(&client).await?;
+    let version = release.version();
     let assets = super::assets()
         .iter()
         .map(|name| {

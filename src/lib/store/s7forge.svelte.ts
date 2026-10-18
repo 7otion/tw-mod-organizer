@@ -4,11 +4,28 @@ import { listen } from '@tauri-apps/api/event';
 
 export type DownloadProgress = { received: number; total: number };
 
+function isNewer(candidate: string, current: string): boolean {
+	const parts = (version: string) => version.split('.').map(Number);
+	const [a, b] = [parts(candidate), parts(current)];
+	for (let index = 0; index < Math.max(a.length, b.length); index++) {
+		const difference = (a[index] ?? 0) - (b[index] ?? 0);
+		if (difference !== 0) return difference > 0;
+	}
+	return false;
+}
+
 export class S7forgeStore extends Store {
 	version = $state<string | null>(null);
+	latestVersion = $state<string | null>(null);
 	isChecked = $state(false);
 	isInstalling = $state(false);
 	downloadProgress = $state.raw<DownloadProgress | null>(null);
+
+	readonly hasUpdate = $derived(
+		this.version !== null &&
+			this.latestVersion !== null &&
+			isNewer(this.latestVersion, this.version)
+	);
 
 	constructor() {
 		super();
@@ -35,6 +52,15 @@ export class S7forgeStore extends Store {
 			this.version = await invoke<string | null>('s7forge_version');
 		} finally {
 			this.isChecked = true;
+		}
+		if (this.version) await this.checkForUpdate();
+	}
+
+	private async checkForUpdate(): Promise<void> {
+		try {
+			this.latestVersion = await invoke<string>('latest_s7forge_version');
+		} catch (error) {
+			console.error(error);
 		}
 	}
 }

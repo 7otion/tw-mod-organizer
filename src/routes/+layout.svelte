@@ -2,6 +2,7 @@
 	import '@/app.css';
 
 	import { listen } from '@tauri-apps/api/event';
+	import { toast } from 'svelte-sonner';
 
 	import { Toaster } from '@/components/ui/sonner';
 	import * as Tooltip from '@/components/ui/tooltip';
@@ -26,6 +27,22 @@
 			toastError(`Backend crashed: ${event.payload}`)
 		);
 		return () => void unlisten.then((off) => off());
+	});
+
+	$effect(() => {
+		if (!s7forgeStore.hasUpdate) return;
+		toast.info(`s7forge ${s7forgeStore.latestVersion} is available`, {
+			description: `You have ${s7forgeStore.version}.`,
+			action: {
+				label: 'Update',
+				onClick: () =>
+					toast.promise(s7forgeStore.install(), {
+						loading: 'Updating s7forge…',
+						success: 's7forge is up to date.',
+						error: (error) => String(error),
+					}),
+			},
+		});
 	});
 
 	function onRejection(event: PromiseRejectionEvent): void {

@@ -3,15 +3,53 @@ use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use tauri::{AppHandle, Manager};
 
 use crate::error::AppError;
 
 pub mod install_s7forge;
+pub mod latest_s7forge_version;
 pub mod s7forge_version;
 
+const LATEST_RELEASE: &str = "https://api.github.com/repos/7otion/s7forge/releases/latest";
 const CACHE_ENV: &str = "S7FORGE_CACHE_DIR";
+
+#[derive(Deserialize)]
+struct Release {
+    tag_name: String,
+    assets: Vec<Asset>,
+}
+
+#[derive(Deserialize)]
+struct Asset {
+    name: String,
+    size: u64,
+    browser_download_url: String,
+}
+
+impl Release {
+    fn version(&self) -> String {
+        self.tag_name.trim_start_matches('v').to_owned()
+    }
+}
+
+fn client() -> Result<reqwest::Client, AppError> {
+    Ok(reqwest::Client::builder()
+        .user_agent("tw-mod-organizer")
+        .build()?)
+}
+
+async fn latest_release(client: &reqwest::Client) -> Result<Release, AppError> {
+    Ok(client
+        .get(LATEST_RELEASE)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?)
+}
 #[cfg(windows)]
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
