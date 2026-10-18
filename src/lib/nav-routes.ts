@@ -4,7 +4,6 @@ import LayersIcon from '@lucide/svelte/icons/layers';
 import LibraryIcon from '@lucide/svelte/icons/library';
 import ListOrderedIcon from '@lucide/svelte/icons/list-ordered';
 import SaveIcon from '@lucide/svelte/icons/save';
-import Settings2Icon from '@lucide/svelte/icons/settings-2';
 
 export type NavRoute = {
 	path: string;
@@ -25,10 +24,3 @@ export const navRoutes: NavRoute[] = [
 	{ path: '/', label: 'Saves', shortcut: 'Ctrl+4', icon: SaveIcon },
 	{ path: '/', label: 'Downloads', shortcut: 'Ctrl+5', icon: DownloadIcon },
 ];
-
-export const settingsRoute: NavRoute = {
-	path: '/',
-	label: 'Settings',
-	shortcut: 'Ctrl+,',
-	icon: Settings2Icon,
-};

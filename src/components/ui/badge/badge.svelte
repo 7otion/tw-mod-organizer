@@ -6,7 +6,7 @@
 		variants: {
 			variant: {
 				default:
-					'h-4 min-w-4 bg-pink px-1 text-3xs font-bold text-pink-ink [a]:hover:bg-pink-hover',
+					'h-4 min-w-4 bg-pink px-1 text-3xs leading-none font-bold text-pink-ink [a]:hover:bg-pink-hover',
 				secondary:
 					'h-5 bg-fill-2 px-2 text-xs font-semibold text-foreground-2',
 				destructive:

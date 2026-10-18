@@ -17,6 +17,7 @@ export class Settings extends Model<typeof Settings.schema> {
 			preview_auto_sort: Column.boolean(),
 			new_mods_placement: Column.text<NewModsPlacement>(),
 			v1_import_offered_at: Column.date('unix').nullable(),
+			current_game_id: Column.integer().nullable(),
 		},
 	});
 

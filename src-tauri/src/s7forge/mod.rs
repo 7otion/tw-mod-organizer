@@ -1,0 +1,76 @@
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+use serde::de::DeserializeOwned;
+use tauri::{AppHandle, Manager};
+
+use crate::error::AppError;
+
+pub mod install_s7forge;
+pub mod s7forge_version;
+
+const CACHE_ENV: &str = "S7FORGE_CACHE_DIR";
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+
+#[cfg(windows)]
+fn assets() -> [&'static str; 2] {
+    ["s7forge.exe", "steam_api64.dll"]
+}
+
+#[cfg(not(windows))]
+fn assets() -> [&'static str; 2] {
+    unimplemented!("s7forge release assets for this platform")
+}
+
+#[cfg(windows)]
+fn command(folder: &Path) -> Command {
+    let mut command = Command::new(folder.join(assets()[0]));
+    command.creation_flags(CREATE_NO_WINDOW);
+    command
+}
+
+#[cfg(not(windows))]
+fn command(_folder: &Path) -> Command {
+    unimplemented!("running s7forge on this platform")
+}
+
+fn folder(app: &AppHandle) -> Result<PathBuf, AppError> {
+    Ok(app.path().app_data_dir()?.join("s7forge"))
+}
+
+pub async fn run<T: DeserializeOwned>(app: &AppHandle, args: Vec<String>) -> Result<T, AppError> {
+    let folder = folder(app)?;
+    let cache = app.path().app_cache_dir()?.join("s7forge");
+    let output = tauri::async_runtime::spawn_blocking(move || {
+        command(&folder).args(args).env(CACHE_ENV, cache).output()
+    })
+    .await
+    .map_err(|error| AppError::Custom(error.to_string()))??;
+    if !output.status.success() {
+        let message = String::from_utf8_lossy(&output.stderr);
+        return Err(AppError::Custom(
+            message.trim().trim_start_matches("Error: ").to_owned(),
+        ));
+    }
+    Ok(serde_json::from_slice(&output.stdout)?)
+}
+
+fn version_in(folder: &Path) -> Option<String> {
+    let output = command(folder).arg("--version").output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .strip_prefix("s7forge ")
+        .map(str::to_owned)
+}
+
+async fn installed_version(folder: PathBuf) -> Result<Option<String>, AppError> {
+    tauri::async_runtime::spawn_blocking(move || version_in(&folder))
+        .await
+        .map_err(|error| AppError::Custom(error.to_string()))
+}

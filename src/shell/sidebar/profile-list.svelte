@@ -13,7 +13,7 @@
 </script>
 
 <div class="flex flex-col pt-4 pb-1.5">
-	<SidebarHeading title="PROFILES" tooltip="New profile (Ctrl+Shift+P)">
+	<SidebarHeading title="PROFILES" tooltip="New profile">
 		<PlusIcon class="size-3.5" />
 		New
 	</SidebarHeading>
@@ -27,7 +27,7 @@
 				{#snippet marker()}
 					{#if profile.isActive}
 						<span
-							class="size-[7px] shrink-0 rotate-45 bg-primary shadow-[0_0_6px_rgba(255,77,148,0.6)]"
+							class="size-[7px] shrink-0 rotate-45 bg-pink-deep shadow-[0_0_6px_rgba(255,77,148,0.6)]"
 						></span>
 					{:else}
 						<span

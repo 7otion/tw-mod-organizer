@@ -1,11 +1,14 @@
 import { Store } from '@7otion-tauri/orm';
+import { getVersion } from '@tauri-apps/api/app';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 export class AppStore extends Store {
 	isMaximized = $state(false);
+	version = $state('');
 
 	constructor() {
 		super();
+		void getVersion().then((version) => (this.version = version));
 		$effect(() => {
 			const appWindow = getCurrentWindow();
 			let resizeTimer: ReturnType<typeof setTimeout> | undefined;

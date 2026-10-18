@@ -3,7 +3,8 @@
 
 	import * as Tooltip from '@/components/ui/tooltip';
 
-	import { navRoutes, settingsRoute } from '@/lib/nav-routes';
+	import { navRoutes } from '@/lib/nav-routes';
+	import SettingsRailButton from '@/shell/settings/rail-button.svelte';
 
 	import RailButton from './rail-button.svelte';
 
@@ -16,14 +17,12 @@
 			: location === path || location.startsWith(path + '/');
 	}
 
-	const active = $derived(
-		[...navRoutes, settingsRoute].find((route) => isAt(route.path))
-	);
+	const active = $derived(navRoutes.find((route) => isAt(route.path)));
 </script>
 
 <nav
 	aria-label="Sections"
-	class="flex w-rail shrink-0 flex-col items-center gap-1.5 border-r bg-void py-3"
+	class="flex w-rail shrink-0 flex-col items-center gap-1.5 border-r border-line bg-tone-0 py-3"
 >
 	<Tooltip.Provider delayDuration={1000}>
 		{#each navRoutes as route (route.label)}
@@ -36,6 +35,6 @@
 			/>
 		{/each}
 		<div class="flex-1"></div>
-		<RailButton route={settingsRoute} active={settingsRoute === active} />
+		<SettingsRailButton />
 	</Tooltip.Provider>
 </nav>

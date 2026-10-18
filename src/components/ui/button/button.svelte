@@ -21,6 +21,7 @@
 				'destructive-outline':
 					'text-status-missing hover:bg-fill-1 active:bg-fill-2',
 				link: 'text-foreground underline decoration-white/30 underline-offset-3 hover:decoration-white/60',
+				pink: 'bg-pink-deep text-white hover:bg-pink-deep/70',
 			},
 			size: {
 				default:

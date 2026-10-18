@@ -7,7 +7,7 @@ export class Game extends Model<typeof Game.schema> {
 			app_id: Column.integer().primary(),
 			active_profile_id: Column.integer().nullable(),
 			install_path: Column.text().nullable(),
-			pin_position: Column.text().nullable(),
+			pin_position: Column.integer().nullable(),
 			last_opened_at: Column.date('unix').nullable(),
 			scanned_at: Column.date('unix').nullable(),
 			created_at: Column.date('unix'),

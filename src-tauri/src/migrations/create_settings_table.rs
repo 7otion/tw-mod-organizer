@@ -18,6 +18,10 @@ impl Migration for CreateSettingsTable {
             table
                 .date("v1_import_offered_at", DateStorage::Unix)
                 .nullable();
+            table
+                .integer("current_game_id")
+                .nullable()
+                .references("games");
         });
     }
 }

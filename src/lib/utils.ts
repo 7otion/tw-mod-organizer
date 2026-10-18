@@ -49,6 +49,22 @@ export function oneOf<T extends string>(
 	};
 }
 
+const TIME_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+	['year', 31_536_000],
+	['month', 2_592_000],
+	['week', 604_800],
+	['day', 86_400],
+	['hour', 3_600],
+	['minute', 60],
+];
+const relativeTime = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+export function timeAgo(date: Date): string {
+	const seconds = (Date.now() - date.getTime()) / 1000;
+	const unit = TIME_UNITS.find(([, size]) => seconds >= size);
+	if (!unit) return 'just now';
+	return relativeTime.format(-Math.floor(seconds / unit[1]), unit[0]);
+}
+
 const REFUSED_ARGUMENT = /^invalid args `[^`]*` for command `[^`]*`: /;
 export function toastError(error: unknown): void {
 	toast.error('Error', {

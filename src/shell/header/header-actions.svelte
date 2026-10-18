@@ -30,7 +30,7 @@
 			class={[
 				'h-7 gap-1.5 rounded-shell px-3 text-sm font-semibold',
 				action.isPrimary
-					? 'bg-bone text-bone-ink hover:bg-foreground'
+					? 'bg-pink-deep/70 text-bone hover:bg-pink-deep/50'
 					: 'bg-raised hover:bg-active aria-expanded:bg-active',
 			]}
 		>

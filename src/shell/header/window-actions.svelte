@@ -16,7 +16,7 @@
 <div class="clickable-content ml-auto flex">
 	<Button
 		variant="ghost"
-		class="h-full w-[46px] rounded-none text-foreground hover:bg-primary/15"
+		class="h-full w-[46px] rounded-none text-foreground hover:bg-pink-deep/15"
 		onclick={() => appWindow.minimize()}
 		aria-label="Minimize"
 	>
@@ -24,7 +24,7 @@
 	</Button>
 	<Button
 		variant="ghost"
-		class="h-full w-[46px] rounded-none text-foreground hover:bg-primary/15"
+		class="h-full w-[46px] rounded-none text-foreground hover:bg-pink-deep/15"
 		onclick={() => appWindow.toggleMaximize()}
 		aria-label={appStore.isMaximized ? 'Restore' : 'Maximize'}
 	>
@@ -36,7 +36,7 @@
 	</Button>
 	<Button
 		variant="ghost"
-		class="h-full w-[46px] rounded-none text-foreground hover:bg-destructive hover:text-foreground dark:hover:bg-destructive"
+		class="h-full w-[46px] rounded-none text-foreground hover:bg-gem-blood-deep hover:text-foreground dark:hover:bg-gem-blood-deep"
 		onclick={() => appWindow.close()}
 		aria-label="Close"
 	>

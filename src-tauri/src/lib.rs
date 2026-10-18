@@ -1,4 +1,8 @@
+mod error;
+mod games;
 mod migrations;
+mod s7forge;
+mod settings;
 
 use tauri::{AppHandle, Emitter};
 use tracing_subscriber::EnvFilter;
@@ -6,6 +10,7 @@ use tracing_subscriber::fmt;
 use tracing_subscriber::prelude::*;
 
 pub const APP_IDENTIFIER: &str = "tw-mod-organizer.v2";
+pub const DATABASE: &str = "twmodorganizer_v2.db";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -41,9 +46,17 @@ pub fn run() {
         )
         .setup(|app| {
             install_panic_hook(app.handle().clone());
+            tauri::async_runtime::block_on(settings::ensure_folders(app.handle()))?;
             tracing::info!("Tauri setup complete");
             Ok(())
         })
+        .invoke_handler(tauri::generate_handler![
+            games::check_game_folder::check_game_folder,
+            games::list_games::list_games,
+            s7forge::install_s7forge::install_s7forge,
+            s7forge::s7forge_version::s7forge_version,
+            settings::move_folder::move_folder,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

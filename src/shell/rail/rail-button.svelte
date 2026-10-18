@@ -23,14 +23,15 @@
 				aria-label={route.label}
 				aria-current={active ? 'page' : undefined}
 				class={cn(
-					'relative grid size-10 place-items-center rounded-md text-muted-foreground outline-0 hover:bg-hover hover:text-foreground',
-					active && 'bg-primary/12 text-primary hover:text-primary'
+					'relative grid size-10 place-items-center rounded-shell text-muted-foreground outline-0 hover:bg-hover hover:text-foreground',
+					active &&
+						'bg-pink-deep/12 text-pink-deep hover:text-pink-deep'
 				)}
 			>
 				<route.icon class="size-5" />
 				{#if badge}
 					<Badge
-						class="absolute top-[3px] right-[2px] min-w-4 rounded-full px-[3px] tracking-normal"
+						class="absolute top-[3px] right-[2px] h-4 min-w-4 rounded-full bg-pink-deep px-[3px] text-2xs leading-none font-bold tracking-normal text-foreground tabular-nums"
 					>
 						{badge}
 					</Badge>

@@ -19,8 +19,11 @@ tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-7otion-sqlite = { path = "../../7otion-tauri/orm/backend" }
 
+fs4 = "1.1.0"
+reqwest = { version = "0.13", default-features = false, features = ["native-tls", "json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+sqlx = { version = "0.8", default-features = false, features = ["sqlite", "runtime-tokio"] }
 thiserror = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

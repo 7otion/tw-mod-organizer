@@ -75,10 +75,7 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col overflow-hidden pt-4 pb-1.5">
-	<SidebarHeading
-		title="OUTLINE"
-		tooltip="Collapse all separators (Ctrl+Shift+[)"
-	>
+	<SidebarHeading title="OUTLINE" tooltip="Collapse all separators">
 		Collapse all
 	</SidebarHeading>
 	<ul class="flex flex-col gap-px">

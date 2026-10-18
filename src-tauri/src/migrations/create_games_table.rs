@@ -10,11 +10,10 @@ impl Migration for CreateGamesTable {
             table.integer("app_id");
             table.primary(&["app_id"]);
             table.text("install_path").nullable();
-            table.text("pin_position").nullable();
+            table.integer("pin_position").nullable();
             table.date("last_opened_at", DateStorage::Unix).nullable();
             table.date("scanned_at", DateStorage::Unix).nullable();
             table.date("created_at", DateStorage::Unix).default_now();
-            table.unique(&["pin_position"]);
         });
     }
 }
