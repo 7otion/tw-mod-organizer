@@ -1,7 +1,7 @@
 import { ConnectionStore } from '@7otion-tauri/orm';
 import { invoke } from '@tauri-apps/api/core';
 
-import { Game } from '@/lib/models';
+import { Game, Profile } from '@/lib/models';
 import { SettingsStore } from '@/lib/store';
 
 export type SupportedGame = {
@@ -77,10 +77,17 @@ export class GamesStore extends ConnectionStore {
 	}
 
 	async open(game: GameEntry): Promise<void> {
-		await Game.updateOrCreate(
+		const row = await Game.updateOrCreate(
 			{ app_id: game.app_id },
 			{ last_opened_at: Date.now() }
 		);
+		if (row.active_profile_id === null) {
+			const profile = await Profile.firstOrCreate(
+				{ game_id: game.app_id },
+				{ name: 'Default', position: 1 }
+			);
+			await row.update({ active_profile_id: profile.id });
+		}
 		await this.#settingsStore.current?.update({
 			current_game_id: game.app_id,
 		});

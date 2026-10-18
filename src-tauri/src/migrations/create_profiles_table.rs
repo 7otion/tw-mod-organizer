@@ -10,11 +10,10 @@ impl Migration for CreateProfilesTable {
             table.id();
             table.integer("game_id").references("games");
             table.text("name");
-            table.text("position");
+            table.integer("position");
             table.date("created_at", DateStorage::Unix).default_now();
             table.date("last_used_at", DateStorage::Unix).nullable();
             table.unique(&["game_id", "name"]);
-            table.unique(&["game_id", "position"]);
         });
         schema.alter("games", |table| {
             table

@@ -1,41 +1,46 @@
 <script lang="ts">
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
-	import SidebarHeading from './sidebar-heading.svelte';
-	import SidebarItem from './sidebar-item.svelte';
+	import type { Profile } from '@/lib/models';
+	import { ProfilesStore } from '@/lib/store';
+	import { toastError } from '@/lib/utils';
 
-	const PROFILES = [
-		{ name: 'Chaos campaign', modCount: 118, isActive: true },
-		{ name: 'Multiplayer clean', modCount: 42, isActive: false },
-		{ name: 'Lore-friendly', modCount: 203, isActive: false },
-		{ name: 'Testing', modCount: 12, isActive: false },
-	];
+	import DeleteProfileDialog from './delete-profile-dialog.svelte';
+	import NewProfileDialog from './new-profile-dialog.svelte';
+	import ProfileItem from './profile-item.svelte';
+	import SidebarHeading from './sidebar-heading.svelte';
+
+	const profilesStore = ProfilesStore.get();
+
+	let isCreating = $state(false);
+	let deleting = $state<Profile | null>(null);
 </script>
 
 <div class="flex flex-col pt-4 pb-1.5">
-	<SidebarHeading title="PROFILES" tooltip="New profile">
+	<SidebarHeading
+		title="PROFILES"
+		tooltip="New profile"
+		onclick={() => (isCreating = true)}
+	>
 		<PlusIcon class="size-3.5" />
 		New
 	</SidebarHeading>
 	<ul class="flex flex-col gap-px">
-		{#each PROFILES as profile (profile.name)}
-			<SidebarItem
-				name={profile.name}
-				count={profile.modCount}
-				active={profile.isActive}
-			>
-				{#snippet marker()}
-					{#if profile.isActive}
-						<span
-							class="size-[7px] shrink-0 rotate-45 bg-pink-deep shadow-[0_0_6px_rgba(255,77,148,0.6)]"
-						></span>
-					{:else}
-						<span
-							class="size-[7px] shrink-0 rotate-45 border border-muted-foreground"
-						></span>
-					{/if}
-				{/snippet}
-			</SidebarItem>
+		{#each profilesStore.list as profile (profile.id)}
+			{@const active = profile === profilesStore.active}
+			<ProfileItem
+				{profile}
+				{active}
+				isNameTaken={(name) => profilesStore.isNameTaken(name, profile)}
+				onactivate={() =>
+					!active &&
+					profilesStore.activate(profile).catch(toastError)}
+				onrename={(name) => profilesStore.rename(profile, name)}
+				ondelete={() => (deleting = profile)}
+			/>
 		{/each}
 	</ul>
 </div>
+
+<NewProfileDialog bind:open={isCreating} />
+<DeleteProfileDialog bind:profile={deleting} />

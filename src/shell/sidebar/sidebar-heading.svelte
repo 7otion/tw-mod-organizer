@@ -8,10 +8,11 @@
 	type Props = {
 		title: string;
 		tooltip: string;
+		onclick?: () => void;
 		children: Snippet;
 	};
 
-	let { title, tooltip, children }: Props = $props();
+	let { title, tooltip, onclick, children }: Props = $props();
 </script>
 
 <div
@@ -20,6 +21,7 @@
 	{title}
 	<Tooltip.Root>
 		<Tooltip.Trigger
+			{onclick}
 			class={cn(
 				buttonVariants({ variant: 'ghost', size: 'xs' }),
 				'h-auto gap-1 rounded-shell px-1 py-0.5 font-sans text-xs font-semibold tracking-normal text-pink-strong hover:bg-hover hover:text-pink-strong'

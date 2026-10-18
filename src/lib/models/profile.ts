@@ -12,7 +12,7 @@ export class Profile extends Model<typeof Profile.schema> {
 			id: Column.integer().primary().generated(),
 			game_id: Column.integer(),
 			name: Column.text(),
-			position: Column.text(),
+			position: Column.integer(),
 			created_at: Column.date('unix'),
 			last_used_at: Column.date('unix').nullable(),
 		},
