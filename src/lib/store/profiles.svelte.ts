@@ -70,13 +70,13 @@ export class ProfilesStore extends ConnectionStore {
 	}
 
 	async reorder(ids: readonly number[]): Promise<void> {
-		await Model.database.transaction(async (tx) => {
-			for (const [index, id] of ids.entries()) {
-				const profile = this.list.find((profile) => profile.id === id);
-				if (profile && profile.position !== index + 1)
-					await profile.update({ position: index + 1 }, tx);
-			}
+		const moved = ids.flatMap((id, index) => {
+			const profile = this.list.find((profile) => profile.id === id);
+			if (!profile || profile.position === index + 1) return [];
+			profile.draft().position = index + 1;
+			return [profile];
 		});
+		await Profile.updateMany(moved);
 	}
 
 	async clone(profile: Profile): Promise<void> {
@@ -93,9 +93,7 @@ export class ProfilesStore extends ConnectionStore {
 	async deleteMany(profiles: readonly Profile[]): Promise<void> {
 		if (profiles.some((profile) => profile === this.active))
 			throw new Error("The active profile can't be deleted.");
-		await Model.database.transaction(async (tx) => {
-			for (const profile of profiles) await profile.delete(tx);
-		});
+		await Profile.deleteMany(profiles);
 	}
 
 	private async copyContents(
@@ -106,45 +104,46 @@ export class ProfilesStore extends ConnectionStore {
 		const entries = await ProfileEntry.query()
 			.where('profile_id', from.id)
 			.get(tx);
-		for (const entry of entries) {
-			let separatorId = entry.separator_id;
-			if (separatorId !== null) {
-				const separator = await Separator.findOrFail(separatorId, tx);
-				const copy = await Separator.create(
-					{
-						title: separator.title,
-						background_color: separator.background_color,
-						text_color: separator.text_color,
-					},
-					tx
-				);
-				separatorId = copy.id;
-			}
-			await ProfileEntry.create(
-				{
-					profile_id: to.id,
-					position: entry.position,
-					enabled: entry.enabled,
-					collapsed: entry.collapsed,
-					mod_id: entry.mod_id,
-					separator_id: separatorId,
-					group_id: entry.group_id,
-				},
-				tx
-			);
-		}
+		const separatorIds = entries.rows.flatMap((entry) =>
+			entry.separator_id === null ? [] : [entry.separator_id]
+		);
+		const separators = separatorIds.length
+			? (await Separator.query().whereIn('id', separatorIds).get(tx)).rows
+			: [];
+		const copies = await Separator.createMany(
+			separators.map((separator) => ({
+				title: separator.title,
+				background_color: separator.background_color,
+				text_color: separator.text_color,
+			})),
+			tx
+		);
+		const originalIds = separators.map((separator) => separator.id);
+		await ProfileEntry.createMany(
+			entries.rows.map((entry) => ({
+				profile_id: to.id,
+				position: entry.position,
+				enabled: entry.enabled,
+				collapsed: entry.collapsed,
+				mod_id: entry.mod_id,
+				separator_id:
+					entry.separator_id === null
+						? null
+						: copies[originalIds.indexOf(entry.separator_id)].id,
+				group_id: entry.group_id,
+			})),
+			tx
+		);
 		const disabled = await ProfileGroupDisabled.query()
 			.where('profile_id', from.id)
 			.get(tx);
-		for (const row of disabled) {
-			await ProfileGroupDisabled.create(
-				{
-					profile_id: to.id,
-					group_id: row.group_id,
-					mod_id: row.mod_id,
-				},
-				tx
-			);
-		}
+		await ProfileGroupDisabled.createMany(
+			disabled.rows.map((row) => ({
+				profile_id: to.id,
+				group_id: row.group_id,
+				mod_id: row.mod_id,
+			})),
+			tx
+		);
 	}
 }
