@@ -6,6 +6,7 @@ mod settings;
 mod steam;
 
 use tauri::{AppHandle, Emitter};
+use tauri_plugin_window_state::StateFlags;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::fmt;
 use tracing_subscriber::prelude::*;
@@ -40,6 +41,11 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {
             tracing::debug!("A second instance was refused");
         }))
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(StateFlags::SIZE | StateFlags::POSITION | StateFlags::MAXIMIZED)
+                .build(),
+        )
         .plugin(
             tauri_plugin_7otion_sqlite::Builder::new()
                 .migrations("app", migrations::app())
