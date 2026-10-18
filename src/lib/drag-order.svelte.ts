@@ -1,7 +1,22 @@
 import type { UniqueIdentifier } from '@dnd-kit/abstract';
 import { move } from '@dnd-kit/helpers';
+import { tick } from 'svelte';
 
 type DragEvent = Parameters<typeof move>[1];
+
+function keepLifted(event: DragEvent): void {
+	const source = event.operation.source;
+	const element = source && 'element' in source ? source.element : null;
+	void tick().then(() => {
+		if (
+			element instanceof HTMLElement &&
+			element.hasAttribute('popover') &&
+			element.hasAttribute('data-dnd-dragging') &&
+			!element.matches(':popover-open')
+		)
+			element.showPopover();
+	});
+}
 
 export class DragOrder<Item, Key extends UniqueIdentifier> {
 	readonly #source: () => readonly Item[];
@@ -30,6 +45,7 @@ export class DragOrder<Item, Key extends UniqueIdentifier> {
 
 	over(event: DragEvent): void {
 		this.#dragged = move(this.items.map(this.#keyOf), event);
+		keepLifted(event);
 	}
 
 	async end(canceled: boolean): Promise<void> {
