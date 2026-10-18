@@ -5,7 +5,6 @@
 
 	import { type NewModsPlacement, NEW_MODS_PLACEMENTS } from '@/lib/models';
 	import { SettingsStore } from '@/lib/store';
-	import { toastError } from '@/lib/utils';
 
 	import SettingRow from './setting-row.svelte';
 
@@ -28,9 +27,7 @@
 			<Switch
 				checked={settings?.confirm_dependency_changes ?? true}
 				onCheckedChange={(checked) =>
-					settings
-						?.update({ confirm_dependency_changes: checked })
-						.catch(toastError)}
+					settings?.update({ confirm_dependency_changes: checked })}
 				aria-label="Confirm dependency changes"
 			/>
 		</SettingRow>
@@ -41,9 +38,7 @@
 			<Switch
 				checked={settings?.preview_auto_sort ?? true}
 				onCheckedChange={(checked) =>
-					settings
-						?.update({ preview_auto_sort: checked })
-						.catch(toastError)}
+					settings?.update({ preview_auto_sort: checked })}
 				aria-label="Preview before Auto-sort"
 			/>
 		</SettingRow>
@@ -56,9 +51,7 @@
 				value={settings?.new_mods_placement ?? 'end_of_list'}
 				onValueChange={(value) =>
 					isPlacement(value) &&
-					settings
-						?.update({ new_mods_placement: value })
-						.catch(toastError)}
+					settings?.update({ new_mods_placement: value })}
 			>
 				<ToggleGroup.Item value="end_of_list"
 					>End of list</ToggleGroup.Item

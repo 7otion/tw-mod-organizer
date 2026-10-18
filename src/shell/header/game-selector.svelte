@@ -9,7 +9,7 @@
 	import * as Popover from '@/components/ui/popover';
 
 	import { type GameEntry, GamesStore } from '@/lib/store';
-	import { cn, toastError } from '@/lib/utils';
+	import { cn } from '@/lib/utils';
 
 	import GameOption from './game-option.svelte';
 
@@ -37,8 +37,7 @@
 
 	async function switchTo(game: GameEntry): Promise<void> {
 		isOpen = false;
-		if (game.app_id !== current?.app_id)
-			await gamesStore.open(game).catch(toastError);
+		if (game.app_id !== current?.app_id) await gamesStore.open(game);
 	}
 
 	function browse(): void {
@@ -48,7 +47,7 @@
 
 	async function close(): Promise<void> {
 		isOpen = false;
-		await gamesStore.close().catch(toastError);
+		await gamesStore.close();
 	}
 </script>
 
@@ -62,7 +61,7 @@
 				{game}
 				{isCurrent}
 				onopen={() => switchTo(game)}
-				onpin={() => gamesStore.togglePin(game).catch(toastError)}
+				onpin={() => gamesStore.togglePin(game)}
 			/>
 		{/each}
 	</div>

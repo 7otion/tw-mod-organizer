@@ -10,7 +10,7 @@
 
 	import { ModTag, type Tag } from '@/lib/models';
 	import { TagsStore } from '@/lib/store';
-	import { toastError } from '@/lib/utils';
+	import { nameError } from '@/lib/utils';
 
 	import TagRow from './tag-row.svelte';
 
@@ -22,13 +22,7 @@
 	let isTouched = $state(false);
 	let deleting = $state<Tag | null>(null);
 
-	const error = $derived(
-		!name.trim()
-			? 'A tag needs a name.'
-			: tagsStore.isNameTaken(name)
-				? 'A tag with this name already exists.'
-				: null
-	);
+	const error = $derived(nameError('tag', name, tagsStore.isNameTaken(name)));
 	const deletingCount = new Count(() =>
 		ModTag.query().where('tag_id', deleting?.id ?? 0)
 	);
@@ -42,17 +36,13 @@
 		event.preventDefault();
 		isTouched = true;
 		if (error) return;
-		try {
-			await tagsStore.create(name);
-			reset();
-		} catch (error) {
-			toastError(error);
-		}
+		await tagsStore.create(name);
+		reset();
 	}
 
 	async function remove(): Promise<void> {
 		if (!deleting) return;
-		await tagsStore.delete(deleting).catch(toastError);
+		await tagsStore.delete(deleting);
 		deleting = null;
 	}
 </script>
@@ -98,14 +88,7 @@
 				</div>
 				<ScrollArea class="max-h-[min(360px,45vh)]">
 					{#each tagsStore.list as tag (tag.id)}
-						<TagRow
-							{tag}
-							isNameTaken={(name) =>
-								tagsStore.isNameTaken(name, tag)}
-							onrename={(name) => tagsStore.rename(tag, name)}
-							onrecolor={(color) => tagsStore.recolor(tag, color)}
-							ondelete={() => (deleting = tag)}
-						/>
+						<TagRow {tag} ondelete={() => (deleting = tag)} />
 					{/each}
 				</ScrollArea>
 			</div>

@@ -6,8 +6,6 @@
 	import * as Dialog from '@/components/ui/dialog';
 	import { ScrollArea } from '@/components/ui/scroll-area';
 
-	import { toastError } from '@/lib/utils';
-
 	import { LICENCES } from './licences';
 
 	const GPL_URL = 'https://www.gnu.org/licenses/gpl-3.0.html';
@@ -52,10 +50,7 @@
 		</ScrollArea>
 
 		<Dialog.Footer>
-			<Button
-				variant="ghost"
-				onclick={() => openUrl(GPL_URL).catch(toastError)}
-			>
+			<Button variant="ghost" onclick={() => openUrl(GPL_URL)}>
 				<ExternalLinkIcon />
 				Read the GPL v3.0
 			</Button>

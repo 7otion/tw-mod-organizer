@@ -5,7 +5,6 @@
 
 	import { type Profile, ProfileEntry } from '@/lib/models';
 	import { ProfilesStore } from '@/lib/store';
-	import { toastError } from '@/lib/utils';
 
 	let { profile = $bindable(null) }: { profile: Profile | null } = $props();
 
@@ -24,7 +23,7 @@
 
 	async function remove(): Promise<void> {
 		if (!profile) return;
-		await profilesStore.delete(profile).catch(toastError);
+		await profilesStore.delete(profile);
 		profile = null;
 	}
 </script>

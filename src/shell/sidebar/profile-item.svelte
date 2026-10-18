@@ -6,7 +6,7 @@
 
 	import { type Profile, ProfileEntry } from '@/lib/models';
 	import { ProfilesStore } from '@/lib/store';
-	import { cn, toastError } from '@/lib/utils';
+	import { cn, nameError } from '@/lib/utils';
 
 	let { profile, ondelete }: { profile: Profile; ondelete: () => void } =
 		$props();
@@ -26,11 +26,7 @@
 	let input = $state<HTMLInputElement | null>(null);
 
 	const error = $derived(
-		!name.trim()
-			? 'A profile needs a name.'
-			: profilesStore.isNameTaken(name, profile)
-				? 'A profile with this name already exists.'
-				: null
+		nameError('profile', name, profilesStore.isNameTaken(name, profile))
 	);
 
 	$effect(() => {
@@ -49,12 +45,12 @@
 		} else if (event.key === 'Enter' && !error) {
 			isRenaming = false;
 			if (name.trim() !== profile.name)
-				await profilesStore.rename(profile, name).catch(toastError);
+				await profilesStore.rename(profile, name);
 		}
 	}
 
 	function activate(): void {
-		if (!active) profilesStore.activate(profile).catch(toastError);
+		if (!active) profilesStore.activate(profile);
 	}
 </script>
 

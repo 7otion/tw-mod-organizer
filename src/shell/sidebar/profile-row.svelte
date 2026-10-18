@@ -17,7 +17,7 @@
 	import { type Profile, ProfileEntry } from '@/lib/models';
 	import type { Selection } from '@/lib/selection.svelte';
 	import { ProfilesStore } from '@/lib/store';
-	import { cn, timeAgo, toastError } from '@/lib/utils';
+	import { cn, nameError, timeAgo } from '@/lib/utils';
 
 	type Props = {
 		profile: Profile;
@@ -63,24 +63,19 @@
 			.whereNotNull('group_id')
 	);
 
-	const description = $derived(
-		mods.current === 0
-			? 'Empty'
-			: enabled.current < mods.current
-				? `${mods.current - enabled.current} off`
-				: ''
-	);
+	const description = $derived.by(() => {
+		if (mods.current === 0) return 'Empty';
+		if (enabled.current < mods.current)
+			return `${mods.current - enabled.current} off`;
+		return '';
+	});
 
 	let isRenaming = $state(false);
 	let name = $state('');
 	let input = $state<HTMLInputElement | null>(null);
 
 	const error = $derived(
-		!name.trim()
-			? 'A profile needs a name.'
-			: profilesStore.isNameTaken(name, profile)
-				? 'A profile with this name already exists.'
-				: null
+		nameError('profile', name, profilesStore.isNameTaken(name, profile))
 	);
 
 	$effect(() => {
@@ -100,16 +95,16 @@
 		} else if (event.key === 'Enter' && !error) {
 			isRenaming = false;
 			if (name.trim() !== profile.name)
-				await profilesStore.rename(profile, name).catch(toastError);
+				await profilesStore.rename(profile, name);
 		}
 	}
 
 	function activate(): void {
-		profilesStore.activate(profile).catch(toastError);
+		profilesStore.activate(profile);
 	}
 
 	function clone(): void {
-		profilesStore.clone(profile).catch(toastError);
+		profilesStore.clone(profile);
 	}
 
 	function created(date: Date): string {

@@ -20,7 +20,6 @@
 	import { Selection } from '@/lib/selection.svelte';
 	import type { Profile } from '@/lib/models';
 	import { GamesStore, ProfilesStore } from '@/lib/store';
-	import { toastError } from '@/lib/utils';
 
 	import DeleteProfileDialog from './delete-profile-dialog.svelte';
 	import NewProfileDialog from './new-profile-dialog.svelte';
@@ -62,15 +61,11 @@
 	);
 
 	async function cloneSelected(): Promise<void> {
-		try {
-			for (const profile of selected) await profilesStore.clone(profile);
-		} catch (error) {
-			toastError(error);
-		}
+		for (const profile of selected) await profilesStore.clone(profile);
 	}
 
 	async function removeMany(): Promise<void> {
-		await profilesStore.deleteMany(deletingMany).catch(toastError);
+		await profilesStore.deleteMany(deletingMany);
 		selection.clear();
 		deletingMany = [];
 	}
@@ -141,8 +136,7 @@
 							}),
 						]}
 						onDragOver={(event) => order.over(event)}
-						onDragEnd={(event) =>
-							order.end(event.canceled).catch(toastError)}
+						onDragEnd={(event) => order.end(event.canceled)}
 					>
 						{#each rows as profile, index (profile.id)}
 							<ProfileRow

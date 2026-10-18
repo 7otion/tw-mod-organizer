@@ -8,7 +8,7 @@
 	import * as Select from '@/components/ui/select';
 
 	import { GamesStore, ProfilesStore } from '@/lib/store';
-	import { toastError } from '@/lib/utils';
+	import { nameError } from '@/lib/utils';
 
 	let { open = $bindable(false) }: { open: boolean } = $props();
 
@@ -26,11 +26,7 @@
 			profilesStore.active
 	);
 	const error = $derived(
-		!name.trim()
-			? 'A profile needs a name.'
-			: profilesStore.isNameTaken(name)
-				? 'A profile with this name already exists.'
-				: null
+		nameError('profile', name, profilesStore.isNameTaken(name))
 	);
 
 	function reset(): void {
@@ -45,17 +41,13 @@
 		event.preventDefault();
 		isTouched = true;
 		if (error) return;
-		try {
-			await profilesStore.create(
-				name,
-				startFrom === 'copy' ? copyOf : null,
-				makeActive
-			);
-			open = false;
-			reset();
-		} catch (error) {
-			toastError(error);
-		}
+		await profilesStore.create(
+			name,
+			startFrom === 'copy' ? copyOf : null,
+			makeActive
+		);
+		open = false;
+		reset();
 	}
 </script>
 

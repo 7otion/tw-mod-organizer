@@ -11,7 +11,6 @@
 	import * as ToggleGroup from '@/components/ui/toggle-group';
 
 	import { type GameEntry, GamesStore } from '@/lib/store';
-	import { toastError } from '@/lib/utils';
 
 	import GameCard from './game-card.svelte';
 	import GameRow from './game-row.svelte';
@@ -61,17 +60,17 @@
 
 	$effect(() => {
 		if (isFirstRun && !gamesStore.isBrowsing && installed.length === 1)
-			void gamesStore.open(installed[0]).catch(toastError);
+			void gamesStore.open(installed[0]);
 	});
 
 	async function proceed(): Promise<void> {
-		if (selected) await gamesStore.open(selected).catch(toastError);
+		if (selected) await gamesStore.open(selected);
 	}
 
 	async function setFolder(game: GameEntry): Promise<void> {
 		const path = await open({ directory: true });
 		if (!path) return;
-		await gamesStore.setFolder(game, path).catch(toastError);
+		await gamesStore.setFolder(game, path);
 	}
 </script>
 
@@ -147,12 +146,8 @@
 								{game}
 								isSelected={game.app_id === selectedId}
 								onselect={() => (selectedId = game.app_id)}
-								oncontinue={() =>
-									gamesStore.open(game).catch(toastError)}
-								onpin={() =>
-									gamesStore
-										.togglePin(game)
-										.catch(toastError)}
+								oncontinue={() => gamesStore.open(game)}
+								onpin={() => gamesStore.togglePin(game)}
 							/>
 						{/each}
 					</div>
@@ -182,7 +177,7 @@
 								onstore={() =>
 									openUrl(
 										`https://store.steampowered.com/app/${game.app_id}/`
-									).catch(toastError)}
+									)}
 							/>
 						{/each}
 					</div>

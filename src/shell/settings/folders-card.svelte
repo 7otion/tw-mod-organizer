@@ -7,7 +7,6 @@
 	import { Progress } from '@/components/ui/progress';
 
 	import { type FolderColumn, GamesStore, SettingsStore } from '@/lib/store';
-	import { toastError } from '@/lib/utils';
 
 	import SettingRow from './setting-row.svelte';
 
@@ -41,7 +40,7 @@
 			defaultPath: game.installPath ?? undefined,
 		});
 		if (!path) return;
-		await gamesStore.setFolder(game, path).catch(toastError);
+		await gamesStore.setFolder(game, path);
 	}
 
 	async function change(column: FolderColumn): Promise<void> {
@@ -50,15 +49,11 @@
 			defaultPath: settingsStore.current?.[column],
 		});
 		if (!to) return;
-		try {
-			const leftover = await settingsStore.moveFolder(column, to);
-			if (leftover)
-				toast.warning('Folder moved', {
-					description: `The old folder couldn't go to the Recycle Bin and is still at ${leftover}.`,
-				});
-		} catch (error) {
-			toastError(error);
-		}
+		const leftover = await settingsStore.moveFolder(column, to);
+		if (leftover)
+			toast.warning('Folder moved', {
+				description: `The old folder couldn't go to the Recycle Bin and is still at ${leftover}.`,
+			});
 	}
 
 	function megabytes(bytes: number): string {

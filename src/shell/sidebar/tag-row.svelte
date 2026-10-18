@@ -7,18 +7,13 @@
 	import * as Popover from '@/components/ui/popover';
 
 	import { ModTag, type Tag, TAG_COLORS, type TagColor } from '@/lib/models';
+	import { TagsStore } from '@/lib/store';
 	import { TAG_SWATCHES } from '@/lib/tag-swatches';
-	import { cn, toastError } from '@/lib/utils';
+	import { cn, nameError } from '@/lib/utils';
 
-	type Props = {
-		tag: Tag;
-		isNameTaken: (name: string) => boolean;
-		onrename: (name: string) => Promise<void>;
-		onrecolor: (color: TagColor) => Promise<void>;
-		ondelete: () => void;
-	};
+	let { tag, ondelete }: { tag: Tag; ondelete: () => void } = $props();
 
-	let { tag, isNameTaken, onrename, onrecolor, ondelete }: Props = $props();
+	const tagsStore = TagsStore.get();
 
 	const modCount = new Count(() => ModTag.query().where('tag_id', tag.id));
 	const color = $derived(tag.color ?? 'ash');
@@ -29,11 +24,7 @@
 	let input = $state<HTMLInputElement | null>(null);
 
 	const error = $derived(
-		!name.trim()
-			? 'A tag needs a name.'
-			: isNameTaken(name)
-				? 'A tag with this name already exists.'
-				: null
+		nameError('tag', name, tagsStore.isNameTaken(name, tag))
 	);
 
 	$effect(() => {
@@ -52,14 +43,13 @@
 			isRenaming = false;
 		} else if (event.key === 'Enter' && !error) {
 			isRenaming = false;
-			if (name.trim() !== tag.name)
-				await onrename(name).catch(toastError);
+			if (name.trim() !== tag.name) await tagsStore.rename(tag, name);
 		}
 	}
 
-	function pick(option: TagColor): void {
+	async function pick(option: TagColor): Promise<void> {
 		isPicking = false;
-		if (option !== color) onrecolor(option).catch(toastError);
+		if (option !== color) await tagsStore.recolor(tag, option);
 	}
 </script>
 

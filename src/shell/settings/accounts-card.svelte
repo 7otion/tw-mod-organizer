@@ -8,7 +8,6 @@
 	import { Progress } from '@/components/ui/progress';
 
 	import { S7forgeStore, SteamStore } from '@/lib/store';
-	import { toastError } from '@/lib/utils';
 
 	import SettingRow from './setting-row.svelte';
 
@@ -18,7 +17,7 @@
 	const steam = $derived(steamStore.status);
 
 	$effect(() => {
-		steamStore.refresh().catch(toastError);
+		steamStore.refresh();
 	});
 
 	const updatePercent = $derived(
@@ -30,7 +29,7 @@
 	);
 
 	function update(): void {
-		s7forgeStore.install().catch(toastError);
+		s7forgeStore.install();
 	}
 </script>
 

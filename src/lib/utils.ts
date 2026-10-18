@@ -49,6 +49,16 @@ export function oneOf<T extends string>(
 	};
 }
 
+export function nameError(
+	kind: string,
+	name: string,
+	isTaken: boolean
+): string | null {
+	if (!name.trim()) return `A ${kind} needs a name.`;
+	if (isTaken) return `A ${kind} with this name already exists.`;
+	return null;
+}
+
 const TIME_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 	['year', 31_536_000],
 	['month', 2_592_000],
