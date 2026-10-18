@@ -3,6 +3,7 @@ mod games;
 mod migrations;
 mod s7forge;
 mod settings;
+mod steam;
 
 use tauri::{AppHandle, Emitter};
 use tracing_subscriber::EnvFilter;
@@ -57,6 +58,7 @@ pub fn run() {
             s7forge::latest_s7forge_version::latest_s7forge_version,
             s7forge::s7forge_version::s7forge_version,
             settings::move_folder::move_folder,
+            steam::steam_status::steam_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

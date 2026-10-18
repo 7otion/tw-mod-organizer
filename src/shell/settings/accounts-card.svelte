@@ -7,12 +7,19 @@
 	import * as Card from '@/components/ui/card';
 	import { Progress } from '@/components/ui/progress';
 
-	import { S7forgeStore } from '@/lib/store';
+	import { S7forgeStore, SteamStore } from '@/lib/store';
 	import { toastError } from '@/lib/utils';
 
 	import SettingRow from './setting-row.svelte';
 
 	const s7forgeStore = S7forgeStore.get();
+	const steamStore = SteamStore.get();
+
+	const steam = $derived(steamStore.status);
+
+	$effect(() => {
+		steamStore.refresh().catch(toastError);
+	});
 
 	const updatePercent = $derived(
 		s7forgeStore.downloadProgress
@@ -35,12 +42,22 @@
 			titleClass="text-blue-400"
 			description="Used for subscriptions, updates and launching"
 		>
-			<span
-				class="inline-flex items-center gap-1.5 text-xs font-semibold text-status-ok"
-			>
-				<CircleCheckIcon class="size-3.5" />
-				Detected · running
-			</span>
+			{#if !steam}
+				<span class="text-xs text-muted-foreground">Checking…</span>
+			{:else if steam.is_running}
+				<span
+					class="inline-flex items-center gap-1.5 text-xs font-semibold text-status-ok"
+				>
+					<CircleCheckIcon class="size-3.5" />
+					Running
+				</span>
+			{:else}
+				<span class="text-xs font-semibold text-muted-foreground">
+					{steam.is_installed
+						? 'Installed · not running'
+						: 'Not found'}
+				</span>
+			{/if}
 		</SettingRow>
 		<SettingRow
 			title="Nexus Mods"
