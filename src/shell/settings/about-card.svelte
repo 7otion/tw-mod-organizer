@@ -4,9 +4,12 @@
 
 	import { AppStore } from '@/lib/store';
 
+	import LicencesDialog from './licences-dialog.svelte';
 	import SettingRow from './setting-row.svelte';
 
 	const appStore = AppStore.get();
+
+	let isShowingLicences = $state(false);
 </script>
 
 <Card.Root>
@@ -25,7 +28,15 @@
 			title="Not affiliated"
 			description="TMO is not affiliated with Creative Assembly, Sega or TaleWorlds."
 		>
-			<Button variant="ghost" size="sm">Licences</Button>
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={() => (isShowingLicences = true)}
+			>
+				Licences
+			</Button>
 		</SettingRow>
 	</Card.Content>
 </Card.Root>
+
+<LicencesDialog bind:open={isShowingLicences} />
