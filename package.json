@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"@dnd-kit/abstract": "0.5.1",
+		"@dnd-kit/dom": "0.5.1",
 		"@dnd-kit/helpers": "0.5.1",
 		"@dnd-kit/svelte": "0.5.1",
 		"@tauri-apps/api": "^2.12.0",

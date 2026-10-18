@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
+	import { RestrictToElement } from '@dnd-kit/dom/modifiers';
 	import { DragDropProvider } from '@dnd-kit/svelte';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
@@ -21,6 +22,7 @@
 		(ids) => profilesStore.reorder(ids)
 	);
 
+	let list = $state<HTMLUListElement | null>(null);
 	let isCreating = $state(false);
 	let deleting = $state<Profile | null>(null);
 </script>
@@ -34,9 +36,12 @@
 		<PlusIcon class="size-3.5" />
 		New
 	</SidebarHeading>
-	<ul class="flex flex-col gap-px">
+	<ul bind:this={list} class="flex flex-col gap-px">
 		<DragDropProvider
-			modifiers={[RestrictToVerticalAxis]}
+			modifiers={[
+				RestrictToVerticalAxis,
+				RestrictToElement.configure({ element: () => list }),
+			]}
 			onDragOver={(event) => order.over(event)}
 			onDragEnd={(event) => order.end(event.canceled).catch(toastError)}
 		>
