@@ -1,12 +1,16 @@
 <script lang="ts">
 	import SaveIcon from '@lucide/svelte/icons/save';
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
+	import TagsIcon from '@lucide/svelte/icons/tags';
 
 	import { Button } from '@/components/ui/button';
 
 	import LibrarySummary from './library-summary.svelte';
 	import LoadOrderOutline from './load-order-outline.svelte';
+	import ManageTagsDialog from './manage-tags-dialog.svelte';
 	import ProfileList from './profile-list.svelte';
+
+	let isManagingTags = $state(false);
 </script>
 
 <aside
@@ -35,6 +39,16 @@
 			<Settings2Icon class="size-4" />
 			Manage profiles…
 		</Button>
+		<Button
+			variant="ghost"
+			class="h-7 justify-start gap-2 rounded-none px-4 text-md font-normal text-foreground-2 hover:bg-hover"
+			onclick={() => (isManagingTags = true)}
+		>
+			<TagsIcon class="size-4" />
+			Manage tags…
+		</Button>
 		<LibrarySummary />
 	</div>
 </aside>
+
+<ManageTagsDialog bind:open={isManagingTags} />
