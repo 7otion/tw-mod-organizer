@@ -62,6 +62,16 @@ export class ProfilesStore extends ConnectionStore {
 		await profile.update({ name: name.trim() });
 	}
 
+	async reorder(ids: readonly number[]): Promise<void> {
+		await Model.database.transaction(async (tx) => {
+			for (const [index, id] of ids.entries()) {
+				const profile = this.list.find((profile) => profile.id === id);
+				if (profile && profile.position !== index + 1)
+					await profile.update({ position: index + 1 }, tx);
+			}
+		});
+	}
+
 	async delete(profile: Profile): Promise<void> {
 		if (profile === this.active)
 			throw new Error("The active profile can't be deleted.");

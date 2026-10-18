@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Count } from '@7otion-tauri/orm';
+	import { createSortable } from '@dnd-kit/svelte/sortable';
 
 	import * as ContextMenu from '@/components/ui/context-menu';
 	import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@
 
 	type Props = {
 		profile: Profile;
+		index: number;
 		active: boolean;
 		isNameTaken: (name: string) => boolean;
 		onactivate: () => void;
@@ -18,12 +20,22 @@
 
 	let {
 		profile,
+		index,
 		active,
 		isNameTaken,
 		onactivate,
 		onrename,
 		ondelete,
 	}: Props = $props();
+
+	const sortable = createSortable({
+		get id() {
+			return profile.id;
+		},
+		get index() {
+			return index;
+		},
+	});
 
 	const modCount = new Count(() =>
 		ProfileEntry.query()
@@ -86,12 +98,14 @@
 				{#snippet child({ props })}
 					<button
 						{...props}
+						{@attach sortable.attach}
 						type="button"
 						aria-current={active}
 						class={cn(
 							'flex h-row-compact w-full items-center gap-2 px-4 text-left text-md text-foreground-2 hover:bg-hover',
 							active &&
-								'bg-linear-to-r from-pink-soft to-transparent text-foreground'
+								'bg-linear-to-r from-pink-soft to-transparent text-foreground',
+							sortable.isDragging && 'bg-hover'
 						)}
 						onclick={onactivate}
 					>
