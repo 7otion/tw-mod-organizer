@@ -5,6 +5,8 @@ use serde::Serialize;
 use crate::error::AppError;
 
 pub mod check_game_folder;
+pub mod detect_games;
+mod detection;
 pub mod list_games;
 mod total_war;
 

@@ -13,6 +13,11 @@ export type SupportedGame = {
 	detected_path: string | null;
 };
 
+type GameList = {
+	games: SupportedGame[];
+	is_fresh: boolean;
+};
+
 export type GameEntry = SupportedGame & {
 	row: Game | null;
 	installPath: string | null;
@@ -120,8 +125,16 @@ export class GamesStore extends ConnectionStore {
 	}
 
 	private async detect(): Promise<void> {
+		const list = await this.listGames();
+		if (!list.is_fresh)
+			this.supported = await invoke<SupportedGame[]>('detect_games');
+	}
+
+	private async listGames(): Promise<GameList> {
 		try {
-			this.supported = await invoke<SupportedGame[]>('list_games');
+			const list = await invoke<GameList>('list_games');
+			this.supported = list.games;
+			return list;
 		} finally {
 			this.isDetected = true;
 		}

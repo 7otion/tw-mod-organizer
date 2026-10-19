@@ -1,29 +1,24 @@
 use serde::Serialize;
 use tauri::AppHandle;
 
-use super::{GAMES, GameInfo};
-use crate::s7forge;
+use super::detection::{self, DetectedGame};
 
 #[derive(Serialize)]
-pub struct DetectedGame {
-    #[serde(flatten)]
-    game: GameInfo,
-    detected_path: Option<String>,
+pub struct GameList {
+    games: Vec<DetectedGame>,
+    is_fresh: bool,
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn list_games(app: AppHandle) -> Vec<DetectedGame> {
-    let mut games = Vec::with_capacity(GAMES.len());
-    for game in GAMES {
-        let game = game.info();
-        let detected_path = s7forge::steam::app_installation_path(&app, game.app_id)
-            .await
-            .inspect_err(|error| tracing::debug!(app_id = game.app_id, "not detected: {error}"))
-            .ok();
-        games.push(DetectedGame {
-            game,
-            detected_path,
-        });
+pub async fn list_games(app: AppHandle) -> GameList {
+    match detection::cached_games(&app) {
+        Some(games) => GameList {
+            games,
+            is_fresh: false,
+        },
+        None => GameList {
+            games: detection::detect_and_cache(&app).await,
+            is_fresh: true,
+        },
     }
-    games
 }

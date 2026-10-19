@@ -65,6 +65,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             games::check_game_folder::check_game_folder,
+            games::detect_games::detect_games,
             games::list_games::list_games,
             languages::export_language_template::export_language_template,
             languages::install_language_pack::install_language_pack,
