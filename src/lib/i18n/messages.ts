@@ -17,7 +17,7 @@ export type LanguagePack = {
 
 export type MessagePart = {
 	text: string;
-	isValue: boolean;
+	name: string | null;
 };
 
 type CompiledMessage = (values: MessageValues) => string;
@@ -63,7 +63,7 @@ export class Translator {
 
 	parts(key: string, values: MessageValues = {}): MessagePart[] {
 		const [message, plural] = this.resolve(key);
-		if (message === undefined) return [{ text: key, isValue: false }];
+		if (message === undefined) return [{ text: key, name: null }];
 		const text =
 			typeof message === 'string'
 				? message
@@ -72,7 +72,7 @@ export class Translator {
 			.split(PLACEHOLDERS)
 			.flatMap((piece, index): MessagePart[] => {
 				if (index % 2 === 0)
-					return piece ? [{ text: piece, isValue: false }] : [];
+					return piece ? [{ text: piece, name: null }] : [];
 				const value = values[piece];
 				return [
 					{
@@ -80,7 +80,7 @@ export class Translator {
 							value === undefined
 								? `{${piece}}`
 								: this.#formatValue(value),
-						isValue: true,
+						name: piece,
 					},
 				];
 			});

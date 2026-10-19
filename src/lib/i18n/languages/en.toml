@@ -35,6 +35,7 @@ selectItem = "Select {name}"
 clearSelection = "Clear selection"
 selectedCount = "{count} selected"
 changeEllipsis = "Change…"
+chooseEllipsis = "Choose…"
 close = "Close"
 error = "Error"
 clear = "Clear"
@@ -324,6 +325,13 @@ description = "Talks to Steam for workshop features, without keeping your game m
 updating = "Updating…"
 updateTo = "Update to v{version}"
 
+# RPFM is Rusted PackFile Manager, a tool for editing .pack files.
+[settings.accounts.rpfm]
+description = "Rusted PackFile Manager, used by “Open in RPFM” in mod details"
+notSet = "Not set"
+clear = "Forget the RPFM path"
+fileFilter = "Programs"
+
 [settings.import]
 import = "Import…"
 
@@ -360,6 +368,10 @@ steam = "Steam"
 title = "Library"
 tableButton = "Table…"
 noMatch = "No mod matches the search or filters."
+
+[library.subscribe]
+# {failures} lists each item that failed, with the reason from Steam.
+failed = "Couldn't subscribe to everything: {failures}"
 
 # Why a mod can't be used. Codes come from the scan; the Total War ones
 # (no_pack_file, many_pack_files) only appear for Total War games.
@@ -411,6 +423,9 @@ manual = "Manual"
 version = "v{version}"
 missing = "missing · {problem}"
 newVersion = "new version"
+# A required mod that isn't in the library.
+needs = "needs {title}"
+needsMore = "needs {title} +{count}"
 profileOff = "{name} (off)"
 viaGroup = { one = "via {group} · {count} profile", other = "via {group} · {count} profiles" }
 openDetails = "Open details"
@@ -505,3 +520,104 @@ download = "Download s7forge"
 [shortcuts]
 ctrl = "Ctrl {key}"
 ctrlPlus = "Ctrl+{key}"
+
+# The mod details panel, opened from a row's "Open details" button.
+[modDetails]
+title = "MOD DETAILS"
+close = "Close"
+
+# Badge on the cover.
+[modDetails.sources]
+steam = "Steam Workshop"
+nexus = "Nexus Mods"
+manual = "Manual"
+base = "Base game"
+
+[modDetails.titleEdit]
+label = "Custom title"
+set = "Set a custom title"
+original = "Original: {title}"
+reset = "Reset"
+
+[modDetails.byline]
+author = "by {name}"
+# "No. 10 in Chaos campaign": the mod's place in that profile's load order.
+number = "No. {number} in {profile}"
+alsoIn = "also in {profiles}"
+inNoProfile = "in no profile"
+
+[modDetails.actions]
+openFolder = "Open folder"
+openInSteam = "Open in Steam"
+openIn = "Open in"
+rpfm = "Open in RPFM"
+rpfmMissing = "Set the RPFM path in Settings"
+browser = "Open in browser"
+
+[modDetails.menu]
+label = "More actions"
+rename = "Rename…"
+setCover = "Set cover image…"
+imageFilter = "Images"
+copySteamId = "Copy Steam ID"
+steamIdCopied = "Steam ID copied."
+removeFromProfile = "Remove from profile"
+unsubscribe = "Unsubscribe…"
+remove = "Remove…"
+
+[modDetails.update]
+text = "Updated {updated} · seen {seen}"
+changeNotes = "Change notes"
+markSeen = "Mark as seen"
+
+[modDetails.tags]
+add = "Tag"
+remove = "Remove tag {name}"
+search = "Find or create a tag"
+none = "No more tags."
+create = "Create “{name}”"
+
+[modDetails.tabs]
+overview = "Overview"
+info = "Info"
+conflicts = "Conflicts"
+dependencies = "Dependencies"
+
+[modDetails.overview]
+noDescription = "No description."
+inProfiles = "In profiles"
+numberOn = "No. {number} · on"
+numberOff = "No. {number} · off"
+viaGroup = "via this group in {profiles}"
+noProfiles = "Not in any profile."
+
+# The Info tab: technical facts about the mod.
+[modDetails.info]
+copy = "Copy"
+file = "File"
+steamId = "Steam ID"
+updated = "Updated"
+dateWithSeen = "{date} · seen {seen}"
+dateWithAge = "{date} · {age}"
+copied = "Copied."
+subscribed = "Subscribed"
+installed = "Installed"
+folder = "Folder"
+
+[modDetails.dependencies]
+# Shown one after the other; each only when its count isn't 0.
+summaryMissing = { one = "{count} required mod isn't in your library.", other = "{count} required mods aren't in your library." }
+summaryOff = { one = "{count} required mod is in the library but not on in this profile.", other = "{count} required mods are in the library but not on in this profile." }
+subscribeMissing = "Subscribe to missing"
+requires = "Requires"
+requiredBy = "Required by"
+notInLibrary = "Not in library · Steam"
+unknownTitle = "Workshop item {id}"
+on = "In library · on"
+off = "In library · off in “{profile}”"
+absent = "In library · not in “{profile}”"
+subscribe = "Subscribe"
+enable = "Enable"
+noRequirements = "This mod doesn't list any requirements."
+notRequired = "No mod in your library requires this one."
+hint = "Requirements are suggestions from the author. You can still play without them, but the mod may crash or do nothing."

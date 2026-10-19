@@ -4,6 +4,7 @@ export class Selection<Key> {
 	readonly #order: () => readonly Key[];
 	readonly #keys = new SvelteSet<Key>();
 	#anchor: Key | null = null;
+	#cursor = $state<Key | null>(null);
 
 	constructor(order: () => readonly Key[]) {
 		this.#order = order;
@@ -14,9 +15,18 @@ export class Selection<Key> {
 		return order.length > 0 && order.every((key) => this.#keys.has(key));
 	});
 	readonly isSome = $derived.by(() => this.#keys.size > 0 && !this.isAll);
+	readonly only = $derived.by((): Key | null => {
+		if (this.#keys.size !== 1) return null;
+		const [key] = this.#keys;
+		return key;
+	});
 
 	get count(): number {
 		return this.#keys.size;
+	}
+
+	get cursor(): Key | null {
+		return this.#cursor;
 	}
 
 	has(key: Key): boolean {
@@ -41,15 +51,38 @@ export class Selection<Key> {
 			this.replace(
 				order.slice(Math.min(from, to), Math.max(from, to) + 1)
 			);
+			this.#cursor = key;
 			return;
 		}
 		this.replace([key]);
 		this.#anchor = key;
+		this.#cursor = key;
+	}
+
+	step(direction: 1 | -1, isExtending: boolean): void {
+		const order = this.#order();
+		if (!order.length) return;
+		const at = this.#cursor === null ? -1 : order.indexOf(this.#cursor);
+		const index =
+			at === -1
+				? direction === 1
+					? 0
+					: order.length - 1
+				: Math.min(order.length - 1, Math.max(0, at + direction));
+		const key = order[index];
+		if (isExtending) {
+			this.#keys.add(key);
+		} else {
+			this.replace([key]);
+			this.#anchor = key;
+		}
+		this.#cursor = key;
 	}
 
 	toggle(key: Key): void {
 		if (!this.#keys.delete(key)) this.#keys.add(key);
 		this.#anchor = key;
+		this.#cursor = key;
 	}
 
 	toggleAll(): void {
@@ -64,6 +97,7 @@ export class Selection<Key> {
 	clear(): void {
 		this.#keys.clear();
 		this.#anchor = null;
+		this.#cursor = null;
 	}
 
 	private replace(keys: readonly Key[]): void {

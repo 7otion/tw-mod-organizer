@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -62,6 +63,13 @@ struct SteamDetails {
     published_at: u64,
     remote_updated_at: u64,
     tags: Vec<String>,
+    required: Vec<RequiredItem>,
+}
+
+#[derive(Serialize)]
+struct RequiredItem {
+    item_ref: String,
+    title: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -103,6 +111,10 @@ pub async fn scan_library(
             .inspect_err(|error| tracing::debug!(app_id, "no workshop folder: {error}"))
             .ok(),
     };
+    let required_titles = match &subscribed {
+        Some(items) => required_titles(&app, app_id, items).await,
+        None => HashMap::new(),
+    };
     let steam_view = match (&subscribed, &workshop_folder) {
         (Some(_), _) => SteamView::Subscriptions,
         (None, Some(_)) => SteamView::WorkshopFolder,
@@ -141,7 +153,7 @@ pub async fn scan_library(
             match subscribed {
                 Some(items) => {
                     for item in items {
-                        if !add(steam_mod(game, item)) {
+                        if !add(steam_mod(game, item, &required_titles)) {
                             return Ok(None);
                         }
                     }
@@ -213,7 +225,11 @@ impl LibraryScans {
     }
 }
 
-fn steam_mod(game: &dyn GameSupport, item: WorkshopItem) -> LibraryMod {
+fn steam_mod(
+    game: &dyn GameSupport,
+    item: WorkshopItem,
+    required_titles: &HashMap<u64, String>,
+) -> LibraryMod {
     let source_ref = item.published_file_id.to_string();
     let files = match &item.install {
         Some(install) => read_mod(game, ScanSource::Steam, source_ref, install.folder.clone()),
@@ -224,6 +240,13 @@ fn steam_mod(game: &dyn GameSupport, item: WorkshopItem) -> LibraryMod {
         if let Some(tag) = tag_from_steam_tag(steam_tag, game.ignored_steam_tags()) {
             tags.push(tag);
         }
+    }
+    let mut required = Vec::with_capacity(item.required_items.len());
+    for item_id in &item.required_items {
+        required.push(RequiredItem {
+            item_ref: item_id.to_string(),
+            title: required_titles.get(item_id).cloned(),
+        });
     }
     LibraryMod {
         size_bytes: item.install.as_ref().map(|install| install.size_on_disk),
@@ -239,9 +262,38 @@ fn steam_mod(game: &dyn GameSupport, item: WorkshopItem) -> LibraryMod {
             published_at: item.time_created,
             remote_updated_at: item.time_updated,
             tags,
+            required,
         }),
         ..files
     }
+}
+
+async fn required_titles(
+    app: &AppHandle,
+    app_id: u32,
+    items: &[WorkshopItem],
+) -> HashMap<u64, String> {
+    let mut titles = HashMap::with_capacity(items.len());
+    for item in items {
+        titles.insert(item.published_file_id, item.title.clone());
+    }
+    let mut missing = Vec::new();
+    for item in items {
+        for item_id in &item.required_items {
+            if !titles.contains_key(item_id) && !missing.contains(item_id) {
+                missing.push(*item_id);
+            }
+        }
+    }
+    match workshop::workshop_items(app, app_id, &missing).await {
+        Ok(found) => {
+            for item in found {
+                titles.insert(item.published_file_id, item.title);
+            }
+        }
+        Err(error) => tracing::debug!(app_id, "no titles for missing requirements: {error}"),
+    }
+    titles
 }
 
 fn read_mod(

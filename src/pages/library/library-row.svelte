@@ -4,6 +4,7 @@
 	import CircleArrowUpIcon from '@lucide/svelte/icons/circle-arrow-up';
 	import LinkIcon from '@lucide/svelte/icons/link';
 	import PanelRightOpenIcon from '@lucide/svelte/icons/panel-right-open';
+	import PuzzleIcon from '@lucide/svelte/icons/puzzle';
 	import UnlinkIcon from '@lucide/svelte/icons/unlink';
 
 	import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@
 	type Props = {
 		mod: Mod;
 		selection: Selection<number>;
+		onopendetails: (mod: Mod) => void;
 	};
 
 	type Mark = {
@@ -47,7 +49,7 @@
 	const SHOWN_TAGS = 2;
 	const SHOWN_PROFILES = 2;
 
-	let { mod, selection }: Props = $props();
+	let { mod, selection, onopendetails }: Props = $props();
 
 	const libraryStore = LibraryStore.get();
 	const libraryColumnsStore = LibraryColumnsStore.get();
@@ -82,7 +84,26 @@
 				label: problemText(mod.problem),
 				class: 'text-status-missing',
 			};
-		if (mod.hasUpdate)
+		const missing = libraryStore.missingRequirementsOf(mod);
+		if (missing.length) {
+			const title =
+				missing[0].required_title ??
+				t('modDetails.dependencies.unknownTitle', {
+					id: missing[0].required_ref,
+				});
+			return {
+				icon: PuzzleIcon,
+				label:
+					missing.length > 1
+						? t('library.row.needsMore', {
+								title,
+								count: missing.length - 1,
+							})
+						: t('library.row.needs', { title }),
+				class: 'text-status-dep',
+			};
+		}
+		if (mod.hasUnseenUpdate)
 			return {
 				icon: CircleArrowUpIcon,
 				label: t('library.row.newVersion'),
@@ -136,17 +157,30 @@
 				size="icon-sm"
 				aria-label={t('library.row.openDetails')}
 				class="ml-auto opacity-0 transition-opacity duration-120 group-hover:opacity-100 focus-visible:opacity-100"
-				onclick={(event) => event.stopPropagation()}
+				onclick={(event) => {
+					event.stopPropagation();
+					onopendetails(mod);
+				}}
 				ondblclick={(event) => event.stopPropagation()}
 			>
 				<PanelRightOpenIcon />
 			</Button>
 		</span>
 	{:else if key === 'source'}
-		<ModSourceIcon
-			source={mod.source}
-			size={SOURCE_ICON_SIZES[libraryColumnsStore.coverSize]}
-		/>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<span
+			class="grid place-items-center"
+			ondblclick={(event) => {
+				if (mod.source !== 'steam') return;
+				event.stopPropagation();
+				void libraryStore.openInSteam(mod);
+			}}
+		>
+			<ModSourceIcon
+				source={mod.source}
+				size={SOURCE_ICON_SIZES[libraryColumnsStore.coverSize]}
+			/>
+		</span>
 	{:else if key === 'author'}
 		<span data-cell class="truncate text-sm">{mod.author_name ?? '—'}</span>
 	{:else if key === 'tags'}
@@ -209,6 +243,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 <li
+	data-mod-id={mod.id}
 	class={cn(
 		'group grid grid-cols-(--library-columns) items-center gap-x-3 rounded-md px-5 text-xs text-muted-foreground transition-colors duration-120 select-none [content-visibility:auto] hover:bg-fill-1',
 		ROW_HEIGHTS[libraryColumnsStore.coverSize],

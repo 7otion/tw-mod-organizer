@@ -62,12 +62,11 @@ export class Mod extends Model<typeof Mod.schema> {
 		return this.missing_since !== null;
 	}
 
-	get hasUpdate(): boolean {
+	get hasUnseenUpdate(): boolean {
 		return (
 			this.remote_updated_at !== null &&
-			this.installed_updated_at !== null &&
-			this.remote_updated_at.getTime() >
-				this.installed_updated_at.getTime()
+			this.seen_updated_at !== null &&
+			this.remote_updated_at.getTime() > this.seen_updated_at.getTime()
 		);
 	}
 

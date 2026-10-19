@@ -306,7 +306,7 @@ export class LibraryFilterStore extends ConnectionStore {
 			case 'in-no-profile':
 				return this.#libraryStore.isUnused(mod);
 			case 'update-available':
-				return mod.hasUpdate;
+				return mod.hasUnseenUpdate;
 			case 'missing-or-broken':
 				return mod.problem !== null;
 		}

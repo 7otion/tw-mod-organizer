@@ -67,6 +67,10 @@ export class SettingsStore extends ConnectionStore {
 		}
 	}
 
+	async setRpfmPath(path: string | null): Promise<void> {
+		await this.current!.update({ rpfm_path: path });
+	}
+
 	async refreshSteamStatus(): Promise<void> {
 		this.steamStatus = await invoke<SteamStatus>('steam_status');
 	}

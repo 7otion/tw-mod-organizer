@@ -2,6 +2,8 @@
 	import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
 	import DownloadIcon from '@lucide/svelte/icons/download';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
+	import XIcon from '@lucide/svelte/icons/x';
+	import { open } from '@tauri-apps/plugin-dialog';
 
 	import { Button } from '@/components/ui/button';
 	import * as Card from '@/components/ui/card';
@@ -33,6 +35,19 @@
 
 	function update(): void {
 		s7forgeStore.install();
+	}
+
+	async function chooseRpfm(): Promise<void> {
+		const path = await open({
+			defaultPath: settingsStore.current?.rpfm_path ?? undefined,
+			filters: [
+				{
+					name: t('settings.accounts.rpfm.fileFilter'),
+					extensions: ['exe'],
+				},
+			],
+		});
+		if (path) await settingsStore.setRpfmPath(path);
 	}
 </script>
 
@@ -102,6 +117,35 @@
 						</Button>
 					{/if}
 				{/if}
+			</div>
+		</SettingRow>
+		<SettingRow
+			title="RPFM"
+			description={t('settings.accounts.rpfm.description')}
+		>
+			<div class="flex min-w-0 items-center gap-2">
+				{#if settingsStore.current?.rpfm_path}
+					<code
+						class="max-w-80 truncate rounded-sm bg-fill-1 px-2 py-1 font-mono text-xs text-foreground-2"
+					>
+						{settingsStore.current.rpfm_path}
+					</code>
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						aria-label={t('settings.accounts.rpfm.clear')}
+						onclick={() => settingsStore.setRpfmPath(null)}
+					>
+						<XIcon />
+					</Button>
+				{:else}
+					<span class="text-xs text-muted-foreground">
+						{t('settings.accounts.rpfm.notSet')}
+					</span>
+				{/if}
+				<Button variant="secondary" size="sm" onclick={chooseRpfm}>
+					{t('common.chooseEllipsis')}
+				</Button>
 			</div>
 		</SettingRow>
 	</Card.Content>

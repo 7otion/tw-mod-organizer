@@ -1,12 +1,14 @@
 import { ConnectionStore, Model, type Transaction } from '@7otion-tauri/orm';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { untrack } from 'svelte';
 
 import {
 	Group,
 	GroupMember,
 	Mod,
+	ModDependency,
 	ModTag,
 	ProfileEntry,
 	Tag,
@@ -27,6 +29,7 @@ type SteamDetails = {
 	published_at: number;
 	remote_updated_at: number;
 	tags: string[];
+	required: { item_ref: string; title: string | null }[];
 };
 
 type LibraryMod = {
@@ -41,6 +44,11 @@ type LibraryMod = {
 	installed_updated_at: number | null;
 	added_at: number | null;
 	steam: SteamDetails | null;
+};
+
+type SubscribedMods = {
+	subscribed: number[];
+	failures: string[];
 };
 
 type RemovedMods = {
@@ -68,9 +76,19 @@ type LibraryScan = {
 };
 
 export type ModPlacement = {
-	profiles: { profile: Profile; isEnabled: boolean }[];
+	profiles: { profile: Profile; isEnabled: boolean; number: number }[];
 	groups: { group: Group; profiles: Profile[] }[];
 	profileIds: number[];
+};
+
+export type Requirement = {
+	dependency: ModDependency;
+	mod: Mod | null;
+};
+
+export type ModDependencies = {
+	requires: Requirement[];
+	requiredBy: Mod[];
 };
 
 const NO_PLACEMENT: ModPlacement = { profiles: [], groups: [], profileIds: [] };
@@ -99,6 +117,12 @@ export class LibraryStore extends ConnectionStore {
 			this.#groups.rows.map((group) => group.id)
 		)
 	);
+	readonly #dependencies = this.query(() =>
+		ModDependency.query().whereIn(
+			'mod_id',
+			this.#mods.rows.map((mod) => mod.id)
+		)
+	);
 	readonly #modTags = this.query(() =>
 		ModTag.query().whereIn(
 			'tag_id',
@@ -125,6 +149,22 @@ export class LibraryStore extends ConnectionStore {
 			(entry) => entry.group_id
 		)
 	);
+	readonly #entryNumbers = $derived.by(() => {
+		const numbers: Record<number, number> = {};
+		const byProfile = Map.groupBy(
+			this.#entries.rows,
+			(entry) => entry.profile_id
+		);
+		for (const entries of byProfile.values()) {
+			let number = 0;
+			const ordered = entries.toSorted((a, b) =>
+				a.position < b.position ? -1 : a.position > b.position ? 1 : 0
+			);
+			for (const entry of ordered)
+				if (entry.mod_id !== null) numbers[entry.id] = ++number;
+		}
+		return numbers;
+	});
 	readonly #membersByModId = $derived(
 		this.#members.collection.groupBy('mod_id')
 	);
@@ -151,6 +191,20 @@ export class LibraryStore extends ConnectionStore {
 			])
 		) as Record<number, Tag[]>
 	);
+	readonly #dependenciesByModId = $derived(
+		this.#dependencies.collection.groupBy('mod_id')
+	);
+	readonly #dependentsByRef = $derived(
+		this.#dependencies.collection.groupBy('required_ref')
+	);
+	readonly #steamModsByRef = $derived(
+		Object.fromEntries(
+			this.list
+				.filter((mod) => mod.source === 'steam')
+				.map((mod) => [mod.source_ref, mod])
+		) as Record<string, Mod>
+	);
+	readonly #modsById = $derived(LibraryStore.byId(this.list));
 	readonly unusedCount = $derived(
 		this.list.filter((mod) => this.isUnused(mod)).length
 	);
@@ -267,6 +321,76 @@ export class LibraryStore extends ConnectionStore {
 		return this.#tagsByModId[mod.id] ?? [];
 	}
 
+	dependenciesOf(mod: Mod): ModDependencies {
+		const requires = (this.#dependenciesByModId.get(mod.id) ?? []).map(
+			(dependency) => ({
+				dependency,
+				mod: this.#steamModsByRef[dependency.required_ref] ?? null,
+			})
+		);
+		const requiredBy =
+			mod.source === 'steam'
+				? (this.#dependentsByRef.get(mod.source_ref) ?? []).flatMap(
+						(dependency) => this.#modsById[dependency.mod_id] ?? []
+					)
+				: [];
+		return { requires, requiredBy };
+	}
+
+	missingRequirementsOf(mod: Mod): ModDependency[] {
+		return (this.#dependenciesByModId.get(mod.id) ?? []).filter(
+			(dependency) => !(dependency.required_ref in this.#steamModsByRef)
+		);
+	}
+
+	async setCustomTitle(mod: Mod, title: string | null): Promise<void> {
+		const custom = title?.trim();
+		await mod.update({
+			custom_title: custom && custom !== mod.title ? custom : null,
+		});
+	}
+
+	async setCover(mod: Mod, source: string): Promise<void> {
+		const cover = await invoke<string>('set_cover_image', {
+			mod_id: mod.id,
+			source,
+		});
+		await mod.update({ custom_preview_file: cover });
+		await this.requestThumbnails(mod.game_id);
+	}
+
+	async markSeen(mod: Mod): Promise<void> {
+		await mod.update({ seen_updated_at: mod.remote_updated_at });
+	}
+
+	async subscribe(itemRefs: readonly string[]): Promise<void> {
+		const result = await invoke<SubscribedMods>('subscribe_mods', {
+			app_id: this.#gamesStore.current!.app_id,
+			item_ids: itemRefs.map(Number),
+		});
+		if (result.subscribed.length) await this.scan();
+		if (result.failures.length)
+			throw new Error(
+				t('library.subscribe.failed', {
+					failures: result.failures.join('; '),
+				})
+			);
+	}
+
+	async openInSteam(mod: Mod): Promise<void> {
+		await openUrl(`steam://url/CommunityFilePage/${mod.source_ref}`);
+	}
+
+	async openFolder(mod: Mod): Promise<void> {
+		await invoke('open_mod_folder', { folder: mod.folder });
+	}
+
+	async openInRpfm(mod: Mod): Promise<void> {
+		await invoke('open_in_rpfm', {
+			pack: `${mod.folder}\\${mod.game_ref}`,
+		});
+	}
+
 	async scan(): Promise<void> {
 		const game = this.#gamesStore.current!;
 		if (game.app_id in this.#scans) return;
@@ -285,6 +409,7 @@ export class LibraryStore extends ConnectionStore {
 					LibraryStore.identityKey(mod.source, mod.source_ref)
 				);
 				const now = unixNow();
+				const withSteam: { mod: Mod; steam: SteamDetails }[] = [];
 				for (const mod of known) {
 					const key = LibraryStore.identityKey(
 						mod.source,
@@ -293,6 +418,14 @@ export class LibraryStore extends ConnectionStore {
 					const found = scanned.get(key)?.[0];
 					if (found) {
 						mod.fill(LibraryStore.scannedColumns(found));
+						if (found.steam) {
+							withSteam.push({ mod, steam: found.steam });
+							if (mod.seen_updated_at === null)
+								mod.fill({
+									seen_updated_at:
+										found.steam.remote_updated_at,
+								});
+						}
 						scanned.delete(key);
 					} else if (LibraryStore.canGoMissing(mod, scan)) {
 						mod.fill({
@@ -313,6 +446,7 @@ export class LibraryStore extends ConnectionStore {
 						source: mod.source === 'steam' ? 'steam' : 'manual',
 						source_ref: mod.source_ref,
 						title: LibraryStore.titleOf(mod),
+						seen_updated_at: mod.steam?.remote_updated_at ?? null,
 						...LibraryStore.scannedColumns(mod),
 					})),
 					tx
@@ -325,6 +459,11 @@ export class LibraryStore extends ConnectionStore {
 					})),
 					tx
 				);
+				created.forEach((mod, index) => {
+					const steam = added[index].steam;
+					if (steam) withSteam.push({ mod, steam });
+				});
+				await LibraryStore.saveSteamDependencies(withSteam, tx);
 				await game.row!.update({ scanned_at: now }, tx);
 			});
 			await this.requestThumbnails(game.app_id);
@@ -346,7 +485,15 @@ export class LibraryStore extends ConnectionStore {
 		const profiles = (this.#entriesByModId.get(mod.id) ?? [])
 			.flatMap((entry) => {
 				const profile = this.#profilesById[entry.profile_id];
-				return profile ? [{ profile, isEnabled: entry.enabled }] : [];
+				return profile
+					? [
+							{
+								profile,
+								isEnabled: entry.enabled,
+								number: this.#entryNumbers[entry.id] ?? 0,
+							},
+						]
+					: [];
 			})
 			.sort(
 				(a, b) =>
@@ -414,6 +561,33 @@ export class LibraryStore extends ConnectionStore {
 				remote_updated_at: mod.steam.remote_updated_at,
 			}),
 		};
+	}
+
+	private static async saveSteamDependencies(
+		mods: readonly { mod: Mod; steam: SteamDetails }[],
+		tx: Transaction
+	): Promise<void> {
+		if (!mods.length) return;
+		const previous = await ModDependency.query()
+			.whereIn(
+				'mod_id',
+				mods.map(({ mod }) => mod.id)
+			)
+			.where('origin', 'steam')
+			.toArray(tx);
+		await ModDependency.deleteMany(previous, tx);
+		await ModDependency.createMany(
+			mods.flatMap(({ mod, steam }) =>
+				steam.required.map((required) => ({
+					mod_id: mod.id,
+					required_ref: required.item_ref,
+					required_title: required.title,
+					optional: false,
+					origin: 'steam' as const,
+				}))
+			),
+			tx
+		);
 	}
 
 	private async requestThumbnails(gameId: number): Promise<void> {

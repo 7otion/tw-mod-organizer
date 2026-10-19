@@ -8,7 +8,7 @@
 	type Props = {
 		key: MessageKey;
 		values?: MessageValues;
-		value: Snippet<[string]>;
+		value: Snippet<[string, string]>;
 	};
 
 	let { key, values, value }: Props = $props();
@@ -17,4 +17,4 @@
 </script>
 
 <!-- prettier-ignore -->
-{#each parts as part, index (index)}{#if part.isValue}{@render value(part.text)}{:else}{part.text}{/if}{/each}
+{#each parts as part, index (index)}{#if part.name}{@render value(part.text, part.name)}{:else}{part.text}{/if}{/each}

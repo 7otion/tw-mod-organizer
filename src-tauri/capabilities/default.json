@@ -13,6 +13,10 @@
 		"core:window:allow-is-maximized",
 		"dialog:default",
 		"opener:default",
+		{
+			"identifier": "opener:allow-open-url",
+			"allow": [{ "url": "steam://*" }]
+		},
 		"7otion-sqlite:default"
 	]
 }

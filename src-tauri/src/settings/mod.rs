@@ -45,6 +45,17 @@ pub async fn mods_dir(app: &AppHandle) -> Result<PathBuf, AppError> {
     .await
 }
 
+pub async fn rpfm_path(app: &AppHandle) -> Result<Option<PathBuf>, AppError> {
+    with_database(app, async |connection: &mut SqliteConnection| {
+        let row = sqlx::query("SELECT rpfm_path FROM settings WHERE id = 1")
+            .fetch_one(&mut *connection)
+            .await?;
+        let path: Option<String> = row.try_get("rpfm_path")?;
+        Ok(path.map(PathBuf::from))
+    })
+    .await
+}
+
 async fn with_database<T>(
     app: &AppHandle,
     work: impl AsyncFnOnce(&mut SqliteConnection) -> Result<T, AppError>,

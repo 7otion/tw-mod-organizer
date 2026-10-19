@@ -22,6 +22,8 @@ pub struct WorkshopItem {
     pub preview_url: Option<String>,
     #[serde(default)]
     pub tags: Vec<String>,
+    #[serde(default)]
+    pub required_items: Vec<u64>,
 }
 
 #[derive(Deserialize)]
@@ -32,7 +34,7 @@ pub struct Install {
 }
 
 #[derive(Deserialize)]
-pub struct UnsubscribeResult {
+pub struct ItemResult {
     pub item_id: u64,
     pub success: bool,
     pub error: Option<String>,
@@ -46,20 +48,46 @@ pub async fn workshop_path(app: &AppHandle, app_id: u32) -> Result<PathBuf, AppE
     run(app, with_app_id("workshop-path", app_id)).await
 }
 
+pub async fn workshop_items(
+    app: &AppHandle,
+    app_id: u32,
+    item_ids: &[u64],
+) -> Result<Vec<WorkshopItem>, AppError> {
+    if item_ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    run(app, with_item_ids("workshop-items", app_id, item_ids)).await
+}
+
+pub async fn subscribe(
+    app: &AppHandle,
+    app_id: u32,
+    item_ids: &[u64],
+) -> Result<Vec<ItemResult>, AppError> {
+    if item_ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    run(app, with_item_ids("subscribe", app_id, item_ids)).await
+}
+
 pub async fn unsubscribe(
     app: &AppHandle,
     app_id: u32,
     item_ids: &[u64],
-) -> Result<Vec<UnsubscribeResult>, AppError> {
+) -> Result<Vec<ItemResult>, AppError> {
     if item_ids.is_empty() {
         return Ok(Vec::new());
     }
+    run(app, with_item_ids("unsubscribe", app_id, item_ids)).await
+}
+
+fn with_item_ids(command: &str, app_id: u32, item_ids: &[u64]) -> Vec<String> {
     let mut ids = Vec::with_capacity(item_ids.len());
     for item_id in item_ids {
         ids.push(item_id.to_string());
     }
-    let mut args = with_app_id("unsubscribe", app_id);
+    let mut args = with_app_id(command, app_id);
     args.push("--item-ids".to_owned());
     args.push(ids.join(","));
-    run(app, args).await
+    args
 }

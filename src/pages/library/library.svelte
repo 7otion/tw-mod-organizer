@@ -6,6 +6,7 @@
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import SearchIcon from '@lucide/svelte/icons/search';
 	import { openUrl } from '@tauri-apps/plugin-opener';
+	import { tick, untrack } from 'svelte';
 
 	import { Button } from '@/components/ui/button';
 	import { Checkbox } from '@/components/ui/checkbox';
@@ -38,6 +39,7 @@
 	import { COLUMN_INFO, SOURCE_ICON_SIZES } from './library-columns';
 	import LibraryRow from './library-row.svelte';
 	import TableSettingsDialog from './table-settings-dialog.svelte';
+	import ModDetailsPanel from '@/pages/mod-details/mod-details-panel.svelte';
 
 	type ProfileScope = Exclude<LibraryScope, 'all'>;
 
@@ -97,17 +99,59 @@
 			),
 		].join(' ')
 	);
+	let detailsModId = $state<number | null>(null);
+
+	const detailsMod = $derived(
+		libraryStore.list.find((mod) => mod.id === detailsModId) ?? null
+	);
+
 	const SortIcon = $derived(
 		libraryFilterStore.isDescending ? ArrowDownIcon : ArrowUpIcon
 	);
+
+	$effect(() => {
+		const only = selection.only;
+		if (only === null) return;
+		untrack(() => {
+			if (detailsModId !== null) detailsModId = only;
+		});
+	});
 
 	function onkeydown(event: KeyboardEvent): void {
 		if (event.ctrlKey && event.key.toLowerCase() === 'f') {
 			event.preventDefault();
 			searchInput?.focus();
 		} else if (event.key === 'Escape' && !event.defaultPrevented) {
-			selection.clear();
+			if (detailsMod) detailsModId = null;
+			else selection.clear();
+		} else if (
+			(event.key === 'ArrowDown' || event.key === 'ArrowUp') &&
+			!event.defaultPrevented &&
+			!isTyping(event.target)
+		) {
+			event.preventDefault();
+			selection.step(
+				event.key === 'ArrowDown' ? 1 : -1,
+				event.shiftKey || event.ctrlKey
+			);
+			void revealCursor();
 		}
+	}
+
+	function isTyping(target: EventTarget | null): boolean {
+		return (
+			target instanceof HTMLElement &&
+			(target.isContentEditable ||
+				target instanceof HTMLInputElement ||
+				target instanceof HTMLTextAreaElement)
+		);
+	}
+
+	async function revealCursor(): Promise<void> {
+		await tick();
+		document
+			.querySelector(`[data-mod-id="${selection.cursor}"]`)
+			?.scrollIntoView({ block: 'nearest' });
 	}
 
 	function widthOf(column: LibraryColumnState): string {
@@ -389,7 +433,11 @@
 		<ScrollArea class="min-h-0 flex-1">
 			<ul class="flex flex-col px-6 py-1">
 				{#each libraryFilterStore.visibleMods as mod (mod.id)}
-					<LibraryRow {mod} {selection} />
+					<LibraryRow
+						{mod}
+						{selection}
+						onopendetails={(opened) => (detailsModId = opened.id)}
+					/>
 				{/each}
 			</ul>
 			{#if !libraryFilterStore.visibleMods.length}
@@ -427,6 +475,15 @@
 
 	{#if selection.count}
 		<LibraryBulkBar {selection} />
+	{/if}
+
+	{#if detailsMod}
+		<ModDetailsPanel
+			mod={detailsMod}
+			context="library"
+			onopen={(opened) => (detailsModId = opened.id)}
+			onclose={() => (detailsModId = null)}
+		/>
 	{/if}
 </div>
 
