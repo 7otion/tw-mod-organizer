@@ -2,10 +2,13 @@
 	import { Button } from '@/components/ui/button';
 	import * as Card from '@/components/ui/card';
 
+	import { t } from '@/lib/i18n';
 	import { AppStore } from '@/lib/store';
 
 	import LicencesDialog from './licences-dialog.svelte';
 	import SettingRow from './setting-row.svelte';
+
+	const AVAILABLE_VERSION = '2.1.0';
 
 	const appStore = AppStore.get();
 
@@ -13,27 +16,33 @@
 </script>
 
 <Card.Root>
-	<Card.Header><Card.Title>Updates &amp; about</Card.Title></Card.Header>
+	<Card.Header>
+		<Card.Title>{t('settings.sections.about')}</Card.Title>
+	</Card.Header>
 	<Card.Content class="gap-0 p-0">
 		<SettingRow
-			title="TMO {appStore.version}"
-			description="Version 2.1.0 is available"
+			title={t('settings.about.version', { version: appStore.version })}
+			description={t('settings.about.available', {
+				version: AVAILABLE_VERSION,
+			})}
 		>
 			<div class="flex gap-1.5">
-				<Button variant="secondary" size="sm">What's new…</Button>
-				<Button size="sm">Update &amp; restart</Button>
+				<Button variant="secondary" size="sm">
+					{t('settings.about.whatsNew')}
+				</Button>
+				<Button size="sm">{t('settings.about.updateRestart')}</Button>
 			</div>
 		</SettingRow>
 		<SettingRow
-			title="Not affiliated"
-			description="TMO is not affiliated with Creative Assembly, Sega or TaleWorlds."
+			title={t('settings.about.notAffiliated.title')}
+			description={t('settings.about.notAffiliated.description')}
 		>
 			<Button
 				variant="ghost"
 				size="sm"
 				onclick={() => (isShowingLicences = true)}
 			>
-				Licences
+				{t('settings.about.licences')}
 			</Button>
 		</SettingRow>
 	</Card.Content>

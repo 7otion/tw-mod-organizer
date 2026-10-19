@@ -1,5 +1,6 @@
 export * from './app.svelte';
 export * from './games.svelte';
+export * from './language.svelte';
 export * from './library';
 export * from './profiles.svelte';
 export * from './s7forge.svelte';

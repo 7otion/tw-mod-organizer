@@ -1,8 +1,10 @@
+import type { MessageKey } from '@/lib/i18n/message-key';
+
 export type Licence = { name: string; licence: string };
 
-export const LICENCES: { group: string; items: Licence[] }[] = [
+export const LICENCES: { group: MessageKey; items: Licence[] }[] = [
 	{
-		group: 'Interface',
+		group: 'settings.licences.groups.interface',
 		items: [
 			{ name: 'Svelte', licence: 'MIT' },
 			{ name: 'SvelteKit', licence: 'MIT' },
@@ -23,13 +25,14 @@ export const LICENCES: { group: string; items: Licence[] }[] = [
 		],
 	},
 	{
-		group: 'Backend',
+		group: 'settings.licences.groups.backend',
 		items: [
 			{ name: 'Tauri and its plugins', licence: 'MIT or Apache-2.0' },
 			{ name: 'SQLx', licence: 'MIT or Apache-2.0' },
 			{ name: 'reqwest', licence: 'MIT or Apache-2.0' },
 			{ name: 'Serde', licence: 'MIT or Apache-2.0' },
 			{ name: 'thiserror', licence: 'MIT or Apache-2.0' },
+			{ name: 'toml', licence: 'MIT or Apache-2.0' },
 			{ name: 'fs4', licence: 'MIT or Apache-2.0' },
 			{ name: 'image', licence: 'MIT or Apache-2.0' },
 			{ name: 'fast_image_resize', licence: 'MIT or Apache-2.0' },
@@ -38,7 +41,7 @@ export const LICENCES: { group: string; items: Licence[] }[] = [
 		],
 	},
 	{
-		group: 'Fonts',
+		group: 'settings.licences.groups.fonts',
 		items: [
 			{ name: 'Grenze Gotisch', licence: 'OFL-1.1' },
 			{ name: 'Cinzel', licence: 'OFL-1.1' },
@@ -46,7 +49,7 @@ export const LICENCES: { group: string; items: Licence[] }[] = [
 		],
 	},
 	{
-		group: 'Steam',
+		group: 'settings.licences.groups.steam',
 		items: [
 			{ name: 's7forge', licence: 'MIT' },
 			{

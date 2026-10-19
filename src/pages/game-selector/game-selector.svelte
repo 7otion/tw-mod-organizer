@@ -10,6 +10,7 @@
 	import { ScrollArea } from '@/components/ui/scroll-area';
 	import * as ToggleGroup from '@/components/ui/toggle-group';
 
+	import { t } from '@/lib/i18n';
 	import { type GameEntry, GamesStore } from '@/lib/store';
 
 	import GameCard from './game-card.svelte';
@@ -85,22 +86,20 @@
 					onclick={() => (gamesStore.isBrowsing = false)}
 				>
 					<ArrowLeftIcon />
-					Back to {gamesStore.current.title}
+					{t('gameSelector.back', { game: gamesStore.current.title })}
 				</Button>
 			{/if}
 			<h1 class="font-blackletter text-[50px] leading-none font-medium">
 				{#if gamesStore.isBrowsing}
-					Games
+					{t('gameSelector.title.browsing')}
 				{:else if isFirstRun}
-					Choose your first game
+					{t('gameSelector.title.firstRun')}
 				{:else}
-					Choose a game
+					{t('gameSelector.title.choose')}
 				{/if}
 			</h1>
 			<p class="text-md">
-				TMO found {installed.length} supported
-				{installed.length === 1 ? 'game' : 'games'} on this PC. You can switch
-				any time from the title bar.
+				{t('gameSelector.found', { count: installed.length })}
 			</p>
 		</div>
 		<ToggleGroup.Root
@@ -110,8 +109,8 @@
 			}
 		>
 			{#each ['all', 'installed', 'pinned'] as const as option (option)}
-				<ToggleGroup.Item value={option} class="h-8 gap-1.5 capitalize">
-					{option}
+				<ToggleGroup.Item value={option} class="h-8 gap-1.5">
+					{t(`gameSelector.filters.${option}`)}
 					<b
 						class="font-mono text-xs font-normal text-muted-foreground"
 					>
@@ -124,8 +123,8 @@
 			<InputGroup.Addon><SearchIcon /></InputGroup.Addon>
 			<InputGroup.Input
 				type="search"
-				placeholder="Filter games"
-				aria-label="Filter games"
+				placeholder={t('header.games.filter')}
+				aria-label={t('header.games.filter')}
 				bind:value={query}
 			/>
 		</InputGroup.Root>
@@ -137,7 +136,8 @@
 				<p
 					class="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground after:h-px after:flex-1 after:bg-border"
 				>
-					Installed <span class="font-medium">{cards.length}</span>
+					{t('gameSelector.installed')}
+					<span class="font-medium">{cards.length}</span>
 				</p>
 				{#if cards.length}
 					<div class="grid grid-cols-4 gap-5">
@@ -154,8 +154,8 @@
 				{:else}
 					<p class="text-md text-muted-foreground">
 						{filter === 'pinned'
-							? 'No pinned games. Pin one from its card.'
-							: 'No supported game found in your Steam libraries.'}
+							? t('gameSelector.noPinned')
+							: t('gameSelector.noneFound')}
 					</p>
 				{/if}
 			</section>
@@ -165,9 +165,8 @@
 					<p
 						class="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground after:h-px after:flex-1 after:bg-border"
 					>
-						Not installed <span class="font-medium"
-							>{others.length}</span
-						>
+						{t('gameSelector.notInstalled')}
+						<span class="font-medium">{others.length}</span>
 					</p>
 					<div class="rounded-lg bg-card">
 						{#each others as game (game.app_id)}
@@ -182,7 +181,7 @@
 						{/each}
 					</div>
 					<p class="mt-2 text-xs text-muted-foreground">
-						More Total War titles appear here as TMO adds support.
+						{t('gameSelector.moreComing')}
 					</p>
 				</section>
 			{/if}
@@ -204,7 +203,7 @@
 			disabled={!selected}
 			onclick={proceed}
 		>
-			Continue
+			{t('gameSelector.continue')}
 			<ArrowRightIcon />
 		</Button>
 	</footer>

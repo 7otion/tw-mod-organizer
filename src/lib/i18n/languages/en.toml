@@ -1,0 +1,507 @@
+[language]
+id = "en"
+name = "English"
+locale = "en"
+
+[settings.display.language]
+title = "Language"
+description = "The language of TMO's interface."
+# {name} is the language System picked.
+system = "System · {name}"
+translated = "{percent}% translated"
+addFile = "Add file…"
+exportTemplate = "Export template…"
+fileFilter = "TMO language files"
+added = "{name} is ready to use."
+exported = "English template saved."
+builtIn = "\"{id}\" is a built-in language. Give the file another language.id."
+missing = "The language file for \"{id}\" is missing. English is used instead."
+
+# Shared words used in many places.
+[common]
+pin = "Pin"
+unpin = "Unpin"
+new = "New"
+add = "Add"
+cancel = "Cancel"
+done = "Done"
+rename = "Rename"
+renameEllipsis = "Rename…"
+clone = "Clone"
+delete = "Delete"
+deleteEllipsis = "Delete…"
+selectAll = "Select all"
+selectItem = "Select {name}"
+clearSelection = "Clear selection"
+selectedCount = "{count} selected"
+changeEllipsis = "Change…"
+close = "Close"
+error = "Error"
+clear = "Clear"
+
+[app]
+backendCrashed = "Backend crashed: {error}"
+
+[app.s7forge]
+available = "s7forge {version} is available"
+current = "You have {version}."
+update = "Update"
+updating = "Updating s7forge…"
+updated = "s7forge is up to date."
+
+# The left rail. Each label also appears as a tooltip with its shortcut.
+[nav]
+sections = "Sections"
+loadOrder = "Load order"
+library = "Library"
+groups = "Groups"
+saves = "Saves"
+downloads = "Downloads"
+
+# Window buttons in the title bar (screen reader labels).
+[window]
+minimize = "Minimize"
+maximize = "Maximize"
+restore = "Restore"
+close = "Close"
+
+# The game picker in the title bar.
+[header.games]
+choose = "Choose a game"
+filter = "Filter games"
+current = "Current"
+pinned = "Pinned"
+recent = "Recent"
+all = "All games…"
+close = "Close game"
+opened = "Opened {time}"
+notOpened = "Not opened yet"
+
+# Title bar buttons, which change with the page.
+[header.loadOrder]
+addMods = "Add mods"
+separator = "Separator"
+linkGroup = "Link group"
+sort = "Sort"
+
+[header.library]
+installMod = "Install mod"
+importCollection = "Import collection"
+forceUpdate = "Force update"
+
+[header.scan]
+starting = "Scanning library…"
+progress = "Scanning {done} / {total}…"
+
+# File sizes. {size} is already formatted for the language (3.4 or 3,4).
+[size]
+bytes = "{size} B"
+kilobytes = "{size} KB"
+megabytes = "{size} MB"
+gigabytes = "{size} GB"
+terabytes = "{size} TB"
+# Messages for names typed by the user (tags, profiles).
+[names.tag]
+empty = "A tag needs a name."
+taken = "A tag with this name already exists."
+
+[names.profile]
+empty = "A profile needs a name."
+taken = "A profile with this name already exists."
+
+# Section headings in the sidebar. They are shown in capital letters.
+[sidebar.outline]
+title = "Outline"
+collapseAll = "Collapse all"
+collapseAllTooltip = "Collapse all separators"
+
+[sidebar.profiles]
+title = "Profiles"
+newTooltip = "New profile"
+
+[sidebar.loadOrder]
+rebuildFromSave = "Rebuild profile from a save…"
+manageProfiles = "Manage profiles…"
+
+[sidebar.summary]
+holds = { one = "Library holds {count} mod", other = "Library holds {count} mods" }
+scanning = "Scanning…"
+notScanned = "Not scanned yet"
+scanned = "Scanned {time}"
+
+[sidebar.library]
+source = "Source"
+state = "State"
+tags = "Tags"
+newTagTooltip = "New tag"
+noTags = "No tags yet."
+manageTags = "Manage tags…"
+rescan = "Rescan library"
+
+[sidebar.library.sources]
+steam = "Steam Workshop"
+nexus = "Nexus Mods"
+manual = "Manual"
+
+[sidebar.library.states]
+inNoProfile = "In no profile"
+updateAvailable = "Update available"
+missingOrBroken = "Missing or broken"
+downloading = "Downloading"
+
+[tags]
+nameLabel = "Tag name"
+changeColour = "Change colour"
+colourLabel = "Colour: {colour}"
+
+[tags.colors]
+ash = "Ash"
+pink = "Pink"
+blood = "Blood"
+ember = "Ember"
+gold = "Gold"
+emerald = "Emerald"
+sapphire = "Sapphire"
+amethyst = "Amethyst"
+
+[tags.delete]
+title = "Delete “{name}”?"
+description = { one = "It's removed from {count} mod. The mods stay in your library.", other = "It's removed from {count} mods. The mods stay in your library." }
+confirm = "Delete tag"
+
+[tags.manage]
+title = "Tags"
+count = { one = "{count} tag", other = "{count} tags" }
+newName = "New tag name"
+tag = "Tag"
+mods = "Mods"
+empty = "No tags yet. Tags label mods for filtering; they never change what a profile loads."
+
+[profiles]
+nameLabel = "Profile name"
+deleteActiveError = "The active profile can't be deleted."
+
+[profiles.delete]
+title = "Delete “{name}”?"
+# {mods} and {separators} are the two counts below, already translated.
+contents = "{mods} and {separators}. The mods stay in your library and other profiles."
+mods = { one = "{count} mod", other = "{count} mods" }
+separators = { one = "{count} separator", other = "{count} separators" }
+confirm = "Delete profile"
+
+[profiles.deleteMany]
+title = { one = "Delete {count} profile?", other = "Delete {count} profiles?" }
+# {names} is a comma-separated list of profile names.
+description = "{names}. Their mods stay in your library and other profiles."
+confirm = "Delete profiles"
+
+[profiles.new]
+title = "New profile"
+name = "Name"
+startFrom = "Start from"
+empty = "Empty"
+emptyDescription = "Add mods from the library afterwards."
+copy = "Copy of another profile"
+copyDescription = "Same mods, order, separators and group links."
+chooseProfile = "Choose a profile"
+makeActive = "Make it the active profile"
+create = "Create profile"
+
+[profiles.manage]
+title = "Manage profiles"
+description = { one = "{game} · {count} profile · the active one launches with Play", other = "{game} · {count} profiles · the active one launches with Play" }
+filter = "Filter profiles"
+new = "New profile…"
+noMatch = "No profile matches “{query}”."
+activeSelected = "The active profile is selected; it can’t be deleted"
+dragHint = "Drag to reorder the sidebar"
+
+[profiles.manage.columns]
+profile = "Profile"
+mods = "Mods"
+enabled = "Enabled"
+groups = "Groups"
+lastUsed = "Last used"
+created = "Created"
+
+[profiles.row]
+empty = "Empty"
+off = "{count} off"
+today = "Today"
+never = "Never"
+active = "Active"
+makeActive = "Make active"
+deleteActive = "Make another profile active first"
+
+# Cover sizes, shared by Settings and the library's Table… dialog.
+[coverSizes]
+none = "None"
+compact = "Compact"
+regular = "Regular"
+large = "Large"
+huge = "Huge"
+
+[settings]
+title = "Settings"
+sectionsLabel = "Settings sections"
+autosave = "Changes save automatically."
+
+# Section names; each is also the title of its card.
+[settings.sections]
+folders = "Folders"
+loadOrder = "Load order"
+display = "Display"
+accounts = "Accounts & tools"
+import = "Import data"
+about = "Updates & about"
+
+[settings.folders]
+moved = "Folder moved"
+leftover = "The old folder couldn't go to the Recycle Bin and is still at {path}."
+moving = "Moving…"
+movingProgress = "Moving… {copied} of {total} MB"
+
+[settings.folders.game]
+title = "Game folder"
+setByYou = "Set by you for {game}"
+detected = "Detected from Steam for {game}"
+
+[settings.folders.mods]
+title = "Manual mods folder"
+description = "Where installed mods go"
+
+[settings.folders.downloads]
+title = "Downloads folder"
+description = "Nexus downloads, kept until installed or hidden"
+
+[settings.loadOrder.confirmDependencies]
+title = "Confirm dependency changes"
+description = "Ask before enabling a mod also enables what it needs, or disabling one disables what needs it"
+
+[settings.loadOrder.previewSort]
+title = "Preview before Auto-sort"
+description = "Show the before / after list instead of sorting straight away"
+
+[settings.loadOrder.newMods]
+title = "New mods go to"
+description = "Where mods added from the library land"
+endOfList = "End of list"
+selectedSection = "Selected section"
+
+[settings.display.dateFormat]
+title = "Date format"
+description = "Every date TMO shows. System follows your Windows region settings."
+system = "System · {date}"
+
+[settings.display.table]
+title = "Mod Table"
+
+[settings.display.table.columns]
+title = "Table columns"
+description = "Visible columns, their order and widths"
+
+[settings.display.table.coverSize]
+title = "Cover size"
+description = "Rows grow with the cover"
+
+[settings.display.table.coverPreview]
+title = "Cover preview on hover"
+description = "Larger preview after a short delay"
+
+[settings.accounts.steam]
+description = "Used for subscriptions, updates and launching"
+checking = "Checking…"
+running = "Running"
+notRunning = "Installed · not running"
+notFound = "Not found"
+
+[settings.accounts.nexus]
+account = "{name} · free account"
+disconnect = "Disconnect…"
+
+[settings.accounts.s7forge]
+description = "Talks to Steam for workshop features, without keeping your game marked as running"
+updating = "Updating…"
+updateTo = "Update to v{version}"
+
+[settings.import]
+import = "Import…"
+
+[settings.import.tmoV1]
+title = "Import from TMO v1"
+description = "Profiles, separators, tags and custom titles"
+
+[settings.import.wh3ModManager]
+title = "Import from WH3 Mod Manager"
+description = "Presets become profiles"
+
+[settings.about]
+version = "TMO {version}"
+available = "Version {version} is available"
+whatsNew = "What's new…"
+updateRestart = "Update & restart"
+licences = "Licences"
+
+[settings.about.notAffiliated]
+title = "Not affiliated"
+description = "TMO is not affiliated with Creative Assembly, Sega or TaleWorlds."
+
+[settings.licences]
+description = "TW Mod Organizer is free software under the GNU General Public License v3.0. It's built on these open-source projects."
+readGpl = "Read the GPL v3.0"
+
+[settings.licences.groups]
+interface = "Interface"
+backend = "Backend"
+fonts = "Fonts"
+steam = "Steam"
+
+[library]
+title = "Library"
+tableButton = "Table…"
+noMatch = "No mod matches the search or filters."
+
+# Why a mod can't be used. Codes come from the scan; the Total War ones
+# (no_pack_file, many_pack_files) only appear for Total War games.
+[problems]
+no_pack_file = "no .pack file"
+many_pack_files = "more than one .pack file"
+not_downloaded = "not downloaded yet"
+unreadable_folder = "folder can't be read"
+unsubscribed = "unsubscribed"
+folder_removed = "folder removed"
+
+[library.stats]
+mods = { one = "{count} mod", other = "{count} mods" }
+unused = "{count} unused"
+
+[library.search]
+placeholder = { one = "Search {count} mod by title, author or tag", other = "Search {count} mods by title, author or tag" }
+label = "Search library"
+
+[library.filter]
+profile = "Profile"
+scope = "Profile filter"
+
+# Shown next to the profile picker: mods the profile has / lacks.
+[library.filter.scopes]
+has = "has"
+lacks = "lacks"
+
+# Column headers. The Mod header is shown in capital letters.
+[library.columns]
+source = "Source"
+sourceShort = "S"
+mod = "Mod"
+author = "Author"
+tags = "Tags"
+profiles = "In profiles"
+size = "Size"
+updated = "Updated"
+added = "Added"
+version = "Version"
+
+[library.sources]
+steam = "Steam"
+nexus = "Nexus"
+base = "Base"
+manual = "Manual"
+
+[library.row]
+version = "v{version}"
+missing = "missing · {problem}"
+newVersion = "new version"
+profileOff = "{name} (off)"
+viaGroup = { one = "via {group} · {count} profile", other = "via {group} · {count} profiles" }
+openDetails = "Open details"
+
+[library.empty]
+scanning = "Scanning…"
+title = "Your library is empty"
+install = "Install mod…"
+workshop = "Open Steam Workshop"
+
+[library.table]
+title = "Table · Library"
+coverSize = "Cover size"
+columns = "Columns"
+hint = "Drag to reorder. Drag a column header's edge to set its width; double-click the edge to make it automatic again."
+reset = "Reset to default"
+show = "Show {column}"
+
+# Width shown next to each column in Table…
+[library.table.width]
+hidden = "hidden"
+auto = "auto"
+pixels = "{width} px"
+fixed = "fixed"
+rest = "rest"
+
+[library.bulk]
+selected = "{count} Selected"
+addToProfile = "Add to profile"
+addToGroup = "Add to group"
+tag = "Tag"
+newTag = "New tag…"
+remove = "Unsubscribe / remove…"
+
+[library.newTag]
+title = "New tag"
+description = { one = "Added to {count} selected mod.", other = "Added to {count} selected mods." }
+name = "Name"
+create = "Create tag"
+
+[library.remove]
+title = { one = "Unsubscribe / remove {count} mod?", other = "Unsubscribe / remove {count} mods?" }
+steam = { one = "{count} Steam mod: unsubscribed. It stays in the library as missing, so profiles keep its place.", other = "{count} Steam mods: unsubscribed. They stay in the library as missing, so profiles keep their place." }
+local = { one = "{count} local mod: the folder goes to the Recycle Bin. It stays in the library as missing.", other = "{count} local mods: the folder goes to the Recycle Bin. They stay in the library as missing." }
+missing = { one = "{count} missing mod: removed from the library and from every profile and group that lists it.", other = "{count} missing mods: removed from the library and from every profile and group that lists them." }
+confirm = "Unsubscribe / remove"
+# {failures} lists each item that failed, with the reason from the system.
+failed = "Couldn't remove everything: {failures}"
+
+[gameSelector]
+back = "Back to {game}"
+found = { one = "TMO found {count} supported game on this PC. You can switch any time from the title bar.", other = "TMO found {count} supported games on this PC. You can switch any time from the title bar." }
+installed = "Installed"
+notInstalled = "Not installed"
+noPinned = "No pinned games. Pin one from its card."
+noneFound = "No supported game found in your Steam libraries."
+moreComing = "More Total War titles appear here as TMO adds support."
+continue = "Continue"
+
+[gameSelector.title]
+browsing = "Games"
+firstRun = "Choose your first game"
+choose = "Choose a game"
+
+[gameSelector.filters]
+all = "All"
+installed = "Installed"
+pinned = "Pinned"
+
+[gameSelector.card]
+selected = "Selected"
+installed = "Installed"
+opened = "opened {time}"
+notOpened = "not opened yet"
+
+[gameSelector.row]
+notFound = "Not found in your Steam libraries"
+notInstalled = "Not installed"
+setFolder = "Set game folder…"
+getOnSteam = "Get on Steam"
+
+# The first-run screen that downloads s7forge, TMO's Steam helper.
+[s7forgeSetup]
+title = "One last piece"
+description = "TMO talks to Steam through s7forge, a small helper that starts only when it's needed, so Steam never thinks your game is running. It's downloaded once from GitHub and kept up to date."
+downloading = "Downloading… {received} of {total} MB"
+finding = "Finding the latest version…"
+download = "Download s7forge"
+
+# Keyboard shortcuts. Write the Ctrl key the way keyboards in your language label it
+# (for example "Strg" in German). {key} is the other key.
+[shortcuts]
+ctrl = "Ctrl {key}"
+ctrlPlus = "Ctrl+{key}"

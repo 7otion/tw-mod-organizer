@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 
+	import { t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
 	import { LibraryStore } from '@/lib/store';
 
@@ -22,10 +23,6 @@
 	);
 	const missingCount = $derived(mods.filter((mod) => mod.isMissing).length);
 
-	function plural(count: number): string {
-		return count === 1 ? 'mod' : 'mods';
-	}
-
 	async function remove(): Promise<void> {
 		await libraryStore.remove(mods);
 		onremoved();
@@ -36,39 +33,34 @@
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>
-				Unsubscribe / remove {mods.length}
-				{plural(mods.length)}?
+				{t('library.remove.title', { count: mods.length })}
 			</AlertDialog.Title>
 			<AlertDialog.Description>
 				<ul class="flex list-disc flex-col gap-1 pl-4">
 					{#if steamCount}
 						<li>
-							{steamCount} Steam {plural(steamCount)}:
-							unsubscribed. They stay in the library as missing,
-							so profiles keep their place.
+							{t('library.remove.steam', { count: steamCount })}
 						</li>
 					{/if}
 					{#if localCount}
 						<li>
-							{localCount} local {plural(localCount)}: the folder
-							goes to the Recycle Bin. They stay in the library as
-							missing.
+							{t('library.remove.local', { count: localCount })}
 						</li>
 					{/if}
 					{#if missingCount}
 						<li>
-							{missingCount} missing {plural(missingCount)}:
-							removed from the library and from every profile and
-							group that lists them.
+							{t('library.remove.missing', {
+								count: missingCount,
+							})}
 						</li>
 					{/if}
 				</ul>
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
 			<AlertDialog.Action variant="destructive" onclick={remove}>
-				Unsubscribe / remove
+				{t('library.remove.confirm')}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>

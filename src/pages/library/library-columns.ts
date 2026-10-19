@@ -1,8 +1,9 @@
+import type { MessageKey } from '@/lib/i18n/message-key';
 import type { CoverSize, LibraryColumn, LibrarySort } from '@/lib/store';
 
 export type ColumnInfo = {
-	label: string;
-	shortLabel?: string;
+	labelKey: MessageKey;
+	shortLabelKey?: MessageKey;
 	sort?: LibrarySort;
 	align?: 'center' | 'end';
 	width?: 'fixed' | 'rest';
@@ -10,20 +11,24 @@ export type ColumnInfo = {
 
 export const COLUMN_INFO: Record<LibraryColumn, ColumnInfo> = {
 	source: {
-		label: 'Source',
-		shortLabel: 'S',
+		labelKey: 'library.columns.source',
+		shortLabelKey: 'library.columns.sourceShort',
 		sort: 'source',
 		align: 'center',
 		width: 'fixed',
 	},
-	mod: { label: 'Mod', sort: 'title', width: 'rest' },
-	author: { label: 'Author', sort: 'author' },
-	tags: { label: 'Tags' },
-	profiles: { label: 'In profiles' },
-	size: { label: 'Size', sort: 'size', align: 'end' },
-	updated: { label: 'Updated', sort: 'updated', align: 'end' },
-	added: { label: 'Added', sort: 'added', align: 'end' },
-	version: { label: 'Version' },
+	mod: { labelKey: 'library.columns.mod', sort: 'title', width: 'rest' },
+	author: { labelKey: 'library.columns.author', sort: 'author' },
+	tags: { labelKey: 'library.columns.tags' },
+	profiles: { labelKey: 'library.columns.profiles' },
+	size: { labelKey: 'library.columns.size', sort: 'size', align: 'end' },
+	updated: {
+		labelKey: 'library.columns.updated',
+		sort: 'updated',
+		align: 'end',
+	},
+	added: { labelKey: 'library.columns.added', sort: 'added', align: 'end' },
+	version: { labelKey: 'library.columns.version' },
 };
 
 export const SOURCE_ICON_SIZES: Record<CoverSize, number> = {

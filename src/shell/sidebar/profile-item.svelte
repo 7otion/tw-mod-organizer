@@ -4,6 +4,7 @@
 	import * as ContextMenu from '@/components/ui/context-menu';
 	import { Input } from '@/components/ui/input';
 
+	import { t } from '@/lib/i18n';
 	import { type Profile, ProfileEntry } from '@/lib/models';
 	import { ProfilesStore } from '@/lib/store';
 	import { cn, nameError } from '@/lib/utils';
@@ -60,14 +61,14 @@
 			<Input
 				bind:ref={input}
 				bind:value={name}
-				aria-label="Profile name"
+				aria-label={t('profiles.nameLabel')}
 				aria-invalid={error !== null}
 				class="h-row-compact"
 				{onkeydown}
 				onblur={() => (isRenaming = false)}
 			/>
 			{#if error}
-				<p class="text-xs text-status-missing">{error}</p>
+				<p class="text-xs text-status-missing">{t(error)}</p>
 			{/if}
 		</div>
 	{:else}
@@ -106,15 +107,15 @@
 			<ContextMenu.Content
 				onCloseAutoFocus={(event) => event.preventDefault()}
 			>
-				<ContextMenu.Item onSelect={startRename}
-					>Rename</ContextMenu.Item
-				>
+				<ContextMenu.Item onSelect={startRename}>
+					{t('common.rename')}
+				</ContextMenu.Item>
 				<ContextMenu.Item
 					variant="destructive"
 					disabled={active}
 					onSelect={ondelete}
 				>
-					Delete…
+					{t('common.deleteEllipsis')}
 				</ContextMenu.Item>
 			</ContextMenu.Content>
 		</ContextMenu.Root>

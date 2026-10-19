@@ -6,24 +6,26 @@
 	import * as Card from '@/components/ui/card';
 	import { Progress } from '@/components/ui/progress';
 
+	import { t } from '@/lib/i18n';
+	import type { MessageKey } from '@/lib/i18n/message-key';
 	import { type FolderColumn, GamesStore, SettingsStore } from '@/lib/store';
 
 	import SettingRow from './setting-row.svelte';
 
 	const FOLDERS: {
 		column: FolderColumn;
-		title: string;
-		description: string;
+		titleKey: MessageKey;
+		descriptionKey: MessageKey;
 	}[] = [
 		{
 			column: 'mods_dir',
-			title: 'Manual mods folder',
-			description: 'Where installed mods go',
+			titleKey: 'settings.folders.mods.title',
+			descriptionKey: 'settings.folders.mods.description',
 		},
 		{
 			column: 'downloads_dir',
-			title: 'Downloads folder',
-			description: 'Nexus downloads, kept until installed or hidden',
+			titleKey: 'settings.folders.downloads.title',
+			descriptionKey: 'settings.folders.downloads.description',
 		},
 	];
 
@@ -50,13 +52,13 @@
 		if (!to) return;
 		const leftover = await settingsStore.moveFolder(column, to);
 		if (leftover)
-			toast.warning('Folder moved', {
-				description: `The old folder couldn't go to the Recycle Bin and is still at ${leftover}.`,
+			toast.warning(t('settings.folders.moved'), {
+				description: t('settings.folders.leftover', { path: leftover }),
 			});
 	}
 
-	function megabytes(bytes: number): string {
-		return (bytes / 1024 / 1024).toFixed(1);
+	function megabytes(bytes: number): number {
+		return Math.round((bytes / 1024 / 1024) * 10) / 10;
 	}
 </script>
 
@@ -69,13 +71,15 @@
 {/snippet}
 
 <Card.Root>
-	<Card.Header><Card.Title>Folders</Card.Title></Card.Header>
+	<Card.Header>
+		<Card.Title>{t('settings.sections.folders')}</Card.Title>
+	</Card.Header>
 	<Card.Content class="gap-0 p-0">
 		<SettingRow
-			title="Game folder"
+			title={t('settings.folders.game.title')}
 			description={game.row!.install_path
-				? `Set by you for ${game.title}`
-				: `Detected from Steam for ${game.title}`}
+				? t('settings.folders.game.setByYou', { game: game.title })
+				: t('settings.folders.game.detected', { game: game.title })}
 		>
 			<div class="flex min-w-0 items-center gap-2">
 				{@render path(game?.installPath ?? '')}
@@ -84,12 +88,15 @@
 					size="sm"
 					onclick={changeGameFolder}
 				>
-					Change…
+					{t('common.changeEllipsis')}
 				</Button>
 			</div>
 		</SettingRow>
 		{#each FOLDERS as folder (folder.column)}
-			<SettingRow title={folder.title} description={folder.description}>
+			<SettingRow
+				title={t(folder.titleKey)}
+				description={t(folder.descriptionKey)}
+			>
 				<div class="flex min-w-0 items-center gap-2">
 					{#if folderMove?.column === folder.column}
 						<Progress
@@ -101,11 +108,12 @@
 						<span
 							class="text-xs whitespace-nowrap text-muted-foreground"
 						>
-							Moving…
-							{#if folderMove.total}
-								{megabytes(folderMove.copied)} of
-								{megabytes(folderMove.total)} MB
-							{/if}
+							{folderMove.total
+								? t('settings.folders.movingProgress', {
+										copied: megabytes(folderMove.copied),
+										total: megabytes(folderMove.total),
+									})
+								: t('settings.folders.moving')}
 						</span>
 					{:else}
 						{@render path(settingsStore.current![folder.column])}
@@ -116,7 +124,7 @@
 						disabled={folderMove !== null}
 						onclick={() => change(folder.column)}
 					>
-						Change…
+						{t('common.changeEllipsis')}
 					</Button>
 				</div>
 			</SettingRow>

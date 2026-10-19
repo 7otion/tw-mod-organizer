@@ -6,6 +6,7 @@
 	import { Input } from '@/components/ui/input';
 	import * as Popover from '@/components/ui/popover';
 
+	import { t } from '@/lib/i18n';
 	import { ModTag, type Tag, TAG_COLORS, type TagColor } from '@/lib/models';
 	import { TagsStore } from '@/lib/store';
 	import { TAG_SWATCHES } from '@/lib/tag-swatches';
@@ -58,7 +59,9 @@
 >
 	<Popover.Root bind:open={isPicking}>
 		<Popover.Trigger
-			aria-label="Colour: {color}"
+			aria-label={t('tags.colourLabel', {
+				colour: t(`tags.colors.${color}`),
+			})}
 			class="grid size-6 place-items-center rounded-full hover:bg-fill-2"
 		>
 			<span class={cn('size-2.5 rounded-full', TAG_SWATCHES[color])}
@@ -68,7 +71,7 @@
 			{#each TAG_COLORS as option (option)}
 				<button
 					type="button"
-					aria-label={option}
+					aria-label={t(`tags.colors.${option}`)}
 					aria-pressed={option === color}
 					class={cn(
 						'grid size-7 place-items-center rounded-full hover:bg-fill-2',
@@ -89,14 +92,14 @@
 			<Input
 				bind:ref={input}
 				bind:value={name}
-				aria-label="Tag name"
+				aria-label={t('tags.nameLabel')}
 				aria-invalid={error !== null}
 				class="h-7"
 				{onkeydown}
 				onblur={() => (isRenaming = false)}
 			/>
 			{#if error}
-				<p class="text-xs text-status-missing">{error}</p>
+				<p class="text-xs text-status-missing">{t(error)}</p>
 			{/if}
 		</div>
 	{:else}
@@ -115,7 +118,7 @@
 	<Button
 		variant="ghost"
 		size="icon-sm"
-		aria-label="Delete tag"
+		aria-label={t('tags.delete.confirm')}
 		onclick={ondelete}
 	>
 		<Trash2Icon />

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import LayersIcon from '@lucide/svelte/icons/layers';
 
+	import { t } from '@/lib/i18n';
 	import { cn } from '@/lib/utils';
 
 	import SidebarHeadingAction from './sidebar-heading-action.svelte';
@@ -77,9 +78,9 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col overflow-hidden pt-4 pb-1.5">
-	<SidebarHeading title="OUTLINE">
-		<SidebarHeadingAction tooltip="Collapse all separators">
-			Collapse all
+	<SidebarHeading title={t('sidebar.outline.title')}>
+		<SidebarHeadingAction tooltip={t('sidebar.outline.collapseAllTooltip')}>
+			{t('sidebar.outline.collapseAll')}
 		</SidebarHeadingAction>
 	</SidebarHeading>
 	<ul class="flex flex-col gap-px">

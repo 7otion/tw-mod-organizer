@@ -30,7 +30,9 @@
 		type LibraryScope,
 		type LibrarySort,
 	} from '@/lib/store';
-	import { cn, formatSize } from '@/lib/utils';
+	import { formatSize, t } from '@/lib/i18n';
+	import Message from '@/lib/i18n/message.svelte';
+	import { cn } from '@/lib/utils';
 
 	import LibraryBulkBar from './library-bulk-bar.svelte';
 	import { COLUMN_INFO, SOURCE_ICON_SIZES } from './library-columns';
@@ -188,28 +190,39 @@
 	style:--library-columns={columns}
 >
 	<div class="flex items-center gap-6 px-9 pt-7 pb-5">
-		<h1 class="font-blackletter text-title font-medium">Library</h1>
+		<h1 class="font-blackletter text-title font-medium">
+			{t('library.title')}
+		</h1>
 		<p
 			class="flex items-center gap-4 pt-1.5 text-md font-medium text-muted-foreground"
 		>
 			<span>
-				<b class="font-bold text-foreground-2">{modCount}</b>
-				{modCount === 1 ? 'mod' : 'mods'}
+				<Message key="library.stats.mods" values={{ count: modCount }}>
+					{#snippet value(text)}
+						<b class="font-bold text-foreground-2">{text}</b>
+					{/snippet}
+				</Message>
 			</span>
 			<b class="font-bold text-foreground-2">{formatSize(totalSize)}</b>
 			<span>
-				<b class="font-bold text-foreground-2"
-					>{libraryStore.unusedCount}</b
+				<Message
+					key="library.stats.unused"
+					values={{ count: libraryStore.unusedCount }}
 				>
-				unused
+					{#snippet value(text)}
+						<b class="font-bold text-foreground-2">{text}</b>
+					{/snippet}
+				</Message>
 			</span>
 		</p>
 		<InputGroup.Root class="ml-4 flex-1">
 			<InputGroup.Addon><SearchIcon /></InputGroup.Addon>
 			<InputGroup.Input
 				type="search"
-				placeholder="Search {modCount} mods by title, author or tag"
-				aria-label="Search library"
+				placeholder={t('library.search.placeholder', {
+					count: modCount,
+				})}
+				aria-label={t('library.search.label')}
 				bind:ref={searchInput}
 				bind:value={
 					() => libraryFilterStore.search,
@@ -217,7 +230,8 @@
 				}
 			/>
 			<InputGroup.Addon align="inline-end"
-				><Kbd>Ctrl F</Kbd></InputGroup.Addon
+				><Kbd>{t('shortcuts.ctrl', { key: 'F' })}</Kbd
+				></InputGroup.Addon
 			>
 		</InputGroup.Root>
 	</div>
@@ -237,7 +251,7 @@
 		>
 			<Select.Trigger
 				size="sm"
-				aria-label="Profile"
+				aria-label={t('library.filter.profile')}
 				class="min-w-48 font-semibold"
 			>
 				{#if libraryFilterStore.scopeProfile}
@@ -266,7 +280,7 @@
 			type="single"
 			variant="filter"
 			spacing={1}
-			aria-label="Profile filter"
+			aria-label={t('library.filter.scope')}
 			bind:value={
 				() =>
 					libraryFilterStore.scope === 'all'
@@ -280,7 +294,7 @@
 		>
 			{#each PROFILE_SCOPES as scope (scope)}
 				<ToggleGroup.Item value={scope}>
-					{scope}
+					{t(`library.filter.scopes.${scope}`)}
 					<b
 						class="font-mono text-xs font-normal text-muted-foreground group-data-[state=on]/toggle:text-primary-foreground/60"
 					>
@@ -297,7 +311,7 @@
 			onclick={() => (isTableOpen = true)}
 		>
 			<Columns3Icon />
-			Table…
+			{t('library.tableButton')}
 		</Button>
 	</div>
 
@@ -309,7 +323,7 @@
 		<Checkbox
 			checked={selection.isAll}
 			indeterminate={selection.isSome}
-			aria-label="Select all"
+			aria-label={t('common.selectAll')}
 			onCheckedChange={() => selection.toggleAll()}
 		/>
 		{#each libraryColumnsStore.visibleColumns as column (column.key)}
@@ -317,11 +331,11 @@
 			{#if column.key === 'mod'}
 				<span
 					class={cn(
-						'flex',
+						'flex uppercase',
 						libraryColumnsStore.hasCover && 'col-span-2'
 					)}
 				>
-					{@render sortButton('MOD', 'title')}
+					{@render sortButton(t(info.labelKey), 'title')}
 				</span>
 			{:else}
 				<span
@@ -331,24 +345,24 @@
 						info.align === 'end' && 'justify-end'
 					)}
 				>
-					{#if info.sort && info.shortLabel}
-						{@const { label, shortLabel, sort } = info}
+					{#if info.sort && info.shortLabelKey}
+						{@const { labelKey, shortLabelKey, sort } = info}
 						<Tooltip.Root>
 							<Tooltip.Trigger>
 								{#snippet child({ props })}
 									{@render sortButton(
-										shortLabel,
+										t(shortLabelKey),
 										sort,
 										props
 									)}
 								{/snippet}
 							</Tooltip.Trigger>
-							<Tooltip.Content>{label}</Tooltip.Content>
+							<Tooltip.Content>{t(labelKey)}</Tooltip.Content>
 						</Tooltip.Root>
 					{:else if info.sort}
-						{@render sortButton(info.label, info.sort)}
+						{@render sortButton(t(info.labelKey), info.sort)}
 					{:else}
-						<span class="truncate">{info.label}</span>
+						<span class="truncate">{t(info.labelKey)}</span>
 					{/if}
 					{#if !info.width}
 						<span
@@ -380,7 +394,7 @@
 			</ul>
 			{#if !libraryFilterStore.visibleMods.length}
 				<p class="px-11 py-6 text-md text-muted-foreground">
-					No mod matches the search or filters.
+					{t('library.noMatch')}
 				</p>
 			{/if}
 		</ScrollArea>
@@ -395,16 +409,16 @@
 			</span>
 			<p class="text-lg font-semibold">
 				{libraryStore.isScanning
-					? 'Scanning…'
-					: 'Your library is empty'}
+					? t('library.empty.scanning')
+					: t('library.empty.title')}
 			</p>
 			<div class="flex gap-2">
 				<Button>
 					<PackageIcon />
-					Install mod…
+					{t('library.empty.install')}
 				</Button>
 				<Button variant="secondary" onclick={openWorkshop}>
-					Open Steam Workshop
+					{t('library.empty.workshop')}
 					<ExternalLinkIcon />
 				</Button>
 			</div>

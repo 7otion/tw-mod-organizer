@@ -10,24 +10,39 @@
 
 	import { Button } from '@/components/ui/button';
 
+	import { t } from '@/lib/i18n';
+	import type { MessageKey } from '@/lib/i18n/message-key';
+
 	type HeaderAction = {
-		label: string;
+		labelKey: MessageKey;
 		icon: LucideIcon;
 		isPrimary?: boolean;
 		opensDialog?: boolean;
 	};
 
 	const LOAD_ORDER_ACTIONS: HeaderAction[] = [
-		{ label: 'Add mods', icon: PlusIcon, isPrimary: true },
-		{ label: 'Separator', icon: PanelTopIcon },
-		{ label: 'Link group', icon: LayersIcon },
-		{ label: 'Sort', icon: ArrowDownWideNarrowIcon, opensDialog: true },
+		{
+			labelKey: 'header.loadOrder.addMods',
+			icon: PlusIcon,
+			isPrimary: true,
+		},
+		{ labelKey: 'header.loadOrder.separator', icon: PanelTopIcon },
+		{ labelKey: 'header.loadOrder.linkGroup', icon: LayersIcon },
+		{
+			labelKey: 'header.loadOrder.sort',
+			icon: ArrowDownWideNarrowIcon,
+			opensDialog: true,
+		},
 	];
 
 	const LIBRARY_ACTIONS: HeaderAction[] = [
-		{ label: 'Install mod', icon: PackageIcon, isPrimary: true },
-		{ label: 'Import collection', icon: LayersIcon },
-		{ label: 'Force update', icon: RefreshCwIcon },
+		{
+			labelKey: 'header.library.installMod',
+			icon: PackageIcon,
+			isPrimary: true,
+		},
+		{ labelKey: 'header.library.importCollection', icon: LayersIcon },
+		{ labelKey: 'header.library.forceUpdate', icon: RefreshCwIcon },
 	];
 
 	const actions = $derived(
@@ -38,7 +53,7 @@
 </script>
 
 <div class="clickable-content flex items-center gap-1.5 self-center">
-	{#each actions as action (action.label)}
+	{#each actions as action (action.labelKey)}
 		<Button
 			variant={action.isPrimary ? 'default' : 'secondary'}
 			aria-haspopup={action.opensDialog ? 'dialog' : undefined}
@@ -50,7 +65,7 @@
 			]}
 		>
 			<action.icon class="size-3.5" />
-			{action.label}
+			{t(action.labelKey)}
 		</Button>
 	{/each}
 </div>

@@ -16,6 +16,8 @@ pub enum AppError {
     Image(#[from] image::ImageError),
     #[error("Unexpected data: {0}")]
     Json(#[from] serde_json::Error),
+    #[error("Not a valid TOML file: {0}")]
+    Toml(#[from] toml::de::Error),
     #[error("{0}")]
     Custom(String),
 }

@@ -3,8 +3,9 @@
 
 	import { Button } from '@/components/ui/button';
 
+	import { t, timeAgo } from '@/lib/i18n';
 	import type { GameEntry } from '@/lib/store';
-	import { cn, timeAgo } from '@/lib/utils';
+	import { cn } from '@/lib/utils';
 
 	type Props = {
 		game: GameEntry;
@@ -39,7 +40,7 @@
 					class="absolute top-2.5 left-2.5 z-10 inline-flex h-5 items-center gap-1.5 rounded-full bg-black/80 px-2 font-engraved text-xs font-bold tracking-[0.08em] text-foreground"
 				>
 					<span class="size-1.5 rounded-full bg-pink"></span>
-					Selected
+					{t('gameSelector.card.selected')}
 				</span>
 			{/if}
 		</span>
@@ -54,17 +55,19 @@
 				class="inline-flex items-center gap-1.5 font-semibold text-foreground-2"
 			>
 				<span class="size-1.5 rounded-full bg-foreground-2"></span>
-				Installed
+				{t('gameSelector.card.installed')}
 			</span>
 			·
-			{openedAt ? `opened ${timeAgo(openedAt)}` : 'not opened yet'}
+			{openedAt
+				? t('gameSelector.card.opened', { time: timeAgo(openedAt) })
+				: t('gameSelector.card.notOpened')}
 		</span>
 	</button>
 	<Button
 		variant="ghost"
 		size="icon-sm"
 		aria-pressed={game.isPinned}
-		aria-label={game.isPinned ? 'Unpin' : 'Pin'}
+		aria-label={game.isPinned ? t('common.unpin') : t('common.pin')}
 		class={cn(
 			'absolute top-2 right-2 rounded-full bg-black/70 opacity-0 group-hover:opacity-100 hover:bg-black/85',
 			game.isPinned && 'text-foreground opacity-100'

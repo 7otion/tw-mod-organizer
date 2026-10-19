@@ -6,6 +6,7 @@ import {
 	ProfileGroupDisabled,
 	Separator,
 } from '@/lib/models';
+import { t } from '@/lib/i18n';
 import { GamesStore } from '@/lib/store';
 import { unixNow } from '@/lib/utils';
 
@@ -92,7 +93,7 @@ export class ProfilesStore extends ConnectionStore {
 
 	async deleteMany(profiles: readonly Profile[]): Promise<void> {
 		if (profiles.some((profile) => profile === this.active))
-			throw new Error("The active profile can't be deleted.");
+			throw new Error(t('profiles.deleteActiveError'));
 		await Profile.deleteMany(profiles);
 	}
 

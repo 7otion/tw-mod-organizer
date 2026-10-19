@@ -7,6 +7,7 @@
 	import * as RadioGroup from '@/components/ui/radio-group';
 	import * as Select from '@/components/ui/select';
 
+	import { t } from '@/lib/i18n';
 	import { GamesStore, ProfilesStore } from '@/lib/store';
 	import { nameError } from '@/lib/utils';
 
@@ -54,7 +55,7 @@
 <Dialog.Root bind:open onOpenChange={(isOpen) => !isOpen && reset()}>
 	<Dialog.Content class="sm:max-w-[440px]">
 		<Dialog.Header>
-			<Dialog.Title>New profile</Dialog.Title>
+			<Dialog.Title>{t('profiles.new.title')}</Dialog.Title>
 			<Dialog.Description>
 				{gamesStore.current!.series}: {gamesStore.current!.title}
 			</Dialog.Description>
@@ -62,7 +63,9 @@
 
 		<form id="new-profile" class="flex flex-col gap-5" onsubmit={create}>
 			<Field.Field>
-				<Field.Label for="profile-name">Name</Field.Label>
+				<Field.Label for="profile-name"
+					>{t('profiles.new.name')}</Field.Label
+				>
 				<Input
 					id="profile-name"
 					bind:value={name}
@@ -70,20 +73,24 @@
 					oninput={() => (isTouched = true)}
 				/>
 				{#if isTouched && error}
-					<Field.Error>{error}</Field.Error>
+					<Field.Error>{t(error)}</Field.Error>
 				{/if}
 			</Field.Field>
 
 			<Field.Set>
-				<Field.Legend variant="label">Start from</Field.Legend>
+				<Field.Legend variant="label"
+					>{t('profiles.new.startFrom')}</Field.Legend
+				>
 				<RadioGroup.Root bind:value={startFrom} class="gap-2">
 					<Field.Label for="start-empty">
 						<Field.Field orientation="horizontal">
 							<RadioGroup.Item value="empty" id="start-empty" />
 							<Field.Content>
-								<Field.Title>Empty</Field.Title>
+								<Field.Title
+									>{t('profiles.new.empty')}</Field.Title
+								>
 								<Field.Description>
-									Add mods from the library afterwards.
+									{t('profiles.new.emptyDescription')}
 								</Field.Description>
 							</Field.Content>
 						</Field.Field>
@@ -93,11 +100,10 @@
 							<RadioGroup.Item value="copy" id="start-copy" />
 							<Field.Content>
 								<Field.Title
-									>Copy of another profile</Field.Title
+									>{t('profiles.new.copy')}</Field.Title
 								>
 								<Field.Description>
-									Same mods, order, separators and group
-									links.
+									{t('profiles.new.copyDescription')}
 								</Field.Description>
 							</Field.Content>
 						</Field.Field>
@@ -112,7 +118,7 @@
 						}
 					>
 						<Select.Trigger class="w-full">
-							{copyOf?.name ?? 'Choose a profile'}
+							{copyOf?.name ?? t('profiles.new.chooseProfile')}
 						</Select.Trigger>
 						<Select.Content>
 							{#each profilesStore.list as profile (profile.id)}
@@ -127,19 +133,23 @@
 
 			<Field.Field orientation="horizontal">
 				<Checkbox id="make-active" bind:checked={makeActive} />
-				<Field.Label for="make-active"
-					>Make it the active profile</Field.Label
-				>
+				<Field.Label for="make-active">
+					{t('profiles.new.makeActive')}
+				</Field.Label>
 			</Field.Field>
 		</form>
 
 		<Dialog.Footer>
 			<Dialog.Close>
 				{#snippet child({ props })}
-					<Button {...props} variant="ghost">Cancel</Button>
+					<Button {...props} variant="ghost"
+						>{t('common.cancel')}</Button
+					>
 				{/snippet}
 			</Dialog.Close>
-			<Button type="submit" form="new-profile">Create profile</Button>
+			<Button type="submit" form="new-profile">
+				{t('profiles.new.create')}
+			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

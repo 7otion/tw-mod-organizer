@@ -19,6 +19,7 @@
 	import { DragOrder } from '@/lib/drag-order.svelte';
 	import { Selection } from '@/lib/selection.svelte';
 	import type { Profile } from '@/lib/models';
+	import { t } from '@/lib/i18n';
 	import { GamesStore, ProfilesStore } from '@/lib/store';
 
 	import DeleteProfileDialog from './delete-profile-dialog.svelte';
@@ -81,11 +82,12 @@
 		class="flex h-[min(680px,calc(100vh-var(--h-titlebar)-2rem))] w-[980px] flex-col sm:max-w-[calc(100%-2rem)]"
 	>
 		<Dialog.Header>
-			<Dialog.Title>Manage profiles</Dialog.Title>
+			<Dialog.Title>{t('profiles.manage.title')}</Dialog.Title>
 			<Dialog.Description>
-				{gamesStore.current!.title} · {profilesStore.list.length}
-				{profilesStore.list.length === 1 ? 'profile' : 'profiles'} · the active
-				one launches with Play
+				{t('profiles.manage.description', {
+					game: gamesStore.current!.title,
+					count: profilesStore.list.length,
+				})}
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -94,15 +96,15 @@
 				<InputGroup.Addon><SearchIcon /></InputGroup.Addon>
 				<InputGroup.Input
 					type="search"
-					placeholder="Filter profiles"
-					aria-label="Filter profiles"
+					placeholder={t('profiles.manage.filter')}
+					aria-label={t('profiles.manage.filter')}
 					bind:value={query}
 				/>
 			</InputGroup.Root>
 			<span class="flex-1"></span>
 			<Button onclick={() => (isCreating = true)}>
 				<PlusIcon />
-				New profile…
+				{t('profiles.manage.new')}
 			</Button>
 		</div>
 
@@ -113,16 +115,22 @@
 				<Checkbox
 					checked={selection.isAll}
 					indeterminate={selection.isSome}
-					aria-label="Select all"
+					aria-label={t('common.selectAll')}
 					onCheckedChange={() => selection.toggleAll()}
 				/>
 				<span></span>
-				<span>Profile</span>
-				<span class="text-right">Mods</span>
-				<span class="text-right">Enabled</span>
-				<span class="text-right">Groups</span>
-				<span>Last used</span>
-				<span>Created</span>
+				<span>{t('profiles.manage.columns.profile')}</span>
+				<span class="text-right"
+					>{t('profiles.manage.columns.mods')}</span
+				>
+				<span class="text-right">
+					{t('profiles.manage.columns.enabled')}
+				</span>
+				<span class="text-right">
+					{t('profiles.manage.columns.groups')}
+				</span>
+				<span>{t('profiles.manage.columns.lastUsed')}</span>
+				<span>{t('profiles.manage.columns.created')}</span>
 				<span></span>
 			</div>
 
@@ -151,7 +159,7 @@
 				</ul>
 				{#if !rows.length}
 					<p class="px-3 py-6 text-md text-muted-foreground">
-						No profile matches “{query.trim()}”.
+						{t('profiles.manage.noMatch', { query: query.trim() })}
 					</p>
 				{/if}
 			</ScrollArea>
@@ -160,29 +168,29 @@
 				<div
 					class="mb-1 flex items-center gap-1.5 self-center rounded-lg bg-surface-1 py-1.5 pr-1.5 pl-4 shadow-pop"
 				>
-					<b class="mr-2 text-md font-semibold"
-						>{selected.length} selected</b
-					>
+					<b class="mr-2 text-md font-semibold">
+						{t('common.selectedCount', { count: selected.length })}
+					</b>
 					<Button variant="ghost" size="sm" onclick={cloneSelected}>
 						<CopyIcon />
-						Clone
+						{t('common.clone')}
 					</Button>
 					<Button
 						variant="destructive-outline"
 						size="sm"
 						disabled={hasActiveSelected}
 						title={hasActiveSelected
-							? 'The active profile is selected; it can’t be deleted'
+							? t('profiles.manage.activeSelected')
 							: undefined}
 						onclick={() => (deletingMany = selected)}
 					>
 						<Trash2Icon />
-						Delete…
+						{t('common.deleteEllipsis')}
 					</Button>
 					<Button
 						variant="ghost"
 						size="icon-sm"
-						aria-label="Clear selection"
+						aria-label={t('common.clearSelection')}
 						onclick={() => selection.clear()}
 					>
 						<XIcon />
@@ -196,11 +204,11 @@
 				class="inline-flex items-center gap-1.5 text-sm text-muted-foreground"
 			>
 				<GripVerticalIcon class="size-4" />
-				Drag to reorder the sidebar
+				{t('profiles.manage.dragHint')}
 			</p>
 			<Dialog.Close>
 				{#snippet child({ props })}
-					<Button {...props}>Done</Button>
+					<Button {...props}>{t('common.done')}</Button>
 				{/snippet}
 			</Dialog.Close>
 		</Dialog.Footer>
@@ -217,17 +225,20 @@
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>
-				Delete {deletingMany.length} profiles?
+				{t('profiles.deleteMany.title', { count: deletingMany.length })}
 			</AlertDialog.Title>
 			<AlertDialog.Description>
-				{deletingMany.map((profile) => profile.name).join(', ')}. Their
-				mods stay in your library and other profiles.
+				{t('profiles.deleteMany.description', {
+					names: deletingMany
+						.map((profile) => profile.name)
+						.join(', '),
+				})}
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
 			<AlertDialog.Action variant="destructive" onclick={removeMany}>
-				Delete profiles
+				{t('profiles.deleteMany.confirm')}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>

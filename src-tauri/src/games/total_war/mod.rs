@@ -101,9 +101,9 @@ impl FolderContents {
             _ => None,
         };
         let problem = match self.pack_files.len() {
-            0 => Some("no .pack file"),
+            0 => Some("no_pack_file"),
             1 => None,
-            _ => Some("more than one .pack file"),
+            _ => Some("many_pack_files"),
         };
         ModInfo {
             game_ref: pack

@@ -4,6 +4,7 @@
 	import * as Field from '@/components/ui/field';
 	import { Input } from '@/components/ui/input';
 
+	import { t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
 	import { LibraryStore, TagsStore } from '@/lib/store';
 	import { nameError } from '@/lib/utils';
@@ -42,17 +43,17 @@
 <Dialog.Root bind:open onOpenChange={(isOpen) => !isOpen && reset()}>
 	<Dialog.Content class="sm:max-w-[400px]">
 		<Dialog.Header>
-			<Dialog.Title>New tag</Dialog.Title>
+			<Dialog.Title>{t('library.newTag.title')}</Dialog.Title>
 			<Dialog.Description>
-				Added to {mods.length} selected {mods.length === 1
-					? 'mod'
-					: 'mods'}.
+				{t('library.newTag.description', { count: mods.length })}
 			</Dialog.Description>
 		</Dialog.Header>
 
 		<form id="new-tag" onsubmit={create}>
 			<Field.Field>
-				<Field.Label for="tag-name">Name</Field.Label>
+				<Field.Label for="tag-name"
+					>{t('library.newTag.name')}</Field.Label
+				>
 				<Input
 					id="tag-name"
 					bind:value={name}
@@ -60,7 +61,7 @@
 					oninput={() => (isTouched = true)}
 				/>
 				{#if isTouched && error}
-					<Field.Error>{error}</Field.Error>
+					<Field.Error>{t(error)}</Field.Error>
 				{/if}
 			</Field.Field>
 		</form>
@@ -68,10 +69,14 @@
 		<Dialog.Footer>
 			<Dialog.Close>
 				{#snippet child({ props })}
-					<Button {...props} variant="ghost">Cancel</Button>
+					<Button {...props} variant="ghost"
+						>{t('common.cancel')}</Button
+					>
 				{/snippet}
 			</Dialog.Close>
-			<Button type="submit" form="new-tag">Create tag</Button>
+			<Button type="submit" form="new-tag">
+				{t('library.newTag.create')}
+			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

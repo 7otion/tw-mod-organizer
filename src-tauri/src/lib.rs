@@ -1,5 +1,6 @@
 mod error;
 mod games;
+mod languages;
 mod library;
 mod migrations;
 #[cfg(windows)]
@@ -65,6 +66,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             games::check_game_folder::check_game_folder,
             games::list_games::list_games,
+            languages::export_language_template::export_language_template,
+            languages::install_language_pack::install_language_pack,
+            languages::list_language_packs::list_language_packs,
+            languages::read_language_file::read_language_file,
             library::cancel_library_scan::cancel_library_scan,
             library::remove_mods::remove_mods,
             library::request_thumbnails::request_thumbnails,

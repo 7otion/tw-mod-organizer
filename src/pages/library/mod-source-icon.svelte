@@ -2,6 +2,7 @@
 	import DiamondIcon from '@lucide/svelte/icons/diamond';
 	import FolderIcon from '@lucide/svelte/icons/folder';
 
+	import { t } from '@/lib/i18n';
 	import type { ModSource } from '@/lib/models';
 
 	type Props = {
@@ -13,11 +14,29 @@
 </script>
 
 {#if source === 'steam'}
-	<img src="/steam-logo.webp" alt="Steam" width={size} height={size} />
+	<img
+		src="/steam-logo.webp"
+		alt={t('library.sources.steam')}
+		width={size}
+		height={size}
+	/>
 {:else if source === 'nexus'}
-	<img src="/nexus-logo.png" alt="Nexus" width={size} height={size} />
+	<img
+		src="/nexus-logo.png"
+		alt={t('library.sources.nexus')}
+		width={size}
+		height={size}
+	/>
 {:else if source === 'base'}
-	<DiamondIcon aria-label="Base" {size} class="text-muted-foreground" />
+	<DiamondIcon
+		aria-label={t('library.sources.base')}
+		{size}
+		class="text-muted-foreground"
+	/>
 {:else}
-	<FolderIcon aria-label="Manual" {size} class="text-muted-foreground" />
+	<FolderIcon
+		aria-label={t('library.sources.manual')}
+		{size}
+		class="text-muted-foreground"
+	/>
 {/if}

@@ -16,8 +16,9 @@
 
 	import { type Profile, ProfileEntry } from '@/lib/models';
 	import type { Selection } from '@/lib/selection.svelte';
-	import { ProfilesStore, SettingsStore } from '@/lib/store';
-	import { cn, formatDate, nameError, timeAgo } from '@/lib/utils';
+	import { formatDate, t, timeAgo } from '@/lib/i18n';
+	import { ProfilesStore } from '@/lib/store';
+	import { cn, nameError } from '@/lib/utils';
 
 	type Props = {
 		profile: Profile;
@@ -30,7 +31,6 @@
 	let { profile, index, canDrag, selection, ondelete }: Props = $props();
 
 	const profilesStore = ProfilesStore.get();
-	const settingsStore = SettingsStore.get();
 
 	const active = $derived(profile === profilesStore.active);
 	const selected = $derived(selection.has(profile.id));
@@ -65,9 +65,11 @@
 	);
 
 	const description = $derived.by(() => {
-		if (mods.current === 0) return 'Empty';
+		if (mods.current === 0) return t('profiles.row.empty');
 		if (enabled.current < mods.current)
-			return `${mods.current - enabled.current} off`;
+			return t('profiles.row.off', {
+				count: mods.current - enabled.current,
+			});
 		return '';
 	});
 
@@ -110,8 +112,9 @@
 
 	function created(date: Date): string {
 		const today = new Date();
-		if (date.toDateString() === today.toDateString()) return 'Today';
-		return formatDate(date, settingsStore.datePattern);
+		if (date.toDateString() === today.toDateString())
+			return t('profiles.row.today');
+		return formatDate(date);
 	}
 </script>
 
@@ -152,7 +155,7 @@
 >
 	<Checkbox
 		checked={selected}
-		aria-label="Select {profile.name}"
+		aria-label={t('common.selectItem', { name: profile.name })}
 		onclick={(event) => event.stopPropagation()}
 		onCheckedChange={() => selection.toggle(profile.id)}
 	/>
@@ -178,7 +181,7 @@
 				<Input
 					bind:ref={input}
 					bind:value={name}
-					aria-label="Profile name"
+					aria-label={t('profiles.nameLabel')}
 					aria-invalid={error !== null}
 					class="h-7 w-64 font-semibold"
 					onclick={(event) => event.stopPropagation()}
@@ -186,7 +189,7 @@
 					onblur={() => (isRenaming = false)}
 				/>
 				{#if error}
-					<span class="text-xs text-status-missing">{error}</span>
+					<span class="text-xs text-status-missing">{t(error)}</span>
 				{/if}
 			</span>
 		{:else}
@@ -202,7 +205,7 @@
 				{/if}
 			</span>
 			{#if active}
-				<Badge variant="secondary">Active</Badge>
+				<Badge variant="secondary">{t('profiles.row.active')}</Badge>
 			{/if}
 		{/if}
 	</span>
@@ -222,7 +225,9 @@
 		{groups.current || '—'}
 	</span>
 	<span class="text-sm text-muted-foreground">
-		{profile.last_used_at ? timeAgo(profile.last_used_at) : 'Never'}
+		{profile.last_used_at
+			? timeAgo(profile.last_used_at)
+			: t('profiles.row.never')}
 	</span>
 	<span class="text-sm text-muted-foreground">
 		{created(profile.created_at)}
@@ -234,10 +239,14 @@
 		onclick={(event) => event.stopPropagation()}
 	>
 		{#if !active}
-			{@render action('Make active', CircleCheckIcon, activate)}
+			{@render action(
+				t('profiles.row.makeActive'),
+				CircleCheckIcon,
+				activate
+			)}
 		{/if}
-		{@render action('Rename', PencilIcon, startRename)}
-		{@render action('Clone', CopyIcon, clone)}
+		{@render action(t('common.rename'), PencilIcon, startRename)}
+		{@render action(t('common.clone'), CopyIcon, clone)}
 		{#if active}
 			<Tooltip.Root>
 				<Tooltip.Trigger>
@@ -246,7 +255,7 @@
 							<Button
 								variant="ghost"
 								size="icon-sm"
-								aria-label="Delete"
+								aria-label={t('common.delete')}
 								disabled
 							>
 								<Trash2Icon />
@@ -254,12 +263,17 @@
 						</span>
 					{/snippet}
 				</Tooltip.Trigger>
-				<Tooltip.Content
-					>Make another profile active first</Tooltip.Content
-				>
+				<Tooltip.Content>
+					{t('profiles.row.deleteActive')}
+				</Tooltip.Content>
 			</Tooltip.Root>
 		{:else}
-			{@render action('Delete…', Trash2Icon, ondelete, true)}
+			{@render action(
+				t('common.deleteEllipsis'),
+				Trash2Icon,
+				ondelete,
+				true
+			)}
 		{/if}
 	</span>
 </li>

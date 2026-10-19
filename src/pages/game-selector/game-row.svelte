@@ -4,6 +4,7 @@
 
 	import { Button } from '@/components/ui/button';
 
+	import { t } from '@/lib/i18n';
 	import type { GameEntry } from '@/lib/store';
 
 	type Props = {
@@ -28,7 +29,7 @@
 			{game.series}: {game.title}
 		</b>
 		<span class="text-xs text-muted-foreground">
-			Not found in your Steam libraries
+			{t('gameSelector.row.notFound')}
 		</span>
 	</span>
 	<span
@@ -36,16 +37,16 @@
 	>
 		<span class="size-1.5 rounded-full border border-muted-foreground"
 		></span>
-		Not installed
+		{t('gameSelector.row.notInstalled')}
 	</span>
 	<span class="flex gap-1.5">
 		<Button variant="ghost" size="sm" onclick={onsetfolder}>
 			<FolderOpenIcon />
-			Set game folder…
+			{t('gameSelector.row.setFolder')}
 		</Button>
 		<Button variant="secondary" size="sm" onclick={onstore}>
 			<ExternalLinkIcon />
-			Get on Steam
+			{t('gameSelector.row.getOnSteam')}
 		</Button>
 	</span>
 </div>

@@ -1,8 +1,12 @@
 <script lang="ts">
+	import type { Component } from 'svelte';
+
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';
 	import { ScrollArea } from '@/components/ui/scroll-area';
 
+	import { t } from '@/lib/i18n';
+	import type { MessageKey } from '@/lib/i18n/message-key';
 	import { cn } from '@/lib/utils';
 
 	import AboutCard from './about-card.svelte';
@@ -14,13 +18,37 @@
 
 	let { open = $bindable(false) }: { open: boolean } = $props();
 
-	const SECTIONS = [
-		{ id: 'folders', label: 'Folders', card: FoldersCard },
-		{ id: 'load-order', label: 'Load order', card: LoadOrderCard },
-		{ id: 'display', label: 'Display', card: DisplayCard },
-		{ id: 'accounts', label: 'Accounts & tools', card: AccountsCard },
-		{ id: 'import', label: 'Import data', card: ImportCard },
-		{ id: 'about', label: 'Updates & about', card: AboutCard },
+	const SECTIONS: {
+		id: string;
+		labelKey: MessageKey;
+		card: Component;
+	}[] = [
+		{
+			id: 'folders',
+			labelKey: 'settings.sections.folders',
+			card: FoldersCard,
+		},
+		{
+			id: 'load-order',
+			labelKey: 'settings.sections.loadOrder',
+			card: LoadOrderCard,
+		},
+		{
+			id: 'display',
+			labelKey: 'settings.sections.display',
+			card: DisplayCard,
+		},
+		{
+			id: 'accounts',
+			labelKey: 'settings.sections.accounts',
+			card: AccountsCard,
+		},
+		{
+			id: 'import',
+			labelKey: 'settings.sections.import',
+			card: ImportCard,
+		},
+		{ id: 'about', labelKey: 'settings.sections.about', card: AboutCard },
 	];
 
 	let viewport = $state<HTMLElement | null>(null);
@@ -74,7 +102,7 @@
 		class="flex h-[min(720px,calc(100vh-var(--h-titlebar)-2rem))] w-[1000px] flex-row gap-0 overflow-hidden p-0 sm:max-w-[calc(100%-2rem)]"
 	>
 		<nav
-			aria-label="Settings sections"
+			aria-label={t('settings.sectionsLabel')}
 			class="flex w-56 shrink-0 flex-col gap-px border-r bg-tone-1 px-2 py-4"
 		>
 			{#each SECTIONS as section (section.id)}
@@ -96,7 +124,7 @@
 								: 'size-2 shadow-[inset_0_0_0_1.5px_var(--text-4)]'
 						)}
 					></span>
-					{section.label}
+					{t(section.labelKey)}
 				</Button>
 			{/each}
 		</nav>
@@ -104,10 +132,10 @@
 		<div class="flex min-w-0 flex-1 flex-col">
 			<div class="flex items-end gap-4 px-6 pt-5 pb-4">
 				<Dialog.Title class="font-blackletter text-title font-medium">
-					Settings
+					{t('settings.title')}
 				</Dialog.Title>
 				<Dialog.Description class="pb-1.5 text-sm">
-					Changes save automatically.
+					{t('settings.autosave')}
 				</Dialog.Description>
 			</div>
 

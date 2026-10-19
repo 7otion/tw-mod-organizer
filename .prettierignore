@@ -3,3 +3,4 @@ node_modules/
 static/
 src-tauri/
 target
+src/lib/i18n/message-key.ts

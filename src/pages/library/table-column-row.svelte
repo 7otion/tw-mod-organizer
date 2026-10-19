@@ -5,6 +5,7 @@
 	import { Checkbox } from '@/components/ui/checkbox';
 
 	import { LibraryColumnsStore, type LibraryColumnState } from '@/lib/store';
+	import { t } from '@/lib/i18n';
 	import { cn } from '@/lib/utils';
 
 	import { COLUMN_INFO } from './library-columns';
@@ -28,10 +29,12 @@
 	});
 
 	const widthLabel = $derived.by(() => {
-		if (!column.isVisible) return 'hidden';
+		if (!column.isVisible) return t('library.table.width.hidden');
 		const { width } = COLUMN_INFO[column.key];
-		if (width) return width;
-		return column.width ? `${column.width} px` : 'auto';
+		if (width) return t(`library.table.width.${width}`);
+		return column.width
+			? t('library.table.width.pixels', { width: column.width })
+			: t('library.table.width.auto');
 	});
 </script>
 
@@ -51,12 +54,14 @@
 	<Checkbox
 		checked={column.isVisible}
 		disabled={column.key === 'mod'}
-		aria-label="Show {COLUMN_INFO[column.key].label}"
+		aria-label={t('library.table.show', {
+			column: t(COLUMN_INFO[column.key].labelKey),
+		})}
 		onCheckedChange={(isChecked) =>
 			libraryColumnsStore.setVisible(column.key, isChecked)}
 	/>
 	<span class={cn(!column.isVisible && 'text-muted-foreground')}>
-		{COLUMN_INFO[column.key].label}
+		{t(COLUMN_INFO[column.key].labelKey)}
 	</span>
 	<span class="font-mono text-xs text-muted-foreground">{widthLabel}</span>
 </li>

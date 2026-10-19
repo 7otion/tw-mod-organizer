@@ -9,6 +9,8 @@
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 
+	import { t } from '@/lib/i18n';
+	import Message from '@/lib/i18n/message.svelte';
 	import type { Selection } from '@/lib/selection.svelte';
 	import { LibraryStore, TagsStore } from '@/lib/store';
 	import { TAG_SWATCHES } from '@/lib/tag-swatches';
@@ -47,7 +49,14 @@
 	class="absolute bottom-4.5 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-[10px] bg-surface-2 py-1.5 pr-1.5 pl-3 whitespace-nowrap shadow-pop"
 >
 	<strong class="mr-2 text-sm font-semibold">
-		<b class="mr-1 text-md text-foreground">{selection.count}</b>Selected
+		<Message
+			key="library.bulk.selected"
+			values={{ count: selection.count }}
+		>
+			{#snippet value(text)}
+				<b class="text-md text-foreground">{text}</b>
+			{/snippet}
+		</Message>
 	</strong>
 	<Button
 		variant="pink"
@@ -55,12 +64,12 @@
 		class="bg-pink text-pink-ink hover:bg-pink-hover"
 	>
 		<PlusIcon />
-		Add to profile
+		{t('library.bulk.addToProfile')}
 		<ChevronDownIcon />
 	</Button>
 	<Button variant="ghost" size="sm" class="text-foreground">
 		<LayersIcon />
-		Add to group
+		{t('library.bulk.addToGroup')}
 		<ChevronDownIcon />
 	</Button>
 	<DropdownMenu.Root>
@@ -73,7 +82,7 @@
 					class="text-foreground"
 				>
 					<TagIcon />
-					Tag
+					{t('library.bulk.tag')}
 					<ChevronDownIcon />
 				</Button>
 			{/snippet}
@@ -101,7 +110,7 @@
 			{/if}
 			<DropdownMenu.Item onSelect={() => (isCreatingTag = true)}>
 				<PlusIcon />
-				New tag…
+				{t('library.bulk.newTag')}
 			</DropdownMenu.Item>
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>
@@ -112,12 +121,12 @@
 		onclick={() => (isRemoving = true)}
 	>
 		<Trash2Icon />
-		Unsubscribe / remove…
+		{t('library.bulk.remove')}
 	</Button>
 	<Button
 		variant="ghost"
 		size="icon-sm"
-		aria-label="Clear selection"
+		aria-label={t('common.clearSelection')}
 		onclick={() => selection.clear()}
 	>
 		<XIcon />

@@ -2,6 +2,7 @@
 	import { Badge } from '@/components/ui/badge';
 	import * as Tooltip from '@/components/ui/tooltip';
 
+	import { t } from '@/lib/i18n';
 	import type { NavRoute } from '@/lib/nav-routes';
 	import { cn } from '@/lib/utils';
 
@@ -20,7 +21,7 @@
 			<a
 				{...props}
 				href={route.path}
-				aria-label={route.label}
+				aria-label={t(route.labelKey)}
 				aria-current={active ? 'page' : undefined}
 				class={cn(
 					'relative grid size-10 place-items-center rounded-shell text-muted-foreground outline-0 hover:bg-hover hover:text-foreground',
@@ -40,6 +41,8 @@
 		{/snippet}
 	</Tooltip.Trigger>
 	<Tooltip.Content side="right">
-		{route.label} ({route.shortcut})
+		{t(route.labelKey)} ({t('shortcuts.ctrlPlus', {
+			key: route.shortcutKey,
+		})})
 	</Tooltip.Content>
 </Tooltip.Root>

@@ -9,17 +9,17 @@
 	import { Button } from '@/components/ui/button';
 	import { Checkbox } from '@/components/ui/checkbox';
 
+	import { formatDate, formatSize, problemText, t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
 	import type { Selection } from '@/lib/selection.svelte';
 	import { selectCellText } from '@/lib/select-cell-text';
 	import {
 		LibraryColumnsStore,
 		LibraryStore,
-		SettingsStore,
 		type CoverSize,
 		type LibraryColumn,
 	} from '@/lib/store';
-	import { cn, formatDate, formatSize } from '@/lib/utils';
+	import { cn } from '@/lib/utils';
 
 	import { SOURCE_ICON_SIZES } from './library-columns';
 	import ModCover from './mod-cover.svelte';
@@ -51,7 +51,6 @@
 
 	const libraryStore = LibraryStore.get();
 	const libraryColumnsStore = LibraryColumnsStore.get();
-	const settingsStore = SettingsStore.get();
 
 	const isSelected = $derived(selection.has(mod.id));
 	const hasVersionColumn = $derived(
@@ -63,26 +62,30 @@
 	const placement = $derived(libraryStore.placementOf(mod));
 
 	const inlineVersion = $derived(
-		mod.version && !hasVersionColumn ? `v${mod.version}` : null
+		mod.version && !hasVersionColumn
+			? t('library.row.version', { version: mod.version })
+			: null
 	);
 
 	const mark = $derived.by((): Mark | null => {
 		if (mod.isMissing)
 			return {
 				icon: UnlinkIcon,
-				label: `missing · ${mod.problem}`,
+				label: t('library.row.missing', {
+					problem: problemText(mod.problem!),
+				}),
 				class: 'text-status-missing',
 			};
 		if (mod.problem)
 			return {
 				icon: CircleAlertIcon,
-				label: mod.problem,
+				label: problemText(mod.problem),
 				class: 'text-status-missing',
 			};
 		if (mod.hasUpdate)
 			return {
 				icon: CircleArrowUpIcon,
-				label: 'new version',
+				label: t('library.row.newVersion'),
 				class: 'text-status-update',
 			};
 		return null;
@@ -90,7 +93,9 @@
 
 	const profileNames = $derived(
 		placement.profiles.map(({ profile, isEnabled }) =>
-			isEnabled ? profile.name : `${profile.name} (off)`
+			isEnabled
+				? profile.name
+				: t('library.row.profileOff', { name: profile.name })
 		)
 	);
 	const firstGroup = $derived(placement.groups[0] ?? null);
@@ -129,7 +134,7 @@
 			<Button
 				variant="ghost"
 				size="icon-sm"
-				aria-label="Open details"
+				aria-label={t('library.row.openDetails')}
 				class="ml-auto opacity-0 transition-opacity duration-120 group-hover:opacity-100 focus-visible:opacity-100"
 				onclick={(event) => event.stopPropagation()}
 				ondblclick={(event) => event.stopPropagation()}
@@ -176,8 +181,10 @@
 			{:else if firstGroup}
 				<span class="inline-flex min-w-0 items-center gap-1 truncate">
 					<LinkIcon class="size-3.5 shrink-0" />
-					via {firstGroup.group.name} · {firstGroup.profiles.length}
-					{firstGroup.profiles.length === 1 ? 'profile' : 'profiles'}
+					{t('library.row.viaGroup', {
+						group: firstGroup.group.name,
+						count: firstGroup.profiles.length,
+					})}
 				</span>
 			{/if}
 		</span>
@@ -189,15 +196,11 @@
 		</span>
 	{:else if key === 'updated'}
 		<span data-cell class="text-right font-mono">
-			{mod.isMissing || !mod.updatedAt
-				? '—'
-				: formatDate(mod.updatedAt, settingsStore.datePattern)}
+			{mod.isMissing || !mod.updatedAt ? '—' : formatDate(mod.updatedAt)}
 		</span>
 	{:else if key === 'added'}
 		<span data-cell class="text-right font-mono"
-			>{mod.added_at
-				? formatDate(mod.added_at, settingsStore.datePattern)
-				: '—'}</span
+			>{mod.added_at ? formatDate(mod.added_at) : '—'}</span
 		>
 	{:else if key === 'version'}
 		<span data-cell class="truncate text-sm">{mod.version ?? '—'}</span>
@@ -216,7 +219,7 @@
 >
 	<Checkbox
 		checked={isSelected}
-		aria-label="Select {mod.displayTitle}"
+		aria-label={t('common.selectItem', { name: mod.displayTitle })}
 		onclick={(event) => event.stopPropagation()}
 		onCheckedChange={() => selection.toggle(mod.id)}
 	/>

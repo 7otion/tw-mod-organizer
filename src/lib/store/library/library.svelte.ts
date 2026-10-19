@@ -14,6 +14,7 @@ import {
 	type Profile,
 } from '@/lib/models';
 import { GamesStore, ProfilesStore, TagsStore } from '@/lib/store';
+import { t } from '@/lib/i18n';
 import { unixNow } from '@/lib/utils';
 
 type SteamDetails = {
@@ -227,14 +228,16 @@ export class LibraryStore extends ConnectionStore {
 		for (const mod of unsubscribed)
 			mod.fill({ missing_since: now, problem: 'unsubscribed' });
 		for (const mod of trashed)
-			mod.fill({ missing_since: now, problem: 'folder removed' });
+			mod.fill({ missing_since: now, problem: 'folder_removed' });
 		await Model.database.transaction(async (tx) => {
 			await Mod.updateMany([...unsubscribed, ...trashed], tx);
 			await Mod.deleteMany(missing, tx);
 		});
 		if (removed.failures.length)
 			throw new Error(
-				`Couldn't remove everything: ${removed.failures.join('; ')}`
+				t('library.remove.failed', {
+					failures: removed.failures.join('; '),
+				})
 			);
 	}
 
@@ -298,7 +301,7 @@ export class LibraryStore extends ConnectionStore {
 								mod.source === 'steam' &&
 								scan.steam_view === 'subscriptions'
 									? 'unsubscribed'
-									: 'folder removed',
+									: 'folder_removed',
 						});
 					}
 				}

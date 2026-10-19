@@ -3,8 +3,9 @@
 
 	import { Button } from '@/components/ui/button';
 
+	import { t, timeAgo } from '@/lib/i18n';
 	import type { GameEntry } from '@/lib/store';
-	import { cn, timeAgo } from '@/lib/utils';
+	import { cn } from '@/lib/utils';
 
 	type Props = {
 		game: GameEntry;
@@ -38,15 +39,15 @@
 			<span class="flex items-baseline gap-2">
 				<span class="text-xs text-muted-foreground">
 					{openedAt
-						? `Opened ${timeAgo(openedAt)}`
-						: 'Not opened yet'}
+						? t('header.games.opened', { time: timeAgo(openedAt) })
+						: t('header.games.notOpened')}
 				</span>
 				{#if isCurrent}
 					<span
 						class="pointer-events-none inline-flex items-center gap-1.5 text-3xs font-bold text-foreground-2"
 					>
 						<span class="size-1.5 rounded-full bg-pink"></span>
-						Current
+						{t('header.games.current')}
 					</span>
 				{/if}
 			</span>
@@ -57,7 +58,7 @@
 			variant="ghost"
 			size="icon-sm"
 			aria-pressed={game.isPinned}
-			aria-label={game.isPinned ? 'Unpin' : 'Pin'}
+			aria-label={game.isPinned ? t('common.unpin') : t('common.pin')}
 			class={cn(
 				'absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground opacity-0 group-hover:opacity-100',
 				game.isPinned && 'text-foreground-2 opacity-100'

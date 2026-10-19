@@ -6,6 +6,8 @@
 	import * as Dialog from '@/components/ui/dialog';
 	import { ScrollArea } from '@/components/ui/scroll-area';
 
+	import { t } from '@/lib/i18n';
+
 	import { LICENCES } from './licences';
 
 	const GPL_URL = 'https://www.gnu.org/licenses/gpl-3.0.html';
@@ -16,10 +18,9 @@
 <Dialog.Root bind:open>
 	<Dialog.Content class="sm:max-w-[480px]">
 		<Dialog.Header>
-			<Dialog.Title>Licences</Dialog.Title>
+			<Dialog.Title>{t('settings.about.licences')}</Dialog.Title>
 			<Dialog.Description class="text-pink-300">
-				TW Mod Organizer is free software under the GNU General Public
-				License v3.0. It's built on these open-source projects.
+				{t('settings.licences.description')}
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -30,7 +31,7 @@
 						<p
 							class="mb-1 flex items-center gap-2 text-sm font-semibold text-muted-foreground after:h-px after:flex-1 after:bg-border"
 						>
-							{group}
+							{t(group)}
 						</p>
 						{#each items as item (item.name)}
 							<div
@@ -52,11 +53,11 @@
 		<Dialog.Footer>
 			<Button variant="ghost" onclick={() => openUrl(GPL_URL)}>
 				<ExternalLinkIcon />
-				Read the GPL v3.0
+				{t('settings.licences.readGpl')}
 			</Button>
 			<Dialog.Close>
 				{#snippet child({ props })}
-					<Button {...props}>Close</Button>
+					<Button {...props}>{t('common.close')}</Button>
 				{/snippet}
 			</Dialog.Close>
 		</Dialog.Footer>

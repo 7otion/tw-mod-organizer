@@ -5,27 +5,50 @@ import LibraryIcon from '@lucide/svelte/icons/library';
 import ListOrderedIcon from '@lucide/svelte/icons/list-ordered';
 import SaveIcon from '@lucide/svelte/icons/save';
 
+import type { MessageKey } from '@/lib/i18n/message-key';
+
 export type NavRoute = {
+	id: 'load-order' | 'library' | 'groups' | 'saves' | 'downloads';
 	path: string;
-	label: string;
-	shortcut: string;
+	labelKey: MessageKey;
+	shortcutKey: string;
 	icon: LucideIcon;
 };
 
 export const navRoutes: NavRoute[] = [
 	{
+		id: 'load-order',
 		path: '/',
-		label: 'Load order',
-		shortcut: 'Ctrl+1',
+		labelKey: 'nav.loadOrder',
+		shortcutKey: '1',
 		icon: ListOrderedIcon,
 	},
 	{
+		id: 'library',
 		path: '/library',
-		label: 'Library',
-		shortcut: 'Ctrl+2',
+		labelKey: 'nav.library',
+		shortcutKey: '2',
 		icon: LibraryIcon,
 	},
-	{ path: '/', label: 'Groups', shortcut: 'Ctrl+3', icon: LayersIcon },
-	{ path: '/', label: 'Saves', shortcut: 'Ctrl+4', icon: SaveIcon },
-	{ path: '/', label: 'Downloads', shortcut: 'Ctrl+5', icon: DownloadIcon },
+	{
+		id: 'groups',
+		path: '/',
+		labelKey: 'nav.groups',
+		shortcutKey: '3',
+		icon: LayersIcon,
+	},
+	{
+		id: 'saves',
+		path: '/',
+		labelKey: 'nav.saves',
+		shortcutKey: '4',
+		icon: SaveIcon,
+	},
+	{
+		id: 'downloads',
+		path: '/',
+		labelKey: 'nav.downloads',
+		shortcutKey: '5',
+		icon: DownloadIcon,
+	},
 ];

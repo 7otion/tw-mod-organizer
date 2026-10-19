@@ -8,6 +8,7 @@
 	import * as InputGroup from '@/components/ui/input-group';
 	import * as Popover from '@/components/ui/popover';
 
+	import { t } from '@/lib/i18n';
 	import { type GameEntry, GamesStore } from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
@@ -94,38 +95,38 @@
 		sideOffset={0}
 		class="w-[340px] gap-0 p-0"
 		role="listbox"
-		aria-label="Choose a game"
+		aria-label={t('header.games.choose')}
 	>
 		<div class="border-b p-2">
 			<InputGroup.Root>
 				<InputGroup.Addon><SearchIcon /></InputGroup.Addon>
 				<InputGroup.Input
 					type="search"
-					placeholder="Filter games"
-					aria-label="Filter games"
+					placeholder={t('header.games.filter')}
+					aria-label={t('header.games.filter')}
 					bind:value={query}
 				/>
 			</InputGroup.Root>
 		</div>
 		<div class="flex flex-col">
 			{#if current && matches(current)}
-				{@render section('Current', [current], true)}
+				{@render section(t('header.games.current'), [current], true)}
 			{/if}
 			{#if pinned.length}
-				{@render section('Pinned', pinned)}
+				{@render section(t('header.games.pinned'), pinned)}
 			{/if}
 			{#if recent.length}
-				{@render section('Recent', recent)}
+				{@render section(t('header.games.recent'), recent)}
 			{/if}
 		</div>
 		<div class="flex flex-col gap-px border-t p-1">
 			<Button variant="ghost" class="justify-start px-2" onclick={browse}>
 				<LayoutGridIcon />
-				All games…
+				{t('header.games.all')}
 			</Button>
 			<Button variant="ghost" class="justify-start px-2" onclick={close}>
 				<LogOutIcon />
-				Close game
+				{t('header.games.close')}
 			</Button>
 		</div>
 	</Popover.Content>

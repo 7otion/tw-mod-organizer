@@ -1,6 +1,7 @@
 <script lang="ts">
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
+	import { t } from '@/lib/i18n';
 	import type { Profile } from '@/lib/models';
 	import { ProfilesStore } from '@/lib/store';
 
@@ -17,13 +18,13 @@
 </script>
 
 <div class="flex flex-col pt-4 pb-1.5">
-	<SidebarHeading title="PROFILES">
+	<SidebarHeading title={t('sidebar.profiles.title')}>
 		<SidebarHeadingAction
-			tooltip="New profile"
+			tooltip={t('sidebar.profiles.newTooltip')}
 			onclick={() => (isCreating = true)}
 		>
 			<PlusIcon class="size-3.5" />
-			New
+			{t('common.new')}
 		</SidebarHeadingAction>
 	</SidebarHeading>
 	<ul class="flex flex-col gap-px">

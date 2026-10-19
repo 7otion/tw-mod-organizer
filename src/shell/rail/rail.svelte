@@ -3,6 +3,7 @@
 
 	import * as Tooltip from '@/components/ui/tooltip';
 
+	import { t } from '@/lib/i18n';
 	import { navRoutes } from '@/lib/nav-routes';
 	import SettingsRailButton from '@/shell/settings/rail-button.svelte';
 
@@ -21,17 +22,15 @@
 </script>
 
 <nav
-	aria-label="Sections"
+	aria-label={t('nav.sections')}
 	class="flex w-rail shrink-0 flex-col items-center gap-1.5 border-r border-line bg-tone-0 py-3"
 >
 	<Tooltip.Provider delayDuration={1000}>
-		{#each navRoutes as route (route.label)}
+		{#each navRoutes as route (route.id)}
 			<RailButton
 				{route}
 				active={route === active}
-				badge={route.label === 'Downloads'
-					? ACTIVE_DOWNLOADS
-					: undefined}
+				badge={route.id === 'downloads' ? ACTIVE_DOWNLOADS : undefined}
 			/>
 		{/each}
 		<div class="flex-1"></div>

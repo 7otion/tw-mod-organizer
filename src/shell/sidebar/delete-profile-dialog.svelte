@@ -3,6 +3,7 @@
 
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 
+	import { t } from '@/lib/i18n';
 	import { type Profile, ProfileEntry } from '@/lib/models';
 	import { ProfilesStore } from '@/lib/store';
 
@@ -33,18 +34,22 @@
 >
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Delete “{profile?.name}”?</AlertDialog.Title>
+			<AlertDialog.Title>
+				{t('profiles.delete.title', { name: profile?.name ?? '' })}
+			</AlertDialog.Title>
 			<AlertDialog.Description>
-				{mods.current}
-				{mods.current === 1 ? 'mod' : 'mods'} and {separators.current}
-				{separators.current === 1 ? 'separator' : 'separators'}. The
-				mods stay in your library and other profiles.
+				{t('profiles.delete.contents', {
+					mods: t('profiles.delete.mods', { count: mods.current }),
+					separators: t('profiles.delete.separators', {
+						count: separators.current,
+					}),
+				})}
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
 			<AlertDialog.Action variant="destructive" onclick={remove}>
-				Delete profile
+				{t('profiles.delete.confirm')}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>

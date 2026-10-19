@@ -217,7 +217,7 @@ fn steam_mod(game: &dyn GameSupport, item: WorkshopItem) -> LibraryMod {
     let source_ref = item.published_file_id.to_string();
     let files = match &item.install {
         Some(install) => read_mod(game, ScanSource::Steam, source_ref, install.folder.clone()),
-        None => without_files(ScanSource::Steam, source_ref, None, "not downloaded yet"),
+        None => without_files(ScanSource::Steam, source_ref, None, "not_downloaded"),
     };
     let mut tags = Vec::new();
     for steam_tag in &item.tags {
@@ -269,7 +269,7 @@ fn read_mod(
         },
         Err(error) => {
             tracing::warn!(folder = %folder.display(), "can't read the mod folder: {error}");
-            without_files(source, source_ref, Some(folder), "folder can't be read")
+            without_files(source, source_ref, Some(folder), "unreadable_folder")
         }
     }
 }

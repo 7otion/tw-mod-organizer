@@ -16,6 +16,7 @@ impl Migration for CreateSettingsTable {
             table.boolean("preview_auto_sort").default(true);
             table.text("new_mods_placement").default("end_of_list");
             table.text("date_format").default("system");
+            table.text("language").default("system");
             table
                 .date("v1_import_offered_at", DateStorage::Unix)
                 .nullable();

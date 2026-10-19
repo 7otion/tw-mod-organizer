@@ -1,12 +1,16 @@
 <script lang="ts">
+	import { t } from '@/lib/i18n';
 	import { LibraryStore } from '@/lib/store';
 
 	const libraryStore = LibraryStore.get();
 
 	const label = $derived.by(() => {
 		const progress = libraryStore.scanProgress;
-		if (!progress?.total) return 'Scanning library…';
-		return `Scanning ${progress.done} / ${progress.total}…`;
+		if (!progress?.total) return t('header.scan.starting');
+		return t('header.scan.progress', {
+			done: progress.done,
+			total: progress.total,
+		});
 	});
 </script>
 

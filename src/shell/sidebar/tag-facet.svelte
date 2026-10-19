@@ -6,6 +6,7 @@
 	import * as ContextMenu from '@/components/ui/context-menu';
 	import { Input } from '@/components/ui/input';
 
+	import { t } from '@/lib/i18n';
 	import { type Tag, TAG_COLORS, type TagColor } from '@/lib/models';
 	import { LibraryFilterStore, TagsStore } from '@/lib/store';
 	import { TAG_SWATCHES } from '@/lib/tag-swatches';
@@ -68,14 +69,14 @@
 		<Input
 			bind:ref={input}
 			bind:value={name}
-			aria-label="Tag name"
+			aria-label={t('tags.nameLabel')}
 			aria-invalid={error !== null}
 			class="h-7"
 			{onkeydown}
 			onblur={() => (isRenaming = false)}
 		/>
 		{#if error}
-			<p class="text-xs text-status-missing">{error}</p>
+			<p class="text-xs text-status-missing">{t(error)}</p>
 		{/if}
 	</li>
 {:else}
@@ -98,12 +99,12 @@
 		<ContextMenu.Content>
 			<ContextMenu.Item onSelect={startRename}>
 				<PencilIcon />
-				Rename…
+				{t('common.renameEllipsis')}
 			</ContextMenu.Item>
 			<ContextMenu.Sub>
 				<ContextMenu.SubTrigger>
 					<PaletteIcon />
-					Change colour
+					{t('tags.changeColour')}
 				</ContextMenu.SubTrigger>
 				<ContextMenu.SubContent>
 					<ContextMenu.RadioGroup
@@ -111,12 +112,9 @@
 						onValueChange={recolor}
 					>
 						{#each TAG_COLORS as option (option)}
-							<ContextMenu.RadioItem
-								value={option}
-								class="capitalize"
-							>
+							<ContextMenu.RadioItem value={option}>
 								{@render dot(option)}
-								{option}
+								{t(`tags.colors.${option}`)}
 							</ContextMenu.RadioItem>
 						{/each}
 					</ContextMenu.RadioGroup>
@@ -125,7 +123,7 @@
 			<ContextMenu.Separator />
 			<ContextMenu.Item variant="destructive" onSelect={ondelete}>
 				<Trash2Icon />
-				Delete…
+				{t('common.deleteEllipsis')}
 			</ContextMenu.Item>
 		</ContextMenu.Content>
 	</ContextMenu.Root>

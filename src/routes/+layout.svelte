@@ -14,6 +14,7 @@
 	import Sidebar from '@/shell/sidebar/sidebar.svelte';
 	import S7forgeSetup from '@/pages/s7forge-setup/s7forge-setup.svelte';
 
+	import { t } from '@/lib/i18n';
 	import { AppStore, S7forgeStore } from '@/lib/store';
 	import { toastError } from '@/lib/utils';
 
@@ -24,25 +25,32 @@
 
 	$effect(() => {
 		const unlisten = listen<string>('backend-panic', (event) =>
-			toastError(`Backend crashed: ${event.payload}`)
+			toastError(t('app.backendCrashed', { error: event.payload }))
 		);
 		return () => void unlisten.then((off) => off());
 	});
 
 	$effect(() => {
 		if (!s7forgeStore.hasUpdate) return;
-		toast.info(`s7forge ${s7forgeStore.latestVersion} is available`, {
-			description: `You have ${s7forgeStore.version}.`,
-			action: {
-				label: 'Update',
-				onClick: () =>
-					toast.promise(s7forgeStore.install(), {
-						loading: 'Updating s7forge…',
-						success: 's7forge is up to date.',
-						error: (error) => String(error),
-					}),
-			},
-		});
+		toast.info(
+			t('app.s7forge.available', {
+				version: s7forgeStore.latestVersion ?? '',
+			}),
+			{
+				description: t('app.s7forge.current', {
+					version: s7forgeStore.version ?? '',
+				}),
+				action: {
+					label: t('app.s7forge.update'),
+					onClick: () =>
+						toast.promise(s7forgeStore.install(), {
+							loading: t('app.s7forge.updating'),
+							success: t('app.s7forge.updated'),
+							error: (error) => String(error),
+						}),
+				},
+			}
+		);
 	});
 
 	function onRejection(event: PromiseRejectionEvent): void {

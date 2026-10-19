@@ -3,10 +3,13 @@ import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
+import { languagePacks } from './src/lib/i18n/language-packs-plugin.ts';
+
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
 	plugins: [
+		languagePacks(),
 		tailwindcss(),
 		sveltekit({
 			compilerOptions: {

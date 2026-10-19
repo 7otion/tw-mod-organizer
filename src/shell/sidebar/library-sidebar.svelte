@@ -5,6 +5,8 @@
 
 	import { ScrollArea } from '@/components/ui/scroll-area';
 
+	import { t } from '@/lib/i18n';
+	import type { MessageKey } from '@/lib/i18n/message-key';
 	import type { Tag } from '@/lib/models';
 	import {
 		LIBRARY_SOURCES,
@@ -27,16 +29,16 @@
 	import SidebarItem from './sidebar-item.svelte';
 	import TagFacet from './tag-facet.svelte';
 
-	const SOURCE_NAMES: Record<LibrarySource, string> = {
-		steam: 'Steam Workshop',
-		nexus: 'Nexus Mods',
-		manual: 'Manual',
+	const SOURCE_NAMES: Record<LibrarySource, MessageKey> = {
+		steam: 'sidebar.library.sources.steam',
+		nexus: 'sidebar.library.sources.nexus',
+		manual: 'sidebar.library.sources.manual',
 	};
 
-	const STATE_NAMES: Record<ModState, string> = {
-		'in-no-profile': 'In no profile',
-		'update-available': 'Update available',
-		'missing-or-broken': 'Missing or broken',
+	const STATE_NAMES: Record<ModState, MessageKey> = {
+		'in-no-profile': 'sidebar.library.states.inNoProfile',
+		'update-available': 'sidebar.library.states.updateAvailable',
+		'missing-or-broken': 'sidebar.library.states.missingOrBroken',
 	};
 
 	const DOWNLOADING_COUNT = 1;
@@ -72,19 +74,19 @@
 	>
 		{@render dot(isPressed)}
 		<span class={cn('min-w-0 flex-1 truncate', STATE_CLASSES[state])}>
-			{STATE_NAMES[state]}
+			{t(STATE_NAMES[state])}
 		</span>
 		<SidebarCount value={libraryFilterStore.stateCounts[state]} />
 	</SidebarItem>
 {/snippet}
 
 <div class="flex flex-col pt-4 pb-1.5">
-	<SidebarHeading title="SOURCE">
+	<SidebarHeading title={t('sidebar.library.source')}>
 		{#if libraryFilterStore.sources.length}
 			<SidebarHeadingAction
 				onclick={() => libraryFilterStore.clearSources()}
 			>
-				Clear
+				{t('common.clear')}
 			</SidebarHeadingAction>
 		{/if}
 	</SidebarHeading>
@@ -97,7 +99,7 @@
 			>
 				{@render dot(isPressed)}
 				<span class="min-w-0 flex-1 truncate"
-					>{SOURCE_NAMES[source]}</span
+					>{t(SOURCE_NAMES[source])}</span
 				>
 				<SidebarCount value={libraryFilterStore.sourceCounts[source]} />
 			</SidebarItem>
@@ -106,12 +108,12 @@
 </div>
 <SidebarDivider />
 <div class="flex flex-col pt-4 pb-1.5">
-	<SidebarHeading title="STATE">
+	<SidebarHeading title={t('sidebar.library.state')}>
 		{#if libraryFilterStore.states.length}
 			<SidebarHeadingAction
 				onclick={() => libraryFilterStore.clearStates()}
 			>
-				Clear
+				{t('common.clear')}
 			</SidebarHeadingAction>
 		{/if}
 	</SidebarHeading>
@@ -121,7 +123,9 @@
 			{#if state === 'update-available'}
 				<SidebarItem>
 					{@render dot(false)}
-					<span class="min-w-0 flex-1 truncate">Downloading</span>
+					<span class="min-w-0 flex-1 truncate">
+						{t('sidebar.library.states.downloading')}
+					</span>
 					<SidebarCount value={DOWNLOADING_COUNT} />
 				</SidebarItem>
 			{/if}
@@ -130,20 +134,20 @@
 </div>
 <SidebarDivider />
 <div class="flex min-h-0 flex-1 flex-col pt-4 pb-1.5">
-	<SidebarHeading title="TAGS">
+	<SidebarHeading title={t('sidebar.library.tags')}>
 		{#if libraryFilterStore.tagIds.length}
 			<SidebarHeadingAction
 				onclick={() => libraryFilterStore.clearTags()}
 			>
-				Clear
+				{t('common.clear')}
 			</SidebarHeadingAction>
 		{/if}
 		<SidebarHeadingAction
-			tooltip="New tag"
+			tooltip={t('sidebar.library.newTagTooltip')}
 			onclick={() => (isManagingTags = true)}
 		>
 			<PlusIcon class="size-3.5" />
-			New
+			{t('common.new')}
 		</SidebarHeadingAction>
 	</SidebarHeading>
 	<ScrollArea class="min-h-0 flex-1">
@@ -151,21 +155,23 @@
 			{#each tagsStore.list as tag (tag.id)}
 				<TagFacet {tag} ondelete={() => (deleting = tag)} />
 			{:else}
-				<li class="px-4 text-sm text-muted-foreground">No tags yet.</li>
+				<li class="px-4 text-sm text-muted-foreground">
+					{t('sidebar.library.noTags')}
+				</li>
 			{/each}
 		</ul>
 	</ScrollArea>
 </div>
 <div class="flex flex-col gap-0.5 border-t border-line py-3">
 	<SidebarAction icon={TagIcon} onclick={() => (isManagingTags = true)}>
-		Manage tags…
+		{t('sidebar.library.manageTags')}
 	</SidebarAction>
 	<SidebarAction
 		icon={RefreshCwIcon}
 		disabled={libraryStore.isScanning}
 		onclick={() => libraryStore.scan()}
 	>
-		Rescan library
+		{t('sidebar.library.rescan')}
 	</SidebarAction>
 </div>
 

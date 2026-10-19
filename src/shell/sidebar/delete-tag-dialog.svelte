@@ -3,6 +3,7 @@
 
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 
+	import { t } from '@/lib/i18n';
 	import { ModTag, type Tag } from '@/lib/models';
 	import { TagsStore } from '@/lib/store';
 
@@ -26,17 +27,17 @@
 >
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Delete “{tag?.name}”?</AlertDialog.Title>
+			<AlertDialog.Title>
+				{t('tags.delete.title', { name: tag?.name ?? '' })}
+			</AlertDialog.Title>
 			<AlertDialog.Description>
-				It's removed from {modCount.current}
-				{modCount.current === 1 ? 'mod' : 'mods'}. The mods stay in your
-				library.
+				{t('tags.delete.description', { count: modCount.current })}
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
 			<AlertDialog.Action variant="destructive" onclick={remove}>
-				Delete tag
+				{t('tags.delete.confirm')}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
