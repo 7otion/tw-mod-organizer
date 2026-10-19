@@ -21,6 +21,7 @@ export const LICENCES: { group: MessageKey; items: Licence[] }[] = [
 			{ name: 'Embla Carousel', licence: 'MIT' },
 			{ name: '@internationalized/date', licence: 'Apache-2.0' },
 			{ name: 'dnd kit', licence: 'MIT' },
+			{ name: 'TanStack Virtual', licence: 'MIT' },
 			{ name: '7otion-tauri', licence: 'MIT' },
 		],
 	},

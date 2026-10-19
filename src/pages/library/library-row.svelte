@@ -17,17 +17,17 @@
 	import {
 		LibraryColumnsStore,
 		LibraryStore,
-		type CoverSize,
 		type LibraryColumn,
 	} from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
-	import { SOURCE_ICON_SIZES } from './library-columns';
+	import { ROW_HEIGHTS, SOURCE_ICON_SIZES } from './library-columns';
 	import ModCover from './mod-cover.svelte';
 	import ModSourceIcon from './mod-source-icon.svelte';
 
 	type Props = {
 		mod: Mod;
+		top: number;
 		selection: Selection<number>;
 		onopendetails: (mod: Mod) => void;
 	};
@@ -38,18 +38,10 @@
 		class: string;
 	};
 
-	const ROW_HEIGHTS: Record<CoverSize, string> = {
-		none: 'h-row-compact',
-		compact: 'h-row-regular',
-		regular: 'h-14',
-		large: 'h-row-large',
-		huge: 'h-27',
-	};
-
 	const SHOWN_TAGS = 2;
 	const SHOWN_PROFILES = 2;
 
-	let { mod, selection, onopendetails }: Props = $props();
+	let { mod, top, selection, onopendetails }: Props = $props();
 
 	const libraryStore = LibraryStore.get();
 	const libraryColumnsStore = LibraryColumnsStore.get();
@@ -243,12 +235,12 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 <li
-	data-mod-id={mod.id}
 	class={cn(
-		'group grid grid-cols-(--library-columns) items-center gap-x-3 rounded-md px-5 text-xs text-muted-foreground transition-colors duration-120 select-none [content-visibility:auto] hover:bg-fill-1',
-		ROW_HEIGHTS[libraryColumnsStore.coverSize],
+		'group absolute inset-x-6 top-0 grid grid-cols-(--library-columns) items-center gap-x-3 rounded-md px-5 text-xs text-muted-foreground transition-colors duration-120 select-none hover:bg-fill-1',
 		isSelected && 'bg-pink-tint hover:bg-pink-tint-2'
 	)}
+	style:height="{ROW_HEIGHTS[libraryColumnsStore.coverSize]}px"
+	style:transform="translateY({top}px)"
 	onclick={(event) => selection.select(mod.id, event)}
 	ondblclick={selectCellText}
 >

@@ -31,6 +31,14 @@ export const COLUMN_INFO: Record<LibraryColumn, ColumnInfo> = {
 	version: { labelKey: 'library.columns.version' },
 };
 
+export const ROW_HEIGHTS: Record<CoverSize, number> = {
+	none: 32,
+	compact: 38,
+	regular: 56,
+	large: 72,
+	huge: 108,
+};
+
 export const SOURCE_ICON_SIZES: Record<CoverSize, number> = {
 	none: 16,
 	compact: 16,

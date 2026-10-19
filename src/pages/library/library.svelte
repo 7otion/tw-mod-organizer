@@ -20,6 +20,7 @@
 
 	import type { Profile } from '@/lib/models';
 	import { Selection } from '@/lib/selection.svelte';
+	import { VirtualList } from '@/lib/virtual-list.svelte';
 	import {
 		GamesStore,
 		LibraryColumnsStore,
@@ -36,7 +37,11 @@
 	import { cn } from '@/lib/utils';
 
 	import LibraryBulkBar from './library-bulk-bar.svelte';
-	import { COLUMN_INFO, SOURCE_ICON_SIZES } from './library-columns';
+	import {
+		COLUMN_INFO,
+		ROW_HEIGHTS,
+		SOURCE_ICON_SIZES,
+	} from './library-columns';
 	import LibraryRow from './library-row.svelte';
 	import TableSettingsDialog from './table-settings-dialog.svelte';
 	import ModDetailsPanel from '@/pages/mod-details/mod-details-panel.svelte';
@@ -50,7 +55,14 @@
 		width: number;
 	};
 
+	type ScrollPosition = {
+		appId: number;
+		offset: number;
+	};
+
 	const MIN_COLUMN_WIDTH = 40;
+	const LIST_PADDING = 4;
+	const SCROLL_SAVE_DELAY = 250;
 
 	const gamesStore = GamesStore.get();
 	const libraryStore = LibraryStore.get();
@@ -61,6 +73,101 @@
 	const selection = new Selection(() =>
 		libraryFilterStore.visibleMods.map((mod) => mod.id)
 	);
+
+	let listViewport = $state<HTMLElement | null>(null);
+	let bulkBar = $state<HTMLElement | null>(null);
+
+	const bulkBarInset = $derived(
+		bulkBar ? bulkBar.offsetParent!.clientHeight - bulkBar.offsetTop : 0
+	);
+
+	const virtualList = new VirtualList({
+		count: () => libraryFilterStore.visibleMods.length,
+		scrollElement: () => listViewport,
+		itemSize: () => ROW_HEIGHTS[libraryColumnsStore.coverSize],
+		itemKey: (index) => libraryFilterStore.visibleMods[index]?.id ?? index,
+		sizeKey: () => libraryColumnsStore.coverSize,
+		paddingStart: LIST_PADDING,
+		paddingEnd: LIST_PADDING,
+		endInset: () => bulkBarInset,
+		onScroll: rememberScroll,
+	});
+
+	const visibleRows = $derived(
+		virtualList.items.flatMap((item) => {
+			const mod = libraryFilterStore.visibleMods[item.index];
+			return mod ? [{ mod, top: item.start }] : [];
+		})
+	);
+
+	let restoredAppId: number | null = null;
+	let unfilteredScroll: ScrollPosition | null = null;
+	let pendingScroll: ScrollPosition | null = null;
+	let scrollTimer: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => {
+		const appId = gamesStore.current?.app_id ?? null;
+		const saved = libraryColumnsStore.savedScrollOffset;
+		const hasRows = libraryFilterStore.visibleMods.length > 0;
+		if (
+			appId === null ||
+			restoredAppId === appId ||
+			saved === null ||
+			!listViewport ||
+			!hasRows ||
+			libraryFilterStore.isFiltered
+		)
+			return;
+		restoredAppId = appId;
+		unfilteredScroll = { appId, offset: saved };
+		scrollTo(saved);
+	});
+
+	$effect(() => {
+		if (libraryFilterStore.isFiltered) return;
+		untrack(() => {
+			const position = unfilteredScroll;
+			if (position && position.appId === gamesStore.current?.app_id)
+				scrollTo(position.offset);
+		});
+	});
+
+	$effect(() => () => {
+		clearTimeout(scrollTimer);
+		saveScroll();
+	});
+
+	function scrollTo(offset: number): void {
+		void tick().then(() => {
+			if (listViewport) virtualList.scrollToOffset(offset);
+		});
+	}
+
+	function rememberScroll(offset: number): void {
+		const appId = gamesStore.current?.app_id;
+		if (
+			appId === undefined ||
+			restoredAppId !== appId ||
+			libraryFilterStore.isFiltered
+		)
+			return;
+		clearTimeout(scrollTimer);
+		const rounded = Math.round(offset);
+		unfilteredScroll = { appId, offset: rounded };
+		pendingScroll =
+			rounded === libraryColumnsStore.savedScrollOffset
+				? null
+				: unfilteredScroll;
+		if (pendingScroll !== null)
+			scrollTimer = setTimeout(saveScroll, SCROLL_SAVE_DELAY);
+	}
+
+	function saveScroll(): void {
+		if (pendingScroll === null) return;
+		const { appId, offset } = pendingScroll;
+		void libraryColumnsStore.setScrollOffset(appId, offset);
+		pendingScroll = null;
+	}
 
 	let searchInput = $state<HTMLInputElement | null>(null);
 	let isTableOpen = $state(false);
@@ -134,7 +241,7 @@
 				event.key === 'ArrowDown' ? 1 : -1,
 				event.shiftKey || event.ctrlKey
 			);
-			void revealCursor();
+			revealCursor();
 		}
 	}
 
@@ -147,11 +254,12 @@
 		);
 	}
 
-	async function revealCursor(): Promise<void> {
-		await tick();
-		document
-			.querySelector(`[data-mod-id="${selection.cursor}"]`)
-			?.scrollIntoView({ block: 'nearest' });
+	function revealCursor(): void {
+		const index = libraryFilterStore.visibleMods.findIndex(
+			(mod) => mod.id === selection.cursor
+		);
+		if (index < 0) return;
+		void tick().then(() => virtualList.scrollToIndex(index));
 	}
 
 	function widthOf(column: LibraryColumnState): string {
@@ -430,11 +538,12 @@
 	></div>
 
 	{#if modCount}
-		<ScrollArea class="min-h-0 flex-1">
-			<ul class="flex flex-col px-6 py-1">
-				{#each libraryFilterStore.visibleMods as mod (mod.id)}
+		<ScrollArea class="min-h-0 flex-1" bind:viewportRef={listViewport}>
+			<ul class="relative" style:height="{virtualList.totalSize}px">
+				{#each visibleRows as row (row.mod.id)}
 					<LibraryRow
-						{mod}
+						mod={row.mod}
+						top={row.top}
 						{selection}
 						onopendetails={(opened) => (detailsModId = opened.id)}
 					/>
@@ -474,7 +583,7 @@
 	{/if}
 
 	{#if selection.count}
-		<LibraryBulkBar {selection} />
+		<LibraryBulkBar {selection} bind:ref={bulkBar} />
 	{/if}
 
 	{#if detailsMod}

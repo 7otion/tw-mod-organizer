@@ -122,6 +122,13 @@ export class LibraryFilterStore extends ConnectionStore {
 		);
 	});
 
+	readonly isFiltered = $derived(
+		this.#search.trim() !== '' ||
+			this.sources.length > 0 ||
+			this.states.length > 0 ||
+			this.tagIds.length > 0
+	);
+
 	readonly #searchTexts = $derived(
 		Object.fromEntries(
 			this.#libraryStore.list.map((mod) => [

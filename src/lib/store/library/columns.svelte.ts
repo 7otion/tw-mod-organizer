@@ -1,7 +1,7 @@
 import { ConnectionStore, Model } from '@7otion-tauri/orm';
 
 import { UiColumn } from '@/lib/models';
-import { UiStateStore, type UiStateField } from '@/lib/store';
+import { GamesStore, UiStateStore, type UiStateField } from '@/lib/store';
 
 export const LIBRARY_COLUMNS = [
 	'source',
@@ -43,10 +43,19 @@ export class LibraryColumnsStore extends ConnectionStore {
 	};
 
 	readonly #uiStateStore = UiStateStore.get();
+	readonly #gamesStore = GamesStore.get();
 	readonly #rows = this.query(() =>
 		UiColumn.query().where('table_key', TABLE_KEY).orderBy('position')
 	);
 
+	readonly savedScrollOffset = $derived.by((): number | null => {
+		const game = this.#gamesStore.current;
+		return this.#uiStateStore.isLoaded && game
+			? this.#uiStateStore.get(
+					LibraryColumnsStore.scrollOffsetField(game.app_id)
+				)
+			: null;
+	});
 	readonly coverSize = $derived(
 		this.#uiStateStore.get(LibraryColumnsStore.coverSizeField)
 	);
@@ -74,6 +83,13 @@ export class LibraryColumnsStore extends ConnectionStore {
 	readonly visibleColumns = $derived(
 		this.columns.filter((column) => column.isVisible)
 	);
+
+	async setScrollOffset(appId: number, offset: number): Promise<void> {
+		await this.#uiStateStore.set(
+			LibraryColumnsStore.scrollOffsetField(appId),
+			Math.round(offset)
+		);
+	}
 
 	async setCoverSize(coverSize: CoverSize): Promise<void> {
 		await this.#uiStateStore.set(
@@ -112,6 +128,14 @@ export class LibraryColumnsStore extends ConnectionStore {
 			LibraryColumnsStore.coverSizeField,
 			LibraryColumnsStore.coverSizeField.initial
 		);
+	}
+
+	private static scrollOffsetField(appId: number): UiStateField<number> {
+		return {
+			key: `library.scroll_offset.${appId}`,
+			initial: 0,
+			is: (value): value is number => typeof value === 'number',
+		};
 	}
 
 	private async save(columns: readonly LibraryColumnState[]): Promise<void> {

@@ -21,9 +21,10 @@
 
 	type Props = {
 		selection: Selection<number>;
+		ref?: HTMLElement | null;
 	};
 
-	let { selection }: Props = $props();
+	let { selection, ref = $bindable(null) }: Props = $props();
 
 	const libraryStore = LibraryStore.get();
 	const tagsStore = TagsStore.get();
@@ -46,6 +47,7 @@
 </script>
 
 <div
+	bind:this={ref}
 	class="absolute bottom-4.5 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-[10px] bg-surface-2 py-1.5 pr-1.5 pl-3 whitespace-nowrap shadow-pop"
 >
 	<strong class="mr-2 text-sm font-semibold">
