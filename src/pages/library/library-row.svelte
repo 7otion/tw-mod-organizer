@@ -14,6 +14,7 @@
 	import type { Mod } from '@/lib/models';
 	import type { Selection } from '@/lib/selection.svelte';
 	import { selectCellText } from '@/lib/select-cell-text';
+	import { tagTextColor } from '@/lib/tag-swatches';
 	import {
 		LibraryColumnsStore,
 		LibraryStore,
@@ -21,7 +22,11 @@
 	} from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
-	import { ROW_HEIGHTS, SOURCE_ICON_SIZES } from './library-columns';
+	import {
+		DIVIDER_GAP,
+		ROW_HEIGHTS,
+		SOURCE_ICON_SIZES,
+	} from './library-columns';
 	import ModCover from './mod-cover.svelte';
 	import ModSourceIcon from './mod-source-icon.svelte';
 
@@ -112,6 +117,10 @@
 		)
 	);
 	const firstGroup = $derived(placement.groups[0] ?? null);
+	const rowHeight = $derived(
+		ROW_HEIGHTS[libraryColumnsStore.coverSize] +
+			(libraryColumnsStore.hasRowDivider ? DIVIDER_GAP : 0)
+	);
 </script>
 
 {#snippet cell(key: LibraryColumn)}
@@ -124,7 +133,7 @@
 			<span
 				data-cell
 				class={cn(
-					'truncate text-md font-medium text-foreground',
+					'truncate font-medium text-foreground',
 					mod.problem !== null && 'text-muted-foreground'
 				)}
 			>
@@ -136,7 +145,7 @@
 			{#if mark}
 				<span
 					class={cn(
-						'inline-flex shrink-0 items-center gap-1 text-sm font-semibold',
+						'inline-flex shrink-0 items-center gap-1 font-semibold',
 						mark.class
 					)}
 				>
@@ -174,14 +183,19 @@
 			/>
 		</span>
 	{:else if key === 'author'}
-		<span data-cell class="truncate text-sm">{mod.author_name ?? '—'}</span>
+		<span data-cell class="truncate">{mod.author_name ?? '—'}</span>
 	{:else if key === 'tags'}
 		<span data-cell class="flex min-w-0 gap-1.5 overflow-hidden">
 			{#each tags.slice(0, SHOWN_TAGS) as tag, index (tag.id)}
 				{#if index > 0}
 					<span class="text-foreground-4">·</span>
 				{/if}
-				<span class="whitespace-nowrap">{tag.name}</span>
+				<span
+					class="whitespace-nowrap"
+					style:color={tagTextColor(tag.color)}
+				>
+					{tag.name}
+				</span>
 			{/each}
 			{#if tags.length > SHOWN_TAGS}
 				<span class="text-foreground-4">·</span>
@@ -229,17 +243,19 @@
 			>{mod.added_at ? formatDate(mod.added_at) : '—'}</span
 		>
 	{:else if key === 'version'}
-		<span data-cell class="truncate text-sm">{mod.version ?? '—'}</span>
+		<span data-cell class="truncate">{mod.version ?? '—'}</span>
 	{/if}
 {/snippet}
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 <li
 	class={cn(
-		'group absolute inset-x-6 top-0 grid grid-cols-(--library-columns) items-center gap-x-3 rounded-md px-5 text-xs text-muted-foreground transition-colors duration-120 select-none hover:bg-fill-1',
-		isSelected && 'bg-pink-tint hover:bg-pink-tint-2'
+		'group absolute inset-x-6 top-0 grid grid-cols-(--library-columns) items-center gap-x-3 rounded-md px-5 text-sm text-muted-foreground transition-colors duration-120 select-none hover:bg-fill-1',
+		isSelected && 'bg-pink-tint hover:bg-pink-tint-2',
+		libraryColumnsStore.hasRowDivider &&
+			'after:absolute after:inset-x-5 after:bottom-0 after:h-px after:bg-border'
 	)}
-	style:height="{ROW_HEIGHTS[libraryColumnsStore.coverSize]}px"
+	style:height="{rowHeight}px"
 	style:transform="translateY({top}px)"
 	onclick={(event) => selection.select(mod.id, event)}
 	ondblclick={selectCellText}

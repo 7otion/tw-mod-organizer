@@ -4,11 +4,13 @@
 	import PuzzleIcon from '@lucide/svelte/icons/puzzle';
 
 	import { Button } from '@/components/ui/button';
+	import * as ContextMenu from '@/components/ui/context-menu';
 
 	import { t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
 	import { LibraryStore, ProfilesStore } from '@/lib/store';
 	import { cn } from '@/lib/utils';
+	import ModContextMenuItems from '@/pages/library/mod-context-menu-items.svelte';
 	import ModCover from '@/pages/library/mod-cover.svelte';
 
 	type Props = {
@@ -65,40 +67,52 @@
 
 {#snippet row(other: Mod)}
 	{@const status = statusOf(other)}
-	<div
-		class="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-fill-1"
-	>
-		<button
-			type="button"
-			class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
-			onclick={() => onopen(other)}
-		>
-			<ModCover mod={other} size="compact" />
-			<span class="flex min-w-0 flex-1 flex-col leading-snug">
-				<b class="truncate font-semibold">{other.displayTitle}</b>
-				<span
-					class={cn(
-						'text-xs',
-						status === 'on'
-							? 'text-muted-foreground'
-							: 'text-status-warn'
-					)}
+	<ContextMenu.Root>
+		<ContextMenu.Trigger>
+			{#snippet child({ props })}
+				<div
+					{...props}
+					class="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-fill-1"
 				>
-					{statusText(other)}
-				</span>
-			</span>
-			{#if status === 'on'}
-				<ChevronRightIcon
-					class="size-4 shrink-0 text-muted-foreground"
-				/>
-			{/if}
-		</button>
-		{#if status !== 'on'}
-			<Button variant="secondary" size="sm">
-				{t('modDetails.dependencies.enable')}
-			</Button>
-		{/if}
-	</div>
+					<button
+						type="button"
+						class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
+						onclick={() => onopen(other)}
+					>
+						<ModCover mod={other} size="compact" />
+						<span class="flex min-w-0 flex-1 flex-col leading-snug">
+							<b class="truncate font-semibold">
+								{other.displayTitle}
+							</b>
+							<span
+								class={cn(
+									'text-xs',
+									status === 'on'
+										? 'text-muted-foreground'
+										: 'text-status-warn'
+								)}
+							>
+								{statusText(other)}
+							</span>
+						</span>
+						{#if status === 'on'}
+							<ChevronRightIcon
+								class="size-4 shrink-0 text-muted-foreground"
+							/>
+						{/if}
+					</button>
+					{#if status !== 'on'}
+						<Button variant="secondary" size="sm">
+							{t('modDetails.dependencies.enable')}
+						</Button>
+					{/if}
+				</div>
+			{/snippet}
+		</ContextMenu.Trigger>
+		<ContextMenu.Content class="min-w-52">
+			<ModContextMenuItems mod={other} />
+		</ContextMenu.Content>
+	</ContextMenu.Root>
 {/snippet}
 
 {#if missing.length || offCount}
@@ -141,35 +155,55 @@
 		{#if requirement.mod}
 			{@render row(requirement.mod)}
 		{:else}
-			<div
-				class="flex min-h-11 items-center gap-2 rounded-lg bg-status-missing/8 px-2 py-1.5 text-sm"
-			>
-				<span
-					class="grid size-thumb-compact shrink-0 place-items-center rounded-sm bg-fill-1 text-foreground-4"
-				>
-					<ImageOffIcon class="size-3.5" />
-				</span>
-				<span class="flex min-w-0 flex-1 flex-col leading-snug">
-					<b class="truncate font-semibold">
-						{requirement.dependency.required_title ??
-							t('modDetails.dependencies.unknownTitle', {
-								id: requirement.dependency.required_ref,
-							})}
-					</b>
-					<span class="text-xs text-status-missing">
-						{t('modDetails.dependencies.notInLibrary')}
-					</span>
-				</span>
-				<Button
-					variant="secondary"
-					size="sm"
-					disabled={isSubscribing}
-					onclick={() =>
-						subscribe([requirement.dependency.required_ref])}
-				>
-					{t('modDetails.dependencies.subscribe')}
-				</Button>
-			</div>
+			<ContextMenu.Root>
+				<ContextMenu.Trigger>
+					{#snippet child({ props })}
+						<div
+							{...props}
+							class="flex min-h-11 items-center gap-2 rounded-lg bg-status-missing/8 px-2 py-1.5 text-sm"
+						>
+							<span
+								class="grid size-thumb-compact shrink-0 place-items-center rounded-sm bg-fill-1 text-foreground-4"
+							>
+								<ImageOffIcon class="size-3.5" />
+							</span>
+							<span
+								class="flex min-w-0 flex-1 flex-col leading-snug"
+							>
+								<b class="truncate font-semibold">
+									{requirement.dependency.required_title ??
+										t(
+											'modDetails.dependencies.unknownTitle',
+											{
+												id: requirement.dependency
+													.required_ref,
+											}
+										)}
+								</b>
+								<span class="text-xs text-status-missing">
+									{t('modDetails.dependencies.notInLibrary')}
+								</span>
+							</span>
+							<Button
+								variant="secondary"
+								size="sm"
+								disabled={isSubscribing}
+								onclick={() =>
+									subscribe([
+										requirement.dependency.required_ref,
+									])}
+							>
+								{t('modDetails.dependencies.subscribe')}
+							</Button>
+						</div>
+					{/snippet}
+				</ContextMenu.Trigger>
+				<ContextMenu.Content class="min-w-52">
+					<ModContextMenuItems
+						steamRef={requirement.dependency.required_ref}
+					/>
+				</ContextMenu.Content>
+			</ContextMenu.Root>
 		{/if}
 	{:else}
 		<p class="text-sm text-muted-foreground">

@@ -13,8 +13,7 @@
 	import Message from '@/lib/i18n/message.svelte';
 	import type { Selection } from '@/lib/selection.svelte';
 	import { LibraryStore, TagsStore } from '@/lib/store';
-	import { TAG_SWATCHES } from '@/lib/tag-swatches';
-	import { cn } from '@/lib/utils';
+	import { tagColor } from '@/lib/tag-swatches';
 
 	import NewTagDialog from './new-tag-dialog.svelte';
 	import RemoveModsDialog from './remove-mods-dialog.svelte';
@@ -99,10 +98,8 @@
 						libraryStore.setTag(mods, tag, isChecked)}
 				>
 					<span
-						class={cn(
-							'size-2 shrink-0 rounded-full',
-							TAG_SWATCHES[tag.color ?? 'ash']
-						)}
+						class="size-2 shrink-0 rounded-full"
+						style:background-color={tagColor(tag.color)}
 					></span>
 					{tag.name}
 				</DropdownMenu.CheckboxItem>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Columns3Icon from '@lucide/svelte/icons/columns-3';
+	import LanguagesIcon from '@lucide/svelte/icons/languages';
 	import { open, save } from '@tauri-apps/plugin-dialog';
 	import { toast } from 'svelte-sonner';
 
@@ -103,6 +104,7 @@
 		</Card.Header>
 		<Card.Content class="gap-0 p-0">
 			<SettingRow
+				icon={LanguagesIcon}
 				title={t('settings.display.language.title')}
 				description={t('settings.display.language.description')}
 			>

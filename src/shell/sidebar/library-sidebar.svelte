@@ -1,7 +1,5 @@
 <script lang="ts">
 	import PlusIcon from '@lucide/svelte/icons/plus';
-	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
-	import TagIcon from '@lucide/svelte/icons/tag';
 
 	import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -11,7 +9,6 @@
 	import {
 		LIBRARY_SOURCES,
 		LibraryFilterStore,
-		LibraryStore,
 		MOD_STATES,
 		TagsStore,
 		type LibrarySource,
@@ -21,7 +18,6 @@
 
 	import DeleteTagDialog from './delete-tag-dialog.svelte';
 	import ManageTagsDialog from './manage-tags-dialog.svelte';
-	import SidebarAction from './sidebar-action.svelte';
 	import SidebarCount from './sidebar-count.svelte';
 	import SidebarDivider from './sidebar-divider.svelte';
 	import SidebarHeadingAction from './sidebar-heading-action.svelte';
@@ -49,7 +45,6 @@
 		'missing-or-broken': 'text-status-missing',
 	};
 
-	const libraryStore = LibraryStore.get();
 	const libraryFilterStore = LibraryFilterStore.get();
 	const tagsStore = TagsStore.get();
 
@@ -162,18 +157,5 @@
 		</ul>
 	</ScrollArea>
 </div>
-<div class="flex flex-col gap-0.5 border-t border-line py-3">
-	<SidebarAction icon={TagIcon} onclick={() => (isManagingTags = true)}>
-		{t('sidebar.library.manageTags')}
-	</SidebarAction>
-	<SidebarAction
-		icon={RefreshCwIcon}
-		disabled={libraryStore.isScanning}
-		onclick={() => libraryStore.scan()}
-	>
-		{t('sidebar.library.rescan')}
-	</SidebarAction>
-</div>
-
 <ManageTagsDialog bind:open={isManagingTags} />
 <DeleteTagDialog bind:tag={deleting} />

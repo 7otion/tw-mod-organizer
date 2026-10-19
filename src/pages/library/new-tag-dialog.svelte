@@ -5,9 +5,10 @@
 	import { Input } from '@/components/ui/input';
 
 	import { t } from '@/lib/i18n';
-	import type { Mod } from '@/lib/models';
+	import type { Mod, TagColor } from '@/lib/models';
 	import { LibraryStore, TagsStore } from '@/lib/store';
 	import { nameError } from '@/lib/utils';
+	import TagColorPicker from '@/shell/sidebar/tag-color-picker.svelte';
 
 	type Props = {
 		open: boolean;
@@ -20,12 +21,14 @@
 	const tagsStore = TagsStore.get();
 
 	let name = $state('');
+	let color = $state<TagColor>('ash');
 	let isTouched = $state(false);
 
 	const error = $derived(nameError('tag', name, tagsStore.isNameTaken(name)));
 
 	function reset(): void {
 		name = '';
+		color = 'ash';
 		isTouched = false;
 	}
 
@@ -33,7 +36,7 @@
 		event.preventDefault();
 		isTouched = true;
 		if (error) return;
-		const tag = await tagsStore.create(name);
+		const tag = await tagsStore.create(name, color);
 		await libraryStore.setTag(mods, tag, true);
 		open = false;
 		reset();
@@ -63,6 +66,10 @@
 				{#if isTouched && error}
 					<Field.Error>{t(error)}</Field.Error>
 				{/if}
+			</Field.Field>
+			<Field.Field class="mt-4">
+				<Field.Label>{t('library.newTag.colour')}</Field.Label>
+				<TagColorPicker {color} onpick={(picked) => (color = picked)} />
 			</Field.Field>
 		</form>
 

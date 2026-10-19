@@ -1,19 +1,28 @@
 <script lang="ts">
 	import PaletteIcon from '@lucide/svelte/icons/palette';
 	import PencilIcon from '@lucide/svelte/icons/pencil';
+	import PlusIcon from '@lucide/svelte/icons/plus';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
 	import * as ContextMenu from '@/components/ui/context-menu';
+	import * as Dialog from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
 
 	import { t } from '@/lib/i18n';
-	import { type Tag, TAG_COLORS, type TagColor } from '@/lib/models';
+	import {
+		isTagPreset,
+		TAG_PRESETS,
+		type Tag,
+		type TagColor,
+		type TagPreset,
+	} from '@/lib/models';
 	import { LibraryFilterStore, TagsStore } from '@/lib/store';
-	import { TAG_SWATCHES } from '@/lib/tag-swatches';
-	import { cn, nameError } from '@/lib/utils';
+	import { tagColor } from '@/lib/tag-swatches';
+	import { nameError } from '@/lib/utils';
 
 	import SidebarCount from './sidebar-count.svelte';
 	import SidebarItem from './sidebar-item.svelte';
+	import TagColorPicker from './tag-color-picker.svelte';
 
 	type Props = {
 		tag: Tag;
@@ -26,6 +35,7 @@
 	const tagsStore = TagsStore.get();
 
 	let isRenaming = $state(false);
+	let isPickingColor = $state(false);
 	let name = $state('');
 	let input = $state<HTMLInputElement | null>(null);
 
@@ -54,13 +64,15 @@
 		}
 	}
 
-	async function recolor(option: string): Promise<void> {
-		if (option !== color) await tagsStore.recolor(tag, option as TagColor);
+	async function recolor(option: TagColor): Promise<void> {
+		if (option !== color) await tagsStore.recolor(tag, option);
 	}
 </script>
 
-{#snippet dot(option: TagColor)}
-	<span class={cn('size-2 shrink-0 rounded-full', TAG_SWATCHES[option])}
+{#snippet dot(option: TagPreset)}
+	<span
+		class="size-2 shrink-0 rounded-full"
+		style:background-color={tagColor(option)}
 	></span>
 {/snippet}
 
@@ -88,7 +100,10 @@
 					active={libraryFilterStore.tagIds.includes(tag.id)}
 					onclick={() => libraryFilterStore.toggleTag(tag.id)}
 				>
-					{@render dot(color)}
+					<span
+						class="size-2 shrink-0 rounded-full"
+						style:background-color={tagColor(color)}
+					></span>
 					<span class="min-w-0 flex-1 truncate">{tag.name}</span>
 					<SidebarCount
 						value={libraryFilterStore.tagCounts[tag.id] ?? 0}
@@ -108,16 +123,21 @@
 				</ContextMenu.SubTrigger>
 				<ContextMenu.SubContent>
 					<ContextMenu.RadioGroup
-						value={color}
-						onValueChange={recolor}
+						value={isTagPreset(color) ? color : ''}
+						onValueChange={(option) => recolor(option as TagPreset)}
 					>
-						{#each TAG_COLORS as option (option)}
+						{#each TAG_PRESETS as option (option)}
 							<ContextMenu.RadioItem value={option}>
 								{@render dot(option)}
 								{t(`tags.colors.${option}`)}
 							</ContextMenu.RadioItem>
 						{/each}
 					</ContextMenu.RadioGroup>
+					<ContextMenu.Separator />
+					<ContextMenu.Item onSelect={() => (isPickingColor = true)}>
+						<PlusIcon />
+						{t('colorPicker.custom')}
+					</ContextMenu.Item>
 				</ContextMenu.SubContent>
 			</ContextMenu.Sub>
 			<ContextMenu.Separator />
@@ -127,4 +147,14 @@
 			</ContextMenu.Item>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
+	<Dialog.Root bind:open={isPickingColor}>
+		<Dialog.Content class="sm:max-w-[360px]">
+			<Dialog.Header>
+				<Dialog.Title>
+					{t('tags.colourTitle', { name: tag.name })}
+				</Dialog.Title>
+			</Dialog.Header>
+			<TagColorPicker {color} onpick={recolor} />
+		</Dialog.Content>
+	</Dialog.Root>
 {/if}

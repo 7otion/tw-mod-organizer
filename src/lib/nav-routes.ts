@@ -1,6 +1,6 @@
 import type { LucideIcon } from '@lucide/svelte';
 import DownloadIcon from '@lucide/svelte/icons/download';
-import LayersIcon from '@lucide/svelte/icons/layers';
+import Layers2Icon from '@lucide/svelte/icons/layers-2';
 import LibraryIcon from '@lucide/svelte/icons/library';
 import ListOrderedIcon from '@lucide/svelte/icons/list-ordered';
 import SaveIcon from '@lucide/svelte/icons/save';
@@ -35,7 +35,7 @@ export const navRoutes: NavRoute[] = [
 		path: '/',
 		labelKey: 'nav.groups',
 		shortcutKey: '3',
-		icon: LayersIcon,
+		icon: Layers2Icon,
 	},
 	{
 		id: 'saves',

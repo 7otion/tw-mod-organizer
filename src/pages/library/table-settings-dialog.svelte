@@ -6,6 +6,7 @@
 
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';
+	import { Switch } from '@/components/ui/switch';
 	import * as ToggleGroup from '@/components/ui/toggle-group';
 
 	import { DragOrder } from '@/lib/drag-order.svelte';
@@ -39,7 +40,7 @@
 		</Dialog.Header>
 
 		<div class="flex flex-col gap-2">
-			<span class="text-sm font-semibold text-muted-foreground">
+			<span class="text-sm font-semibold">
 				{t('library.table.coverSize')}
 			</span>
 			<ToggleGroup.Root
@@ -60,8 +61,27 @@
 			</ToggleGroup.Root>
 		</div>
 
+		<div class="flex items-center justify-between gap-3">
+			<span class="flex flex-col gap-0.5">
+				<span class="text-sm font-semibold">
+					{t('library.table.rowDivider')}
+				</span>
+				<span class="text-sm text-muted-foreground">
+					{t('library.table.rowDividerHint')}
+				</span>
+			</span>
+			<Switch
+				aria-label={t('library.table.rowDivider')}
+				bind:checked={
+					() => libraryColumnsStore.hasRowDivider,
+					(hasRowDivider) =>
+						void libraryColumnsStore.setRowDivider(hasRowDivider)
+				}
+			/>
+		</div>
+
 		<div class="flex flex-col gap-2">
-			<span class="text-sm font-semibold text-muted-foreground">
+			<span class="text-sm font-semibold">
 				{t('library.table.columns')}
 			</span>
 			<div class="flex flex-col gap-px">
@@ -82,9 +102,6 @@
 					</DragDropProvider>
 				</ul>
 			</div>
-			<p class="text-xs text-muted-foreground">
-				{t('library.table.hint')}
-			</p>
 		</div>
 
 		<Dialog.Footer class="items-center sm:justify-between">

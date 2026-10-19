@@ -17,7 +17,7 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 use crate::error::AppError;
 
-const MAX_SIDE: u32 = 300;
+const MAX_SIDE: u32 = 150;
 const JPEG_QUALITY: u8 = 80;
 const PAUSE_BETWEEN: Duration = Duration::from_millis(40);
 const EMIT_EVERY: usize = 20;
@@ -179,6 +179,7 @@ fn parse_thumbnail_name(name: &str) -> Option<(String, u32, u32)> {
 
 fn thumbnail_key(source: &ThumbnailSource) -> Option<String> {
     let mut hasher = DefaultHasher::new();
+    MAX_SIDE.hash(&mut hasher);
     let fingerprint = source
         .file
         .as_ref()

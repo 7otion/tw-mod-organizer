@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ArrowDownIcon from '@lucide/svelte/icons/arrow-down';
 	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
-	import Columns3Icon from '@lucide/svelte/icons/columns-3';
+	import Columns3CogIcon from '@lucide/svelte/icons/columns-3-cog';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import SearchIcon from '@lucide/svelte/icons/search';
@@ -14,7 +14,6 @@
 	import { Kbd } from '@/components/ui/kbd';
 	import { ScrollArea } from '@/components/ui/scroll-area';
 	import * as Select from '@/components/ui/select';
-	import { toggleVariants } from '@/components/ui/toggle';
 	import * as ToggleGroup from '@/components/ui/toggle-group';
 	import * as Tooltip from '@/components/ui/tooltip';
 
@@ -40,6 +39,7 @@
 	import LibraryBulkBar from './library-bulk-bar.svelte';
 	import {
 		COLUMN_INFO,
+		DIVIDER_GAP,
 		ROW_HEIGHTS,
 		SOURCE_ICON_SIZES,
 	} from './library-columns';
@@ -79,9 +79,12 @@
 	const virtualList = new VirtualList({
 		count: () => libraryFilterStore.visibleMods.length,
 		scrollElement: () => listViewport,
-		itemSize: () => ROW_HEIGHTS[libraryColumnsStore.coverSize],
+		itemSize: () =>
+			ROW_HEIGHTS[libraryColumnsStore.coverSize] +
+			(libraryColumnsStore.hasRowDivider ? DIVIDER_GAP : 0),
 		itemKey: (index) => libraryFilterStore.visibleMods[index]?.id ?? index,
-		sizeKey: () => libraryColumnsStore.coverSize,
+		sizeKey: () =>
+			`${libraryColumnsStore.coverSize}:${libraryColumnsStore.hasRowDivider}`,
 		paddingStart: LIST_PADDING,
 		paddingEnd: LIST_PADDING,
 		endInset: () => bulkBarInset,
@@ -368,6 +371,7 @@
 		<ToggleGroup.Root
 			type="single"
 			variant="filter"
+			size="lg"
 			spacing={1}
 			aria-label={t('library.filter.scope')}
 			bind:value={
@@ -394,12 +398,11 @@
 		</ToggleGroup.Root>
 		<span class="flex-1"></span>
 		<Button
-			variant="ghost"
+			variant="outline"
 			aria-haspopup="dialog"
-			class={toggleVariants({ variant: 'filter' })}
 			onclick={() => (isTableOpen = true)}
 		>
-			<Columns3Icon />
+			<Columns3CogIcon />
 			{t('library.tableButton')}
 		</Button>
 	</div>

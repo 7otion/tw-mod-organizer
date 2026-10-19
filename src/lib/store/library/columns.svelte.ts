@@ -42,6 +42,12 @@ export class LibraryColumnsStore extends ConnectionStore {
 			COVER_SIZES.some((size) => size === value),
 	};
 
+	private static readonly rowDividerField: UiStateField<boolean> = {
+		key: 'library.row_divider',
+		initial: false,
+		is: (value): value is boolean => typeof value === 'boolean',
+	};
+
 	readonly #uiStateStore = UiStateStore.get();
 	readonly #gamesStore = GamesStore.get();
 	readonly #rows = this.query(() =>
@@ -58,6 +64,9 @@ export class LibraryColumnsStore extends ConnectionStore {
 	});
 	readonly coverSize = $derived(
 		this.#uiStateStore.get(LibraryColumnsStore.coverSizeField)
+	);
+	readonly hasRowDivider = $derived(
+		this.#uiStateStore.get(LibraryColumnsStore.rowDividerField)
 	);
 
 	readonly columns = $derived.by((): LibraryColumnState[] => {
@@ -98,6 +107,13 @@ export class LibraryColumnsStore extends ConnectionStore {
 		);
 	}
 
+	async setRowDivider(hasRowDivider: boolean): Promise<void> {
+		await this.#uiStateStore.set(
+			LibraryColumnsStore.rowDividerField,
+			hasRowDivider
+		);
+	}
+
 	async setVisible(key: LibraryColumn, isVisible: boolean): Promise<void> {
 		await this.save(
 			this.columns.map((column) =>
@@ -127,6 +143,10 @@ export class LibraryColumnsStore extends ConnectionStore {
 		await this.#uiStateStore.set(
 			LibraryColumnsStore.coverSizeField,
 			LibraryColumnsStore.coverSizeField.initial
+		);
+		await this.#uiStateStore.set(
+			LibraryColumnsStore.rowDividerField,
+			LibraryColumnsStore.rowDividerField.initial
 		);
 	}
 

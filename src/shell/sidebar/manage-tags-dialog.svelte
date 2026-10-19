@@ -5,6 +5,7 @@
 	import * as Dialog from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
 	import { ScrollArea } from '@/components/ui/scroll-area';
+	import * as Tooltip from '@/components/ui/tooltip';
 
 	import { t } from '@/lib/i18n';
 	import type { Tag } from '@/lib/models';
@@ -69,12 +70,19 @@
 		{#if tagsStore.list.length}
 			<div class="rounded-lg bg-card">
 				<div
-					class="grid grid-cols-[24px_minmax(0,1fr)_56px_28px] gap-2 border-b px-2 py-2 text-sm font-semibold text-muted-foreground"
+					class="grid grid-cols-[24px_minmax(0,1fr)_56px_28px] gap-2 border-b px-2 py-2 text-sm font-semibold"
 				>
 					<span></span>
 					<span>{t('tags.manage.tag')}</span>
-					<span class="text-right">{t('tags.manage.mods')}</span>
-					<span></span>
+					<span class="text-center">{t('tags.manage.mods')}</span>
+					<Tooltip.Root>
+						<Tooltip.Trigger class="cursor-default text-center">
+							{t('tags.manage.actions')}
+						</Tooltip.Trigger>
+						<Tooltip.Content>
+							{t('tags.manage.actionsTooltip')}
+						</Tooltip.Content>
+					</Tooltip.Root>
 				</div>
 				<ScrollArea class="max-h-[min(360px,45vh)]">
 					{#each tagsStore.list as tag (tag.id)}

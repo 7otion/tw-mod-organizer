@@ -147,7 +147,7 @@
 <li
 	{@attach sortable.attach}
 	class={cn(
-		'group grid min-h-12 grid-cols-[18px_16px_minmax(0,1fr)_64px_64px_64px_104px_88px_136px] items-center gap-x-3 rounded-md px-3 transition-colors duration-120 hover:bg-fill-1',
+		'group relative grid min-h-12 grid-cols-[18px_16px_minmax(0,1fr)_64px_64px_64px_104px_88px] items-center gap-x-3 rounded-md px-3 transition-colors duration-120 hover:bg-fill-1',
 		selected && 'bg-pink-tint hover:bg-pink-tint-2',
 		sortable.isDragging && 'bg-surface-1'
 	)}
@@ -210,10 +210,10 @@
 		{/if}
 	</span>
 
-	<span class="text-right font-mono text-sm text-foreground-2">
+	<span class="text-center font-mono text-sm text-foreground-2">
 		{mods.current}
 	</span>
-	<span class="text-right font-mono text-sm text-foreground-2">
+	<span class="text-center font-mono text-sm text-foreground-2">
 		{enabled.current}
 	</span>
 	<span
@@ -229,13 +229,13 @@
 			? timeAgo(profile.last_used_at)
 			: t('profiles.row.never')}
 	</span>
-	<span class="text-sm text-muted-foreground">
+	<span class="text-right text-sm text-muted-foreground">
 		{created(profile.created_at)}
 	</span>
 
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<span
-		class="flex justify-end gap-0.5 opacity-0 transition-opacity duration-120 group-hover:opacity-100"
+		class="absolute inset-y-1.5 right-2 flex items-center gap-0.5 rounded-md bg-surface-1 px-1 opacity-0 shadow-pop transition-opacity duration-120 group-hover:opacity-100"
 		onclick={(event) => event.stopPropagation()}
 	>
 		{#if !active}

@@ -31,6 +31,8 @@ export const COLUMN_INFO: Record<LibraryColumn, ColumnInfo> = {
 	version: { labelKey: 'library.columns.version' },
 };
 
+export const DIVIDER_GAP = 4;
+
 export const ROW_HEIGHTS: Record<CoverSize, number> = {
 	none: 32,
 	compact: 38,

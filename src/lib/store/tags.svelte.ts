@@ -20,11 +20,11 @@ export class TagsStore extends ConnectionStore {
 		);
 	}
 
-	async create(name: string): Promise<Tag> {
+	async create(name: string, color: TagColor = 'ash'): Promise<Tag> {
 		return await Tag.create({
 			game_id: this.#gamesStore.current!.app_id,
 			name: name.trim(),
-			color: 'ash',
+			color,
 		});
 	}
 

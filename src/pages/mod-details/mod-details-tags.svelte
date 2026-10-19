@@ -8,6 +8,7 @@
 	import { t } from '@/lib/i18n';
 	import type { Mod, Tag } from '@/lib/models';
 	import { LibraryStore, TagsStore } from '@/lib/store';
+	import { tagTextColor } from '@/lib/tag-swatches';
 
 	let { mod }: { mod: Mod } = $props();
 
@@ -45,6 +46,7 @@
 	{#each tags as tag (tag.id)}
 		<span
 			class="inline-flex h-7 items-center gap-1 rounded-full bg-fill-1 pr-1.5 pl-3 text-sm font-semibold text-foreground"
+			style:color={tagTextColor(tag.color)}
 		>
 			{tag.name}
 			<button

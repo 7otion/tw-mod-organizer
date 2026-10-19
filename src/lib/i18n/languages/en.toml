@@ -58,6 +58,9 @@ library = "Library"
 groups = "Groups"
 saves = "Saves"
 downloads = "Downloads"
+manageTags = "Manage tags"
+manageProfiles = "Manage profiles"
+rescan = "Rescan library"
 
 # Window buttons in the title bar (screen reader labels).
 [window]
@@ -122,7 +125,6 @@ newTooltip = "New profile"
 
 [sidebar.loadOrder]
 rebuildFromSave = "Rebuild profile from a save…"
-manageProfiles = "Manage profiles…"
 
 [sidebar.summary]
 holds = { one = "Library holds {count} mod", other = "Library holds {count} mods" }
@@ -136,8 +138,6 @@ state = "State"
 tags = "Tags"
 newTagTooltip = "New tag"
 noTags = "No tags yet."
-manageTags = "Manage tags…"
-rescan = "Rescan library"
 
 [sidebar.library.sources]
 steam = "Steam Workshop"
@@ -154,6 +154,7 @@ downloading = "Downloading"
 nameLabel = "Tag name"
 changeColour = "Change colour"
 colourLabel = "Colour: {colour}"
+colourTitle = "Colour of “{name}”"
 
 [tags.colors]
 ash = "Ash"
@@ -162,8 +163,16 @@ blood = "Blood"
 ember = "Ember"
 gold = "Gold"
 emerald = "Emerald"
+teal = "Teal"
 sapphire = "Sapphire"
 amethyst = "Amethyst"
+
+[colorPicker]
+custom = "Custom…"
+hex = "Hex"
+hue = "Hue"
+lightness = "Lightness"
+lightened = "Lightened so it stays readable on the dark background."
 
 [tags.delete]
 title = "Delete “{name}”?"
@@ -174,8 +183,12 @@ confirm = "Delete tag"
 title = "Tags"
 count = { one = "{count} tag", other = "{count} tags" }
 newName = "New tag name"
-tag = "Tag"
-mods = "Mods"
+# Column headers; uppercase on purpose.
+tag = "TAG"
+mods = "MODS"
+# One letter heading the actions column; the tooltip spells it out.
+actions = "A"
+actionsTooltip = "Actions"
 empty = "No tags yet. Tags label mods for filtering; they never change what a profile loads."
 
 [profiles]
@@ -366,7 +379,7 @@ steam = "Steam"
 
 [library]
 title = "Library"
-tableButton = "Table…"
+tableButton = "Table configuration"
 noMatch = "No mod matches the search or filters."
 
 [library.subscribe]
@@ -402,16 +415,16 @@ lacks = "lacks"
 
 # Column headers. The Mod header is shown in capital letters.
 [library.columns]
-source = "Source"
+source = "SOURCE"
 sourceShort = "S"
-mod = "Mod"
-author = "Author"
-tags = "Tags"
-profiles = "In profiles"
-size = "Size"
-updated = "Updated"
-added = "Added"
-version = "Version"
+mod = "MOD"
+author = "AUTHOR"
+tags = "TAGS"
+profiles = "PROFILES"
+size = "SIZE"
+updated = "UPDATED"
+added = "ADDED"
+version = "VERSION"
 
 [library.sources]
 steam = "Steam"
@@ -439,8 +452,9 @@ workshop = "Open Steam Workshop"
 [library.table]
 title = "Table · Library"
 coverSize = "Cover size"
+rowDivider = "Row divider"
+rowDividerHint = "A line between rows."
 columns = "Columns"
-hint = "Drag to reorder. Drag a column header's edge to set its width; double-click the edge to make it automatic again."
 reset = "Reset to default"
 show = "Show {column}"
 
@@ -464,6 +478,7 @@ remove = "Unsubscribe / remove…"
 title = "New tag"
 description = { one = "Added to {count} selected mod.", other = "Added to {count} selected mods." }
 name = "Name"
+colour = "Colour"
 create = "Create tag"
 
 [library.remove]

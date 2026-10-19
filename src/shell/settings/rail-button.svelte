@@ -1,28 +1,19 @@
 <script lang="ts">
-	import Settings2Icon from '@lucide/svelte/icons/settings-2';
-
-	import * as Tooltip from '@/components/ui/tooltip';
+	import SettingsIcon from '@lucide/svelte/icons/settings';
 
 	import { t } from '@/lib/i18n';
-	import { cn } from '@/lib/utils';
+	import RailAction from '@/shell/rail/rail-action.svelte';
 
 	import SettingsDialog from './settings-dialog.svelte';
 
 	let isOpen = $state(false);
 </script>
 
-<Tooltip.Root>
-	<Tooltip.Trigger
-		aria-label={t('settings.title')}
-		class={cn(
-			'relative grid size-10 place-items-center rounded-shell text-muted-foreground outline-0 hover:bg-hover hover:text-foreground',
-			isOpen && 'bg-pink-deep/12 text-pink-deep hover:text-pink-deep'
-		)}
-		onclick={() => (isOpen = true)}
-	>
-		<Settings2Icon class="size-5" />
-	</Tooltip.Trigger>
-	<Tooltip.Content side="right">{t('settings.title')}</Tooltip.Content>
-</Tooltip.Root>
+<RailAction
+	icon={SettingsIcon}
+	label={t('settings.title')}
+	active={isOpen}
+	onclick={() => (isOpen = true)}
+/>
 
 <SettingsDialog bind:open={isOpen} />

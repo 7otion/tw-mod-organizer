@@ -110,7 +110,7 @@
 
 		<div class="flex min-h-0 flex-1 flex-col">
 			<div
-				class="grid h-8 grid-cols-[18px_16px_minmax(0,1fr)_64px_64px_64px_104px_88px_136px] items-center gap-x-3 border-b px-3 text-sm font-semibold text-muted-foreground"
+				class="grid h-8 grid-cols-[18px_16px_minmax(0,1fr)_64px_64px_64px_104px_88px] items-center gap-x-3 border-b px-3 text-sm font-semibold"
 			>
 				<Checkbox
 					checked={selection.isAll}
@@ -120,18 +120,19 @@
 				/>
 				<span></span>
 				<span>{t('profiles.manage.columns.profile')}</span>
-				<span class="text-right"
-					>{t('profiles.manage.columns.mods')}</span
-				>
-				<span class="text-right">
+				<span class="text-center">
+					{t('profiles.manage.columns.mods')}
+				</span>
+				<span class="text-center">
 					{t('profiles.manage.columns.enabled')}
 				</span>
 				<span class="text-right">
 					{t('profiles.manage.columns.groups')}
 				</span>
 				<span>{t('profiles.manage.columns.lastUsed')}</span>
-				<span>{t('profiles.manage.columns.created')}</span>
-				<span></span>
+				<span class="text-right">
+					{t('profiles.manage.columns.created')}
+				</span>
 			</div>
 
 			<ScrollArea class="min-h-0 flex-1">

@@ -7,10 +7,12 @@
 	import * as Popover from '@/components/ui/popover';
 
 	import { t } from '@/lib/i18n';
-	import { ModTag, type Tag, TAG_COLORS, type TagColor } from '@/lib/models';
+	import { isTagPreset, ModTag, type Tag, type TagColor } from '@/lib/models';
 	import { TagsStore } from '@/lib/store';
-	import { TAG_SWATCHES } from '@/lib/tag-swatches';
-	import { cn, nameError } from '@/lib/utils';
+	import { tagColor } from '@/lib/tag-swatches';
+
+	import TagColorPicker from './tag-color-picker.svelte';
+	import { nameError } from '@/lib/utils';
 
 	let { tag, ondelete }: { tag: Tag; ondelete: () => void } = $props();
 
@@ -49,8 +51,7 @@
 	}
 
 	async function pick(option: TagColor): Promise<void> {
-		isPicking = false;
-		if (option !== color) await tagsStore.recolor(tag, option);
+		await tagsStore.recolor(tag, option);
 	}
 </script>
 
@@ -60,30 +61,17 @@
 	<Popover.Root bind:open={isPicking}>
 		<Popover.Trigger
 			aria-label={t('tags.colourLabel', {
-				colour: t(`tags.colors.${color}`),
+				colour: isTagPreset(color) ? t(`tags.colors.${color}`) : color,
 			})}
 			class="grid size-6 place-items-center rounded-full hover:bg-fill-2"
 		>
-			<span class={cn('size-2.5 rounded-full', TAG_SWATCHES[color])}
+			<span
+				class="size-2.5 rounded-full"
+				style:background-color={tagColor(color)}
 			></span>
 		</Popover.Trigger>
-		<Popover.Content align="start" class="w-auto flex-row gap-1 p-1.5">
-			{#each TAG_COLORS as option (option)}
-				<button
-					type="button"
-					aria-label={t(`tags.colors.${option}`)}
-					aria-pressed={option === color}
-					class={cn(
-						'grid size-7 place-items-center rounded-full hover:bg-fill-2',
-						option === color && 'bg-fill-3'
-					)}
-					onclick={() => pick(option)}
-				>
-					<span
-						class={cn('size-3 rounded-full', TAG_SWATCHES[option])}
-					></span>
-				</button>
-			{/each}
+		<Popover.Content align="start" class="w-72 p-2">
+			<TagColorPicker {color} onpick={pick} />
 		</Popover.Content>
 	</Popover.Root>
 
@@ -112,7 +100,7 @@
 		</button>
 	{/if}
 
-	<span class="text-right font-mono text-xs text-muted-foreground">
+	<span class="text-center font-mono text-xs text-muted-foreground">
 		{modCount.current}
 	</span>
 	<Button
