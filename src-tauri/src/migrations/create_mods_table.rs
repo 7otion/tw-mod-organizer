@@ -11,7 +11,7 @@ impl Migration for CreateModsTable {
             table.integer("game_id").references("games");
             table.text("source");
             table.text("source_ref");
-            table.text("module_id").nullable();
+            table.text("game_ref").nullable();
             table.text("title");
             table.text("custom_title").nullable();
             table.text("description").nullable();
@@ -23,7 +23,6 @@ impl Migration for CreateModsTable {
             table.text("preview_file").nullable();
             table.text("custom_preview_file").nullable();
             table.text("folder").nullable();
-            table.text("pack_file").nullable();
             table.text("problem").nullable();
             table.integer("size_bytes").nullable();
             table.date("published_at", DateStorage::Unix).nullable();
@@ -36,11 +35,10 @@ impl Migration for CreateModsTable {
             table.date("seen_updated_at", DateStorage::Unix).nullable();
             table.integer("nexus_mod_id").nullable();
             table.integer("nexus_file_id").nullable();
-            table.date("added_at", DateStorage::Unix).default_now();
+            table.date("added_at", DateStorage::Unix).nullable();
             table.date("missing_since", DateStorage::Unix).nullable();
             table.unique(&["game_id", "source", "source_ref"]);
-            table.index(&["game_id", "module_id"]);
-            table.index(&["game_id", "pack_file"]);
+            table.index(&["game_id", "game_ref"]);
         });
     }
 }

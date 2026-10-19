@@ -8,7 +8,7 @@
 
 	import SettingRow from './setting-row.svelte';
 
-	let rowSize = $state('regular');
+	let coverSize = $state('compact');
 	let coverPreview = $state(true);
 </script>
 
@@ -24,11 +24,13 @@
 				Table…
 			</Button>
 		</SettingRow>
-		<SettingRow title="Row size" description="Compact hides covers">
-			<ToggleGroup.Root type="single" bind:value={rowSize}>
+		<SettingRow title="Cover size" description="Rows grow with the cover">
+			<ToggleGroup.Root type="single" bind:value={coverSize}>
+				<ToggleGroup.Item value="none">None</ToggleGroup.Item>
 				<ToggleGroup.Item value="compact">Compact</ToggleGroup.Item>
 				<ToggleGroup.Item value="regular">Regular</ToggleGroup.Item>
 				<ToggleGroup.Item value="large">Large</ToggleGroup.Item>
+				<ToggleGroup.Item value="huge">Huge</ToggleGroup.Item>
 			</ToggleGroup.Root>
 		</SettingRow>
 		<SettingRow

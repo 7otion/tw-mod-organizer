@@ -1,59 +1,56 @@
+use std::path::{Path, PathBuf};
+
 use serde::Serialize;
 
 use crate::error::AppError;
 
 pub mod check_game_folder;
 pub mod list_games;
+mod total_war;
 
 #[derive(Clone, Copy, Serialize)]
-pub struct Game {
+pub struct GameInfo {
     pub app_id: u32,
     pub series: &'static str,
     pub title: &'static str,
     pub cover: &'static str,
-    #[cfg(windows)]
-    #[serde(skip)]
-    pub exe: &'static str,
 }
 
-pub const GAMES: [Game; 4] = [
-    Game {
-        app_id: 1142710,
-        series: "Total War",
-        title: "Warhammer III",
-        cover: "/tww3.jpg",
-        #[cfg(windows)]
-        exe: "Warhammer3.exe",
-    },
-    Game {
-        app_id: 594570,
-        series: "Total War",
-        title: "Warhammer II",
-        cover: "/tww2.jpg",
-        #[cfg(windows)]
-        exe: "Warhammer2.exe",
-    },
-    Game {
-        app_id: 779340,
-        series: "Total War",
-        title: "Three Kingdoms",
-        cover: "/tw3k.jpg",
-        #[cfg(windows)]
-        exe: "Three_Kingdoms.exe",
-    },
-    Game {
-        app_id: 261550,
-        series: "Mount & Blade II",
-        title: "Bannerlord",
-        cover: "/mbbl.jpg",
-        #[cfg(windows)]
-        exe: r"bin\Win64_Shipping_Client\Bannerlord.exe",
-    },
+pub struct ModInfo {
+    pub game_ref: Option<String>,
+    pub title: String,
+    pub preview_file: Option<PathBuf>,
+    pub size_bytes: u64,
+    pub problem: Option<&'static str>,
+}
+
+pub trait GameSupport: Sync {
+    fn info(&self) -> GameInfo;
+
+    fn mods_folder_name(&self) -> &'static str;
+
+    fn holds_game(&self, path: &Path) -> bool;
+
+    fn mod_info(&self, folder: &Path) -> Result<ModInfo, AppError>;
+
+    fn local_source_ref(&self, folder_name: &str) -> String;
+
+    fn ignored_steam_tags(&self) -> &'static [&'static str];
+}
+
+pub static GAMES: [&dyn GameSupport; 3] = [
+    &total_war::WARHAMMER_3,
+    &total_war::WARHAMMER_2,
+    &total_war::THREE_KINGDOMS,
 ];
 
-fn find(app_id: u32) -> Result<&'static Game, AppError> {
-    GAMES
-        .iter()
-        .find(|game| game.app_id == app_id)
-        .ok_or_else(|| AppError::Custom(format!("App {app_id} isn't a supported game.")))
+pub fn find(app_id: u32) -> Result<&'static dyn GameSupport, AppError> {
+    for game in GAMES {
+        if game.info().app_id == app_id {
+            return Ok(game);
+        }
+    }
+    Err(AppError::Custom(format!(
+        "App {app_id} isn't a supported game."
+    )))
 }

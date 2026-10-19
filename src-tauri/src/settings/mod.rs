@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use sqlx::{Row, SqliteConnection};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_7otion_sqlite::SqliteExt;
@@ -30,6 +32,16 @@ pub async fn ensure_folders(app: &AppHandle) -> Result<(), AppError> {
         std::fs::create_dir_all(folder)?;
     }
     Ok(())
+}
+
+pub async fn mods_dir(app: &AppHandle) -> Result<PathBuf, AppError> {
+    with_database(app, async |connection: &mut SqliteConnection| {
+        let row = sqlx::query("SELECT mods_dir FROM settings WHERE id = 1")
+            .fetch_one(&mut *connection)
+            .await?;
+        Ok(PathBuf::from(row.try_get::<String, _>("mods_dir")?))
+    })
+    .await
 }
 
 async fn with_database<T>(

@@ -10,6 +10,10 @@ export type FolderMove = {
 	copied: number;
 	total: number;
 };
+export type SteamStatus = {
+	is_installed: boolean;
+	is_running: boolean;
+};
 
 export class SettingsStore extends ConnectionStore {
 	readonly #row = this.query(() => Settings.query().whereKey(1));
@@ -17,11 +21,11 @@ export class SettingsStore extends ConnectionStore {
 	readonly current = $derived(this.#row.first);
 	readonly isLoaded = $derived(this.#row.loaded);
 	folderMove = $state.raw<FolderMove | null>(null);
+	steamStatus = $state.raw<SteamStatus | null>(null);
 
 	async moveFolder(column: FolderColumn, to: string): Promise<string | null> {
-		const settings = this.current;
-		if (!settings || this.folderMove || settings[column] === to)
-			return null;
+		const settings = this.current!;
+		if (this.folderMove || settings[column] === to) return null;
 
 		this.folderMove = { column, copied: 0, total: 0 };
 		const unlisten = await listen<Omit<FolderMove, 'column'>>(
@@ -39,5 +43,9 @@ export class SettingsStore extends ConnectionStore {
 			unlisten();
 			this.folderMove = null;
 		}
+	}
+
+	async refreshSteamStatus(): Promise<void> {
+		this.steamStatus = await invoke<SteamStatus>('steam_status');
 	}
 }

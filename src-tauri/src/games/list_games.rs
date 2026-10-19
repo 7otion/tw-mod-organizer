@@ -1,13 +1,13 @@
 use serde::Serialize;
 use tauri::AppHandle;
 
-use super::{GAMES, Game};
+use super::{GAMES, GameInfo};
 use crate::s7forge;
 
 #[derive(Serialize)]
 pub struct DetectedGame {
     #[serde(flatten)]
-    game: Game,
+    game: GameInfo,
     detected_path: Option<String>,
 }
 
@@ -15,12 +15,8 @@ pub struct DetectedGame {
 pub async fn list_games(app: AppHandle) -> Vec<DetectedGame> {
     let mut games = Vec::with_capacity(GAMES.len());
     for game in GAMES {
-        let args = vec![
-            "app-installation-path".to_owned(),
-            "--app-id".to_owned(),
-            game.app_id.to_string(),
-        ];
-        let detected_path = s7forge::run::<String>(&app, args)
+        let game = game.info();
+        let detected_path = s7forge::steam::app_installation_path(&app, game.app_id)
             .await
             .inspect_err(|error| tracing::debug!(app_id = game.app_id, "not detected: {error}"))
             .ok();

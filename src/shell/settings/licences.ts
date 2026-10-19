@@ -31,6 +31,8 @@ export const LICENCES: { group: string; items: Licence[] }[] = [
 			{ name: 'Serde', licence: 'MIT or Apache-2.0' },
 			{ name: 'thiserror', licence: 'MIT or Apache-2.0' },
 			{ name: 'fs4', licence: 'MIT or Apache-2.0' },
+			{ name: 'image', licence: 'MIT or Apache-2.0' },
+			{ name: 'fast_image_resize', licence: 'MIT or Apache-2.0' },
 			{ name: 'tracing', licence: 'MIT' },
 			{ name: 'trash', licence: 'MIT' },
 		],
@@ -38,8 +40,9 @@ export const LICENCES: { group: string; items: Licence[] }[] = [
 	{
 		group: 'Fonts',
 		items: [
-			{ name: 'Cinzel', licence: 'OFL-1.1' },
 			{ name: 'Grenze Gotisch', licence: 'OFL-1.1' },
+			{ name: 'Cinzel', licence: 'OFL-1.1' },
+			{ name: 'Macondo', licence: 'OFL-1.1' },
 		],
 	},
 	{

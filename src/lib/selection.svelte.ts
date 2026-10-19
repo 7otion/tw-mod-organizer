@@ -1,20 +1,26 @@
+import { SvelteSet } from 'svelte/reactivity';
+
 export class Selection<Key> {
 	readonly #order: () => readonly Key[];
+	readonly #keys = new SvelteSet<Key>();
 	#anchor: Key | null = null;
-
-	keys = $state.raw<readonly Key[]>([]);
 
 	constructor(order: () => readonly Key[]) {
 		this.#order = order;
 	}
 
-	readonly isAll = $derived.by(
-		() => this.keys.length > 0 && this.keys.length === this.#order().length
-	);
-	readonly isSome = $derived.by(() => this.keys.length > 0 && !this.isAll);
+	readonly isAll = $derived.by(() => {
+		const order = this.#order();
+		return order.length > 0 && order.every((key) => this.#keys.has(key));
+	});
+	readonly isSome = $derived.by(() => this.#keys.size > 0 && !this.isAll);
+
+	get count(): number {
+		return this.#keys.size;
+	}
 
 	has(key: Key): boolean {
-		return this.keys.includes(key);
+		return this.#keys.has(key);
 	}
 
 	select(key: Key, event: MouseEvent): void {
@@ -32,26 +38,36 @@ export class Selection<Key> {
 				order.indexOf(this.#anchor),
 				order.indexOf(key),
 			];
-			this.keys = order.slice(Math.min(from, to), Math.max(from, to) + 1);
+			this.replace(
+				order.slice(Math.min(from, to), Math.max(from, to) + 1)
+			);
 			return;
 		}
-		this.keys = [key];
+		this.replace([key]);
 		this.#anchor = key;
 	}
 
 	toggle(key: Key): void {
-		this.keys = this.has(key)
-			? this.keys.filter((selected) => selected !== key)
-			: [...this.keys, key];
+		if (!this.#keys.delete(key)) this.#keys.add(key);
 		this.#anchor = key;
 	}
 
 	toggleAll(): void {
-		this.keys = this.isAll ? [] : [...this.#order()];
+		const order = this.#order();
+		if (this.isAll) {
+			for (const key of order) this.#keys.delete(key);
+			return;
+		}
+		for (const key of order) this.#keys.add(key);
 	}
 
 	clear(): void {
-		this.keys = [];
+		this.#keys.clear();
 		this.#anchor = null;
+	}
+
+	private replace(keys: readonly Key[]): void {
+		this.#keys.clear();
+		for (const key of keys) this.#keys.add(key);
 	}
 }

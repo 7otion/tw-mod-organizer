@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { Count } from '@7otion-tauri/orm';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
-	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
 	import { ScrollArea } from '@/components/ui/scroll-area';
 
-	import { ModTag, type Tag } from '@/lib/models';
+	import type { Tag } from '@/lib/models';
 	import { TagsStore } from '@/lib/store';
 	import { nameError } from '@/lib/utils';
 
+	import DeleteTagDialog from './delete-tag-dialog.svelte';
 	import TagRow from './tag-row.svelte';
 
 	let { open = $bindable(false) }: { open: boolean } = $props();
@@ -23,9 +22,6 @@
 	let deleting = $state<Tag | null>(null);
 
 	const error = $derived(nameError('tag', name, tagsStore.isNameTaken(name)));
-	const deletingCount = new Count(() =>
-		ModTag.query().where('tag_id', deleting?.id ?? 0)
-	);
 
 	function reset(): void {
 		name = '';
@@ -38,12 +34,6 @@
 		if (error) return;
 		await tagsStore.create(name);
 		reset();
-	}
-
-	async function remove(): Promise<void> {
-		if (!deleting) return;
-		await tagsStore.delete(deleting);
-		deleting = null;
 	}
 </script>
 
@@ -109,24 +99,4 @@
 	</Dialog.Content>
 </Dialog.Root>
 
-<AlertDialog.Root
-	open={deleting !== null}
-	onOpenChange={(isOpen) => !isOpen && (deleting = null)}
->
-	<AlertDialog.Content>
-		<AlertDialog.Header>
-			<AlertDialog.Title>Delete “{deleting?.name}”?</AlertDialog.Title>
-			<AlertDialog.Description>
-				It's removed from {deletingCount.current}
-				{deletingCount.current === 1 ? 'mod' : 'mods'}. The mods stay in
-				your library.
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action variant="destructive" onclick={remove}>
-				Delete tag
-			</AlertDialog.Action>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
+<DeleteTagDialog bind:tag={deleting} />

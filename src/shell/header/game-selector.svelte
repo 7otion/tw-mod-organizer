@@ -20,13 +20,13 @@
 	let isOpen = $state(false);
 	let query = $state('');
 
-	const current = $derived(gamesStore.current);
+	const current = $derived(gamesStore.current!);
 	const matches = (game: GameEntry) =>
 		`${game.series} ${game.title}`
 			.toLowerCase()
 			.includes(query.trim().toLowerCase());
 	const isListed = (game: GameEntry) =>
-		game.isInstalled && game.app_id !== current?.app_id && matches(game);
+		game.isInstalled && game.app_id !== current.app_id && matches(game);
 
 	const pinned = $derived(gamesStore.pinned.filter(isListed));
 	const recent = $derived(
@@ -37,7 +37,7 @@
 
 	async function switchTo(game: GameEntry): Promise<void> {
 		isOpen = false;
-		if (game.app_id !== current?.app_id) await gamesStore.open(game);
+		if (game.app_id !== current.app_id) await gamesStore.open(game);
 	}
 
 	function browse(): void {
@@ -74,17 +74,17 @@
 			'clickable-content h-auto w-sidebar justify-start gap-3 rounded-none border-r border-line bg-panel px-0 pe-3 text-left hover:bg-hover aria-expanded:bg-hover'
 		)}
 	>
-		<img src={current?.cover} alt="" class="h-full w-20 object-cover" />
+		<img src={current.cover} alt="" class="h-full w-20 object-cover" />
 		<span class="flex flex-1 flex-col font-engraved leading-[1.2]">
 			<small
 				class="text-xs font-medium tracking-[0.14em] text-gray-400 brightness-125"
 			>
-				{current?.series}
+				{current.series}
 			</small>
 			<span
 				class="text-md font-semibold tracking-[0.10em] text-foreground"
 			>
-				{current?.title}
+				{current.title}
 			</span>
 		</span>
 		<ChevronDownIcon class="size-3.5 text-muted-foreground" />

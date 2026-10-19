@@ -1,5 +1,3 @@
-#[cfg(windows)]
-use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -8,10 +6,14 @@ use serde::de::DeserializeOwned;
 use tauri::{AppHandle, Manager};
 
 use crate::error::AppError;
+#[cfg(windows)]
+use crate::process::windowless_command;
 
 pub mod install_s7forge;
 pub mod latest_s7forge_version;
 pub mod s7forge_version;
+pub mod steam;
+pub mod workshop;
 
 const LATEST_RELEASE: &str = "https://api.github.com/repos/7otion/s7forge/releases/latest";
 const CACHE_ENV: &str = "S7FORGE_CACHE_DIR";
@@ -51,9 +53,6 @@ async fn latest_release(client: &reqwest::Client) -> Result<Release, AppError> {
         .await?)
 }
 #[cfg(windows)]
-const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-
-#[cfg(windows)]
 fn assets() -> [&'static str; 2] {
     ["s7forge.exe", "steam_api64.dll"]
 }
@@ -65,9 +64,7 @@ fn assets() -> [&'static str; 2] {
 
 #[cfg(windows)]
 fn command(folder: &Path) -> Command {
-    let mut command = Command::new(folder.join(assets()[0]));
-    command.creation_flags(CREATE_NO_WINDOW);
-    command
+    windowless_command(folder.join(assets()[0]))
 }
 
 #[cfg(not(windows))]
@@ -79,7 +76,7 @@ fn folder(app: &AppHandle) -> Result<PathBuf, AppError> {
     Ok(app.path().app_data_dir()?.join("s7forge"))
 }
 
-pub async fn run<T: DeserializeOwned>(app: &AppHandle, args: Vec<String>) -> Result<T, AppError> {
+async fn run<T: DeserializeOwned>(app: &AppHandle, args: Vec<String>) -> Result<T, AppError> {
     let folder = folder(app)?;
     let cache = app.path().app_cache_dir()?.join("s7forge");
     let output = tauri::async_runtime::spawn_blocking(move || {
@@ -111,4 +108,12 @@ async fn installed_version(folder: PathBuf) -> Result<Option<String>, AppError> 
     tauri::async_runtime::spawn_blocking(move || version_in(&folder))
         .await
         .map_err(|error| AppError::Custom(error.to_string()))
+}
+
+fn with_app_id(command: &str, app_id: u32) -> Vec<String> {
+    vec![
+        command.to_owned(),
+        "--app-id".to_owned(),
+        app_id.to_string(),
+    ]
 }

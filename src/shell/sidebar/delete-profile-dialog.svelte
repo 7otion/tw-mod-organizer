@@ -22,8 +22,7 @@
 	);
 
 	async function remove(): Promise<void> {
-		if (!profile) return;
-		await profilesStore.delete(profile);
+		await profilesStore.delete(profile!);
 		profile = null;
 	}
 </script>

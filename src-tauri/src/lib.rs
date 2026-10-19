@@ -1,6 +1,9 @@
 mod error;
 mod games;
+mod library;
 mod migrations;
+#[cfg(windows)]
+mod process;
 mod s7forge;
 mod settings;
 mod steam;
@@ -51,6 +54,8 @@ pub fn run() {
                 .migrations("app", migrations::app())
                 .build(),
         )
+        .manage(library::request_thumbnails::ThumbnailRequests::default())
+        .manage(library::scan_library::LibraryScans::default())
         .setup(|app| {
             install_panic_hook(app.handle().clone());
             tauri::async_runtime::block_on(settings::ensure_folders(app.handle()))?;
@@ -60,6 +65,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             games::check_game_folder::check_game_folder,
             games::list_games::list_games,
+            library::cancel_library_scan::cancel_library_scan,
+            library::remove_mods::remove_mods,
+            library::request_thumbnails::request_thumbnails,
+            library::scan_library::scan_library,
             s7forge::install_s7forge::install_s7forge,
             s7forge::latest_s7forge_version::latest_s7forge_version,
             s7forge::s7forge_version::s7forge_version,

@@ -2,6 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
 @import '@fontsource-variable/cinzel';
+@import '@fontsource/macondo';
 @import '@fontsource-variable/grenze-gotisch';
 
 @custom-variant dark (&:is(.dark *));
@@ -74,10 +75,10 @@
 	--row-regular: 38px;
 	--row-large: 72px;
 	--row-sep: 38px;
-	--thumb-regular-w: 52px;
-	--thumb-regular-h: 29px;
-	--thumb-large-w: 112px;
-	--thumb-large-h: 63px;
+	--thumb-compact: 34px;
+	--thumb-regular: 48px;
+	--thumb-large: 63px;
+	--thumb-huge: 96px;
 
 	--radius: 8px;
 	--background: var(--bg-2);
@@ -115,6 +116,7 @@
 
 @theme inline {
 	--font-sans: 'Segoe UI', system-ui, sans-serif;
+	--font-macondo: 'Macondo', serif;
 	--font-engraved: 'Cinzel Variable', serif;
 	--font-blackletter: 'Grenze Gotisch Variable', serif;
 	--font-mono: Consolas, 'Cascadia Mono', monospace;
@@ -131,10 +133,10 @@
 	--spacing-row-regular: var(--row-regular);
 	--spacing-row-large: var(--row-large);
 	--spacing-row-sep: var(--row-sep);
-	--spacing-thumb-regular-w: var(--thumb-regular-w);
-	--spacing-thumb-regular-h: var(--thumb-regular-h);
-	--spacing-thumb-large-w: var(--thumb-large-w);
-	--spacing-thumb-large-h: var(--thumb-large-h);
+	--spacing-thumb-compact: var(--thumb-compact);
+	--spacing-thumb-regular: var(--thumb-regular);
+	--spacing-thumb-large: var(--thumb-large);
+	--spacing-thumb-huge: var(--thumb-huge);
 	--shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--line-2);
 	--shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--line-2);
 	--color-background: var(--background);

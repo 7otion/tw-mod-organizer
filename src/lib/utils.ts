@@ -12,10 +12,10 @@ export const cn = createCn({
 				'row-regular',
 				'row-large',
 				'row-sep',
-				'thumb-regular-w',
-				'thumb-regular-h',
-				'thumb-large-w',
-				'thumb-large-h',
+				'thumb-compact',
+				'thumb-regular',
+				'thumb-large',
+				'thumb-huge',
 			],
 			radius: ['shell', 'window'],
 		},
@@ -59,6 +59,10 @@ export function nameError(
 	return null;
 }
 
+export function unixNow(): number {
+	return Math.floor(Date.now() / 1000);
+}
+
 const TIME_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 	['year', 31_536_000],
 	['month', 2_592_000],
@@ -73,6 +77,29 @@ export function timeAgo(date: Date): string {
 	const unit = TIME_UNITS.find(([, size]) => seconds >= size);
 	if (!unit) return 'just now';
 	return relativeTime.format(-Math.floor(seconds / unit[1]), unit[0]);
+}
+
+const SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
+export function formatSize(bytes: number): string {
+	let size = bytes;
+	let unit = 0;
+	while (size >= 1024 && unit < SIZE_UNITS.length - 1) {
+		size /= 1024;
+		unit++;
+	}
+	const digits = unit > 0 && size < 10 ? 1 : 0;
+	return `${size.toFixed(digits)} ${SIZE_UNITS[unit]}`;
+}
+
+export function shortDate(date: Date): string {
+	return date.toLocaleDateString('en-GB', {
+		day: 'numeric',
+		month: 'short',
+		year:
+			date.getFullYear() === new Date().getFullYear()
+				? undefined
+				: 'numeric',
+	});
 }
 
 const REFUSED_ARGUMENT = /^invalid args `[^`]*` for command `[^`]*`: /;

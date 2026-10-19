@@ -3,7 +3,9 @@
 
 	import { cn } from '@/lib/utils';
 
+	import SidebarHeadingAction from './sidebar-heading-action.svelte';
 	import SidebarHeading from './sidebar-heading.svelte';
+	import SidebarCount from './sidebar-count.svelte';
 	import SidebarItem from './sidebar-item.svelte';
 
 	type SeparatorColor =
@@ -75,31 +77,30 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col overflow-hidden pt-4 pb-1.5">
-	<SidebarHeading title="OUTLINE" tooltip="Collapse all separators">
-		Collapse all
+	<SidebarHeading title="OUTLINE">
+		<SidebarHeadingAction tooltip="Collapse all separators">
+			Collapse all
+		</SidebarHeadingAction>
 	</SidebarHeading>
 	<ul class="flex flex-col gap-px">
 		{#each OUTLINE as entry (entry.name)}
-			<SidebarItem
-				name={entry.name}
-				count={entry.type === 'group'
-					? `${entry.enabledCount}/${entry.memberCount}`
-					: entry.modCount}
-			>
-				{#snippet marker()}
-					{#if entry.type === 'group'}
-						<LayersIcon
-							class="size-3.5 shrink-0 text-pink-strong"
-						/>
-					{:else}
-						<span
-							class={cn(
-								'size-2 shrink-0 rotate-45',
-								SEPARATOR_SWATCHES[entry.color]
-							)}
-						></span>
-					{/if}
-				{/snippet}
+			<SidebarItem>
+				{#if entry.type === 'group'}
+					<LayersIcon class="size-3.5 shrink-0 text-pink-strong" />
+				{:else}
+					<span
+						class={cn(
+							'size-2 shrink-0 rotate-45',
+							SEPARATOR_SWATCHES[entry.color]
+						)}
+					></span>
+				{/if}
+				<span class="min-w-0 flex-1 truncate">{entry.name}</span>
+				<SidebarCount
+					value={entry.type === 'group'
+						? `${entry.enabledCount}/${entry.memberCount}`
+						: entry.modCount}
+				/>
 			</SidebarItem>
 		{/each}
 	</ul>

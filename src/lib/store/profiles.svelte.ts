@@ -7,6 +7,7 @@ import {
 	Separator,
 } from '@/lib/models';
 import { GamesStore } from '@/lib/store';
+import { unixNow } from '@/lib/utils';
 
 export class ProfilesStore extends ConnectionStore {
 	readonly #gamesStore = GamesStore.get();
@@ -37,8 +38,7 @@ export class ProfilesStore extends ConnectionStore {
 		copyOf: Profile | null,
 		makeActive: boolean
 	): Promise<void> {
-		const game = this.#gamesStore.current;
-		if (!game) return;
+		const game = this.#gamesStore.current!;
 		const profile = await Model.database.transaction(async (tx) => {
 			const last = await Profile.query()
 				.where('game_id', game.app_id)
@@ -59,10 +59,10 @@ export class ProfilesStore extends ConnectionStore {
 	}
 
 	async activate(profile: Profile): Promise<void> {
-		await this.#gamesStore.current?.row?.update({
+		await this.#gamesStore.current!.row!.update({
 			active_profile_id: profile.id,
 		});
-		await profile.update({ last_used_at: Date.now() });
+		await profile.update({ last_used_at: unixNow() });
 	}
 
 	async rename(profile: Profile, name: string): Promise<void> {
@@ -71,8 +71,8 @@ export class ProfilesStore extends ConnectionStore {
 
 	async reorder(ids: readonly number[]): Promise<void> {
 		const moved = ids.flatMap((id, index) => {
-			const profile = this.list.find((profile) => profile.id === id);
-			if (!profile || profile.position === index + 1) return [];
+			const profile = this.list.find((profile) => profile.id === id)!;
+			if (profile.position === index + 1) return [];
 			profile.draft().position = index + 1;
 			return [profile];
 		});
@@ -103,12 +103,12 @@ export class ProfilesStore extends ConnectionStore {
 	): Promise<void> {
 		const entries = await ProfileEntry.query()
 			.where('profile_id', from.id)
-			.get(tx);
-		const separatorIds = entries.rows.flatMap((entry) =>
+			.toArray(tx);
+		const separatorIds = entries.flatMap((entry) =>
 			entry.separator_id === null ? [] : [entry.separator_id]
 		);
 		const separators = separatorIds.length
-			? (await Separator.query().whereIn('id', separatorIds).get(tx)).rows
+			? await Separator.query().whereIn('id', separatorIds).toArray(tx)
 			: [];
 		const copies = await Separator.createMany(
 			separators.map((separator) => ({
@@ -120,7 +120,7 @@ export class ProfilesStore extends ConnectionStore {
 		);
 		const originalIds = separators.map((separator) => separator.id);
 		await ProfileEntry.createMany(
-			entries.rows.map((entry) => ({
+			entries.map((entry) => ({
 				profile_id: to.id,
 				position: entry.position,
 				enabled: entry.enabled,
@@ -136,9 +136,9 @@ export class ProfilesStore extends ConnectionStore {
 		);
 		const disabled = await ProfileGroupDisabled.query()
 			.where('profile_id', from.id)
-			.get(tx);
+			.toArray(tx);
 		await ProfileGroupDisabled.createMany(
-			disabled.rows.map((row) => ({
+			disabled.map((row) => ({
 				profile_id: to.id,
 				group_id: row.group_id,
 				mod_id: row.mod_id,

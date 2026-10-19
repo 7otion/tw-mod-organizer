@@ -17,6 +17,7 @@
         "@eslint/js": "^10.0.1",
         "@fontsource-variable/cinzel": "^5.3.0",
         "@fontsource-variable/grenze-gotisch": "^5.3.0",
+        "@fontsource/macondo": "^5.3.0",
         "@internationalized/date": "^3.12.0",
         "@lucide/svelte": "^1.57.0",
         "@sveltejs/adapter-static": "^3.0.10",
@@ -96,6 +97,8 @@
     "@fontsource-variable/cinzel": ["@fontsource-variable/cinzel@5.3.0", "", {}, "sha512-eFcU0TwaAP5QESF2pV8VoOPJJXJ6sSGm/6mXMwqTdMBPAJMaLhfa6oISHuOtFeddsoHP9RYm4Io0j1j3mNEz2Q=="],
 
     "@fontsource-variable/grenze-gotisch": ["@fontsource-variable/grenze-gotisch@5.3.0", "", {}, "sha512-cWTjlS5H5PXkE2ABZ3KajF5YXLSJlJpAdXTbioEIvdCnlXCwRqnIXEzOA5yeLGPdvkW1ilZaAIJAASr28LNERg=="],
+
+    "@fontsource/macondo": ["@fontsource/macondo@5.3.0", "", {}, "sha512-ZrVbY9F0Z/OSSc1BEvNJ8wizmRBPvlsu2jF7e6G1SgOaDn/QeQkoLP2++UJ5YZWBPVTgrwcpE278p37Ns76Jsw=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.2", "", { "dependencies": { "@humanfs/types": "^0.15.0" } }, "sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA=="],
 

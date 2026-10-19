@@ -56,7 +56,7 @@
 		<Dialog.Header>
 			<Dialog.Title>New profile</Dialog.Title>
 			<Dialog.Description>
-				{gamesStore.current?.series}: {gamesStore.current?.title}
+				{gamesStore.current!.series}: {gamesStore.current!.title}
 			</Dialog.Description>
 		</Dialog.Header>
 

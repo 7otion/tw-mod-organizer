@@ -5,7 +5,7 @@ import { oneOf } from '@/lib/utils';
 import { Download } from './download';
 import { GroupMember } from './group-member';
 import { LaunchEntry } from './launch-entry';
-import { ModRelation } from './mod-relation';
+import { ModDependency } from './mod-dependency';
 import { ModTag } from './mod-tag';
 import { ProfileEntry } from './profile-entry';
 import { ProfileGroupDisabled } from './profile-group-disabled';
@@ -21,7 +21,7 @@ export class Mod extends Model<typeof Mod.schema> {
 			game_id: Column.integer(),
 			source: Column.text<ModSource>(),
 			source_ref: Column.text(),
-			module_id: Column.text().nullable(),
+			game_ref: Column.text().nullable(),
 			title: Column.text(),
 			custom_title: Column.text().nullable(),
 			description: Column.text().nullable(),
@@ -33,7 +33,6 @@ export class Mod extends Model<typeof Mod.schema> {
 			preview_file: Column.text().nullable(),
 			custom_preview_file: Column.text().nullable(),
 			folder: Column.text().nullable(),
-			pack_file: Column.text().nullable(),
 			problem: Column.text().nullable(),
 			size_bytes: Column.integer().nullable(),
 			published_at: Column.date('unix').nullable(),
@@ -42,7 +41,7 @@ export class Mod extends Model<typeof Mod.schema> {
 			seen_updated_at: Column.date('unix').nullable(),
 			nexus_mod_id: Column.integer().nullable(),
 			nexus_file_id: Column.integer().nullable(),
-			added_at: Column.date('unix'),
+			added_at: Column.date('unix').nullable(),
 			missing_since: Column.date('unix').nullable(),
 		},
 	});
@@ -50,6 +49,31 @@ export class Mod extends Model<typeof Mod.schema> {
 	static readonly mutators = this.mutate({
 		source: oneOf(MOD_SOURCES, 'mod source'),
 	});
+
+	get displayTitle(): string {
+		return this.custom_title ?? this.title;
+	}
+
+	get coverFile(): string | null {
+		return this.custom_preview_file ?? this.preview_file;
+	}
+
+	get isMissing(): boolean {
+		return this.missing_since !== null;
+	}
+
+	get hasUpdate(): boolean {
+		return (
+			this.remote_updated_at !== null &&
+			this.installed_updated_at !== null &&
+			this.remote_updated_at.getTime() >
+				this.installed_updated_at.getTime()
+		);
+	}
+
+	get updatedAt(): Date | null {
+		return this.remote_updated_at ?? this.added_at;
+	}
 
 	static readonly events: ModelEvents<Mod> = {
 		'delete:before': async (written, tx) => {
@@ -60,7 +84,7 @@ export class Mod extends Model<typeof Mod.schema> {
 				.whereIn('mod_id', ids)
 				.delete(tx);
 			await ProfileEntry.query().whereIn('mod_id', ids).delete(tx);
-			await ModRelation.query().whereIn('mod_id', ids).delete(tx);
+			await ModDependency.query().whereIn('mod_id', ids).delete(tx);
 			await LaunchEntry.query()
 				.whereIn('mod_id', ids)
 				.update({ mod_id: null }, tx);

@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 
 import { Game, Profile } from '@/lib/models';
 import { SettingsStore } from '@/lib/store';
+import { unixNow } from '@/lib/utils';
 
 export type SupportedGame = {
 	app_id: number;
@@ -79,7 +80,7 @@ export class GamesStore extends ConnectionStore {
 	async open(game: GameEntry): Promise<void> {
 		const row = await Game.updateOrCreate(
 			{ app_id: game.app_id },
-			{ last_opened_at: Date.now() }
+			{ last_opened_at: unixNow() }
 		);
 		if (row.active_profile_id === null) {
 			const profile = await Profile.firstOrCreate(
@@ -88,14 +89,14 @@ export class GamesStore extends ConnectionStore {
 			);
 			await row.update({ active_profile_id: profile.id });
 		}
-		await this.#settingsStore.current?.update({
+		await this.#settingsStore.current!.update({
 			current_game_id: game.app_id,
 		});
 		this.isBrowsing = false;
 	}
 
 	async close(): Promise<void> {
-		await this.#settingsStore.current?.update({ current_game_id: null });
+		await this.#settingsStore.current!.update({ current_game_id: null });
 	}
 
 	async togglePin(game: GameEntry): Promise<void> {

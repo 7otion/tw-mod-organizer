@@ -12,6 +12,8 @@ pub enum AppError {
     Sqlite(#[from] tauri_plugin_7otion_sqlite::Error),
     #[error("Couldn't move to the Recycle Bin: {0}")]
     Trash(#[from] trash::Error),
+    #[error("Image error: {0}")]
+    Image(#[from] image::ImageError),
     #[error("Unexpected data: {0}")]
     Json(#[from] serde_json::Error),
     #[error("{0}")]

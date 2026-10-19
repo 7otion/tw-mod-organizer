@@ -83,7 +83,7 @@
 		<Dialog.Header>
 			<Dialog.Title>Manage profiles</Dialog.Title>
 			<Dialog.Description>
-				{gamesStore.current?.title} · {profilesStore.list.length}
+				{gamesStore.current!.title} · {profilesStore.list.length}
 				{profilesStore.list.length === 1 ? 'profile' : 'profiles'} · the active
 				one launches with Play
 			</Dialog.Description>

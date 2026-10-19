@@ -1,5 +1,6 @@
 <script lang="ts">
 	import GameSelector from './game-selector.svelte';
+	import GlobalStatus from './global-status.svelte';
 	import HeaderActions from './header-actions.svelte';
 	import WindowActions from './window-actions.svelte';
 </script>
@@ -14,5 +15,7 @@
 	</div>
 	<GameSelector />
 	<HeaderActions />
+	<span class="flex-1"></span>
+	<GlobalStatus />
 	<WindowActions />
 </header>

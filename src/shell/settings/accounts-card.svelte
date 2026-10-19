@@ -7,17 +7,17 @@
 	import * as Card from '@/components/ui/card';
 	import { Progress } from '@/components/ui/progress';
 
-	import { S7forgeStore, SteamStore } from '@/lib/store';
+	import { S7forgeStore, SettingsStore } from '@/lib/store';
 
 	import SettingRow from './setting-row.svelte';
 
 	const s7forgeStore = S7forgeStore.get();
-	const steamStore = SteamStore.get();
+	const settingsStore = SettingsStore.get();
 
-	const steam = $derived(steamStore.status);
+	const steam = $derived(settingsStore.steamStatus);
 
 	$effect(() => {
-		steamStore.refresh();
+		settingsStore.refreshSteamStatus();
 	});
 
 	const updatePercent = $derived(

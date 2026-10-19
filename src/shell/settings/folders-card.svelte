@@ -18,7 +18,7 @@
 		{
 			column: 'mods_dir',
 			title: 'Manual mods folder',
-			description: 'Where installed archives and .pack files go',
+			description: 'Where installed mods go',
 		},
 		{
 			column: 'downloads_dir',
@@ -31,10 +31,9 @@
 	const gamesStore = GamesStore.get();
 
 	const folderMove = $derived(settingsStore.folderMove);
-	const game = $derived(gamesStore.current);
+	const game = $derived(gamesStore.current!);
 
 	async function changeGameFolder(): Promise<void> {
-		if (!game) return;
 		const path = await open({
 			directory: true,
 			defaultPath: game.installPath ?? undefined,
@@ -46,7 +45,7 @@
 	async function change(column: FolderColumn): Promise<void> {
 		const to = await open({
 			directory: true,
-			defaultPath: settingsStore.current?.[column],
+			defaultPath: settingsStore.current![column],
 		});
 		if (!to) return;
 		const leftover = await settingsStore.moveFolder(column, to);
@@ -74,9 +73,9 @@
 	<Card.Content class="gap-0 p-0">
 		<SettingRow
 			title="Game folder"
-			description={game?.row?.install_path
+			description={game.row!.install_path
 				? `Set by you for ${game.title}`
-				: `Detected from Steam for ${game?.title}`}
+				: `Detected from Steam for ${game.title}`}
 		>
 			<div class="flex min-w-0 items-center gap-2">
 				{@render path(game?.installPath ?? '')}
@@ -109,9 +108,7 @@
 							{/if}
 						</span>
 					{:else}
-						{@render path(
-							settingsStore.current?.[folder.column] ?? ''
-						)}
+						{@render path(settingsStore.current![folder.column])}
 					{/if}
 					<Button
 						variant="secondary"

@@ -19,7 +19,12 @@ export const navRoutes: NavRoute[] = [
 		shortcut: 'Ctrl+1',
 		icon: ListOrderedIcon,
 	},
-	{ path: '/', label: 'Library', shortcut: 'Ctrl+2', icon: LibraryIcon },
+	{
+		path: '/library',
+		label: 'Library',
+		shortcut: 'Ctrl+2',
+		icon: LibraryIcon,
+	},
 	{ path: '/', label: 'Groups', shortcut: 'Ctrl+3', icon: LayersIcon },
 	{ path: '/', label: 'Saves', shortcut: 'Ctrl+4', icon: SaveIcon },
 	{ path: '/', label: 'Downloads', shortcut: 'Ctrl+5', icon: DownloadIcon },
