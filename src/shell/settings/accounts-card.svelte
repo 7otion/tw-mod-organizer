@@ -105,9 +105,11 @@
 						{t('settings.accounts.s7forge.updating')}
 					</span>
 				{:else}
-					<span class="font-mono text-sm text-foreground-2">
-						v{s7forgeStore.version}
-					</span>
+					{#if s7forgeStore.version}
+						<span class="font-mono text-sm text-foreground-2">
+							v{s7forgeStore.version}
+						</span>
+					{/if}
 					{#if s7forgeStore.hasUpdate}
 						<Button variant="secondary" size="sm" onclick={update}>
 							<DownloadIcon />

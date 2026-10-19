@@ -84,7 +84,7 @@
 	>
 		{#if !s7forgeStore.isChecked}
 			<WordmarkHeader />
-		{:else if !s7forgeStore.version}
+		{:else if !s7forgeStore.isInstalled}
 			<WordmarkHeader />
 			<S7forgeSetup />
 		{:else}

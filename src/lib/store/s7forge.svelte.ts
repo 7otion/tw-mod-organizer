@@ -17,6 +17,7 @@ function isNewer(candidate: string, current: string): boolean {
 export class S7forgeStore extends Store {
 	version = $state<string | null>(null);
 	latestVersion = $state<string | null>(null);
+	isInstalled = $state(false);
 	isChecked = $state(false);
 	isInstalling = $state(false);
 	downloadProgress = $state.raw<DownloadProgress | null>(null);
@@ -40,6 +41,7 @@ export class S7forgeStore extends Store {
 		);
 		try {
 			this.version = await invoke<string>('install_s7forge');
+			this.isInstalled = true;
 		} finally {
 			unlisten();
 			this.isInstalling = false;
@@ -49,11 +51,17 @@ export class S7forgeStore extends Store {
 
 	private async check(): Promise<void> {
 		try {
-			this.version = await invoke<string | null>('s7forge_version');
+			this.isInstalled = await invoke<boolean>('s7forge_installed');
 		} finally {
 			this.isChecked = true;
 		}
-		if (this.version) await this.checkForUpdate();
+		if (!this.isInstalled) return;
+		this.version = await invoke<string | null>('s7forge_version');
+		if (!this.version) {
+			this.isInstalled = false;
+			return;
+		}
+		await this.checkForUpdate();
 	}
 
 	private async checkForUpdate(): Promise<void> {

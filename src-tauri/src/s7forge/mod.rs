@@ -11,6 +11,7 @@ use crate::process::windowless_command;
 
 pub mod install_s7forge;
 pub mod latest_s7forge_version;
+pub mod s7forge_installed;
 pub mod s7forge_version;
 pub mod steam;
 pub mod workshop;

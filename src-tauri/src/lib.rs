@@ -80,6 +80,7 @@ pub fn run() {
             library::subscribe_mods::subscribe_mods,
             s7forge::install_s7forge::install_s7forge,
             s7forge::latest_s7forge_version::latest_s7forge_version,
+            s7forge::s7forge_installed::s7forge_installed,
             s7forge::s7forge_version::s7forge_version,
             settings::move_folder::move_folder,
             settings::system_date_pattern::system_date_pattern,
