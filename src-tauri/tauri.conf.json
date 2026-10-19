@@ -15,7 +15,7 @@
 				"title": "TW Mod Organizer",
 				"width": 1400,
 				"height": 860,
-				"minWidth": 1100,
+				"minWidth": 1400,
 				"minHeight": 680,
 				"resizable": true,
 				"dragDropEnabled": true,
