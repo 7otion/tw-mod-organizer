@@ -17,7 +17,7 @@
 	const SECTIONS = [
 		{ id: 'folders', label: 'Folders', card: FoldersCard },
 		{ id: 'load-order', label: 'Load order', card: LoadOrderCard },
-		{ id: 'display', label: 'Table & display', card: DisplayCard },
+		{ id: 'display', label: 'Display', card: DisplayCard },
 		{ id: 'accounts', label: 'Accounts & tools', card: AccountsCard },
 		{ id: 'import', label: 'Import data', card: ImportCard },
 		{ id: 'about', label: 'Updates & about', card: AboutCard },

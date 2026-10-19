@@ -91,14 +91,40 @@ export function formatSize(bytes: number): string {
 	return `${size.toFixed(digits)} ${SIZE_UNITS[unit]}`;
 }
 
-export function shortDate(date: Date): string {
-	return date.toLocaleDateString('en-GB', {
-		day: 'numeric',
-		month: 'short',
-		year:
-			date.getFullYear() === new Date().getFullYear()
-				? undefined
-				: 'numeric',
+const DATE_TOKEN = /'[^']*'|d{1,4}|M{1,4}|y{1,5}/g;
+const MONTH_NAMES = new Intl.DateTimeFormat('en', { month: 'short' });
+const LONG_MONTH_NAMES = new Intl.DateTimeFormat('en', { month: 'long' });
+const DAY_NAMES = new Intl.DateTimeFormat('en', { weekday: 'short' });
+const LONG_DAY_NAMES = new Intl.DateTimeFormat('en', { weekday: 'long' });
+export function formatDate(date: Date, pattern: string): string {
+	const pad = (value: number) => String(value).padStart(2, '0');
+	return pattern.replace(DATE_TOKEN, (token) => {
+		switch (token) {
+			case 'd':
+				return String(date.getDate());
+			case 'dd':
+				return pad(date.getDate());
+			case 'ddd':
+				return DAY_NAMES.format(date);
+			case 'dddd':
+				return LONG_DAY_NAMES.format(date);
+			case 'M':
+				return String(date.getMonth() + 1);
+			case 'MM':
+				return pad(date.getMonth() + 1);
+			case 'MMM':
+				return MONTH_NAMES.format(date);
+			case 'MMMM':
+				return LONG_MONTH_NAMES.format(date);
+			case 'y':
+				return String(date.getFullYear() % 100);
+			case 'yy':
+				return pad(date.getFullYear() % 100);
+			default:
+				return token.startsWith("'")
+					? token.slice(1, -1)
+					: String(date.getFullYear());
+		}
 	});
 }
 

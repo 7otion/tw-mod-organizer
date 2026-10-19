@@ -3,44 +3,103 @@
 
 	import { Button } from '@/components/ui/button';
 	import * as Card from '@/components/ui/card';
+	import * as Select from '@/components/ui/select';
 	import { Switch } from '@/components/ui/switch';
 	import * as ToggleGroup from '@/components/ui/toggle-group';
 
+	import { DATE_FORMATS, type DateFormat } from '@/lib/models';
+	import { SettingsStore } from '@/lib/store';
+	import { formatDate } from '@/lib/utils';
+
 	import SettingRow from './setting-row.svelte';
+
+	const settingsStore = SettingsStore.get();
+
+	const today = new Date();
 
 	let coverSize = $state('compact');
 	let coverPreview = $state(true);
+
+	function example(format: DateFormat): string {
+		const pattern =
+			format === 'system' ? settingsStore.systemDatePattern : format;
+		const date = formatDate(today, pattern);
+		return format === 'system' ? `System · ${date}` : date;
+	}
 </script>
 
-<Card.Root>
-	<Card.Header><Card.Title>Table &amp; display</Card.Title></Card.Header>
-	<Card.Content class="gap-0 p-0">
-		<SettingRow
-			title="Table columns"
-			description="Visible columns, their order and widths"
-		>
-			<Button variant="secondary" size="sm">
-				<Columns3Icon />
-				Table…
-			</Button>
-		</SettingRow>
-		<SettingRow title="Cover size" description="Rows grow with the cover">
-			<ToggleGroup.Root type="single" bind:value={coverSize}>
-				<ToggleGroup.Item value="none">None</ToggleGroup.Item>
-				<ToggleGroup.Item value="compact">Compact</ToggleGroup.Item>
-				<ToggleGroup.Item value="regular">Regular</ToggleGroup.Item>
-				<ToggleGroup.Item value="large">Large</ToggleGroup.Item>
-				<ToggleGroup.Item value="huge">Huge</ToggleGroup.Item>
-			</ToggleGroup.Root>
-		</SettingRow>
-		<SettingRow
-			title="Cover preview on hover"
-			description="Larger preview after a short delay"
-		>
-			<Switch
-				bind:checked={coverPreview}
-				aria-label="Cover preview on hover"
-			/>
-		</SettingRow>
-	</Card.Content>
-</Card.Root>
+<div class="flex flex-col gap-4">
+	<Card.Root>
+		<Card.Header><Card.Title>Display</Card.Title></Card.Header>
+		<Card.Content class="gap-0 p-0">
+			<SettingRow
+				title="Date format"
+				description="Every date TMO shows. System follows your Windows region settings."
+			>
+				<Select.Root
+					type="single"
+					bind:value={
+						() => settingsStore.current?.date_format ?? 'system',
+						(format) =>
+							void settingsStore.setDateFormat(
+								format as DateFormat
+							)
+					}
+				>
+					<Select.Trigger
+						size="sm"
+						aria-label="Date format"
+						class="min-w-48"
+					>
+						{example(
+							settingsStore.current?.date_format ?? 'system'
+						)}
+					</Select.Trigger>
+					<Select.Content align="end">
+						{#each DATE_FORMATS as format (format)}
+							<Select.Item value={format} label={example(format)}>
+								{example(format)}
+							</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
+			</SettingRow>
+		</Card.Content>
+	</Card.Root>
+
+	<Card.Root>
+		<Card.Header><Card.Title>Mod Table</Card.Title></Card.Header>
+		<Card.Content class="gap-0 p-0">
+			<SettingRow
+				title="Table columns"
+				description="Visible columns, their order and widths"
+			>
+				<Button variant="secondary" size="sm">
+					<Columns3Icon />
+					Table…
+				</Button>
+			</SettingRow>
+			<SettingRow
+				title="Cover size"
+				description="Rows grow with the cover"
+			>
+				<ToggleGroup.Root type="single" bind:value={coverSize}>
+					<ToggleGroup.Item value="none">None</ToggleGroup.Item>
+					<ToggleGroup.Item value="compact">Compact</ToggleGroup.Item>
+					<ToggleGroup.Item value="regular">Regular</ToggleGroup.Item>
+					<ToggleGroup.Item value="large">Large</ToggleGroup.Item>
+					<ToggleGroup.Item value="huge">Huge</ToggleGroup.Item>
+				</ToggleGroup.Root>
+			</SettingRow>
+			<SettingRow
+				title="Cover preview on hover"
+				description="Larger preview after a short delay"
+			>
+				<Switch
+					bind:checked={coverPreview}
+					aria-label="Cover preview on hover"
+				/>
+			</SettingRow>
+		</Card.Content>
+	</Card.Root>
+</div>

@@ -7,6 +7,7 @@ use tauri_plugin_7otion_sqlite::SqliteExt;
 use crate::error::AppError;
 
 pub mod move_folder;
+pub mod system_date_pattern;
 
 pub async fn ensure_folders(app: &AppHandle) -> Result<(), AppError> {
     let defaults = app.path().app_data_dir()?;

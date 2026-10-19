@@ -15,10 +15,11 @@
 	import {
 		LibraryColumnsStore,
 		LibraryStore,
+		SettingsStore,
 		type CoverSize,
 		type LibraryColumn,
 	} from '@/lib/store';
-	import { cn, formatSize, shortDate } from '@/lib/utils';
+	import { cn, formatDate, formatSize } from '@/lib/utils';
 
 	import { SOURCE_ICON_SIZES } from './library-columns';
 	import ModCover from './mod-cover.svelte';
@@ -50,6 +51,7 @@
 
 	const libraryStore = LibraryStore.get();
 	const libraryColumnsStore = LibraryColumnsStore.get();
+	const settingsStore = SettingsStore.get();
 
 	const isSelected = $derived(selection.has(mod.id));
 	const hasVersionColumn = $derived(
@@ -187,11 +189,15 @@
 		</span>
 	{:else if key === 'updated'}
 		<span data-cell class="text-right font-mono">
-			{mod.isMissing || !mod.updatedAt ? '—' : shortDate(mod.updatedAt)}
+			{mod.isMissing || !mod.updatedAt
+				? '—'
+				: formatDate(mod.updatedAt, settingsStore.datePattern)}
 		</span>
 	{:else if key === 'added'}
 		<span data-cell class="text-right font-mono"
-			>{mod.added_at ? shortDate(mod.added_at) : '—'}</span
+			>{mod.added_at
+				? formatDate(mod.added_at, settingsStore.datePattern)
+				: '—'}</span
 		>
 	{:else if key === 'version'}
 		<span data-cell class="truncate text-sm">{mod.version ?? '—'}</span>

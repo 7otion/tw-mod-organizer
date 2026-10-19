@@ -16,8 +16,8 @@
 
 	import { type Profile, ProfileEntry } from '@/lib/models';
 	import type { Selection } from '@/lib/selection.svelte';
-	import { ProfilesStore } from '@/lib/store';
-	import { cn, nameError, timeAgo } from '@/lib/utils';
+	import { ProfilesStore, SettingsStore } from '@/lib/store';
+	import { cn, formatDate, nameError, timeAgo } from '@/lib/utils';
 
 	type Props = {
 		profile: Profile;
@@ -30,6 +30,7 @@
 	let { profile, index, canDrag, selection, ondelete }: Props = $props();
 
 	const profilesStore = ProfilesStore.get();
+	const settingsStore = SettingsStore.get();
 
 	const active = $derived(profile === profilesStore.active);
 	const selected = $derived(selection.has(profile.id));
@@ -110,14 +111,7 @@
 	function created(date: Date): string {
 		const today = new Date();
 		if (date.toDateString() === today.toDateString()) return 'Today';
-		return date.toLocaleDateString('en-GB', {
-			day: 'numeric',
-			month: 'short',
-			year:
-				date.getFullYear() === today.getFullYear()
-					? undefined
-					: 'numeric',
-		});
+		return formatDate(date, settingsStore.datePattern);
 	}
 </script>
 

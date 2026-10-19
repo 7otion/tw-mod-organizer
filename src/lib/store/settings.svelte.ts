@@ -2,7 +2,7 @@ import { ConnectionStore } from '@7otion-tauri/orm';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 
-import { Settings } from '@/lib/models';
+import { type DateFormat, Settings } from '@/lib/models';
 
 export type FolderColumn = 'mods_dir' | 'downloads_dir';
 export type FolderMove = {
@@ -15,13 +15,35 @@ export type SteamStatus = {
 	is_running: boolean;
 };
 
+const FALLBACK_DATE_PATTERN = 'yyyy-MM-dd';
+
 export class SettingsStore extends ConnectionStore {
 	readonly #row = this.query(() => Settings.query().whereKey(1));
+
+	#systemDatePattern = $state.raw<string | null>(null);
 
 	readonly current = $derived(this.#row.first);
 	readonly isLoaded = $derived(this.#row.loaded);
 	folderMove = $state.raw<FolderMove | null>(null);
 	steamStatus = $state.raw<SteamStatus | null>(null);
+
+	readonly datePattern = $derived.by(() => {
+		const format = this.current?.date_format ?? 'system';
+		return format === 'system' ? this.systemDatePattern : format;
+	});
+
+	constructor() {
+		super();
+		void this.loadSystemDatePattern();
+	}
+
+	get systemDatePattern(): string {
+		return this.#systemDatePattern ?? FALLBACK_DATE_PATTERN;
+	}
+
+	async setDateFormat(format: DateFormat): Promise<void> {
+		await this.current!.update({ date_format: format });
+	}
 
 	async moveFolder(column: FolderColumn, to: string): Promise<string | null> {
 		const settings = this.current!;
@@ -47,5 +69,11 @@ export class SettingsStore extends ConnectionStore {
 
 	async refreshSteamStatus(): Promise<void> {
 		this.steamStatus = await invoke<SteamStatus>('steam_status');
+	}
+
+	private async loadSystemDatePattern(): Promise<void> {
+		this.#systemDatePattern = await invoke<string | null>(
+			'system_date_pattern'
+		);
 	}
 }
