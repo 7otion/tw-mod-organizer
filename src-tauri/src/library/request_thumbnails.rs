@@ -2,11 +2,11 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::hash::{Hash, Hasher};
-use std::io::{BufWriter, Cursor};
+use std::io::{self, BufWriter, Cursor, Read};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use fast_image_resize::images::Image;
 use fast_image_resize::{IntoImageView, Resizer};
@@ -22,6 +22,7 @@ const JPEG_QUALITY: u8 = 80;
 const PAUSE_BETWEEN: Duration = Duration::from_millis(40);
 const EMIT_EVERY: usize = 20;
 const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(15);
+const FINGERPRINT_BYTES: usize = 4096;
 
 #[derive(Deserialize)]
 pub struct ThumbnailSource {
@@ -103,7 +104,7 @@ fn make_thumbnails(
         }
     }
     if !stale.is_empty()
-        && let Err(error) = trash::delete_all(&stale)
+        && let Err(error) = trash_stale(folder, &stale)
     {
         tracing::warn!("couldn't move stale thumbnails to the Recycle Bin: {error}");
     }
@@ -178,20 +179,46 @@ fn parse_thumbnail_name(name: &str) -> Option<(String, u32, u32)> {
 
 fn thumbnail_key(source: &ThumbnailSource) -> Option<String> {
     let mut hasher = DefaultHasher::new();
-    let metadata = source
+    let fingerprint = source
         .file
         .as_ref()
-        .and_then(|file| fs::metadata(file).ok());
-    match (&source.file, metadata, &source.url) {
-        (Some(file), Some(metadata), _) => {
+        .and_then(|file| file_fingerprint(file).ok());
+    match (&source.file, fingerprint, &source.url) {
+        (Some(file), Some((len, head)), _) => {
             file.hash(&mut hasher);
-            metadata.len().hash(&mut hasher);
-            metadata.modified().ok().hash(&mut hasher);
+            len.hash(&mut hasher);
+            head.hash(&mut hasher);
         }
         (_, _, Some(url)) => url.hash(&mut hasher),
         _ => return None,
     }
     Some(format!("{:016x}", hasher.finish()))
+}
+
+fn file_fingerprint(file: &Path) -> io::Result<(u64, Vec<u8>)> {
+    let mut reader = fs::File::open(file)?;
+    let len = reader.metadata()?.len();
+    let mut head = Vec::with_capacity(FINGERPRINT_BYTES);
+    (&mut reader)
+        .take(FINGERPRINT_BYTES as u64)
+        .read_to_end(&mut head)?;
+    Ok((len, head))
+}
+
+fn trash_stale(folder: &Path, stale: &[PathBuf]) -> Result<(), AppError> {
+    let millis = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|elapsed| elapsed.as_millis())
+        .unwrap_or_default();
+    let bin = folder.join(format!("stale-{millis}"));
+    fs::create_dir_all(&bin)?;
+    for file in stale {
+        if let Some(name) = file.file_name() {
+            fs::rename(file, bin.join(name))?;
+        }
+    }
+    trash::delete(&bin)?;
+    Ok(())
 }
 
 fn source_bytes(client: &reqwest::Client, source: &ThumbnailSource) -> Result<Vec<u8>, AppError> {
