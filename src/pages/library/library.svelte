@@ -19,6 +19,7 @@
 	import * as Tooltip from '@/components/ui/tooltip';
 
 	import type { Profile } from '@/lib/models';
+	import { ScrollMemory } from '@/lib/scroll-memory.svelte';
 	import { Selection } from '@/lib/selection.svelte';
 	import { VirtualList } from '@/lib/virtual-list.svelte';
 	import {
@@ -55,14 +56,8 @@
 		width: number;
 	};
 
-	type ScrollPosition = {
-		appId: number;
-		offset: number;
-	};
-
 	const MIN_COLUMN_WIDTH = 40;
 	const LIST_PADDING = 4;
-	const SCROLL_SAVE_DELAY = 250;
 
 	const gamesStore = GamesStore.get();
 	const libraryStore = LibraryStore.get();
@@ -90,7 +85,18 @@
 		paddingStart: LIST_PADDING,
 		paddingEnd: LIST_PADDING,
 		endInset: () => bulkBarInset,
-		onScroll: rememberScroll,
+		onScroll: (offset) => scrollMemory.remember(offset),
+	});
+
+	const scrollMemory = new ScrollMemory({
+		list: virtualList,
+		viewport: () => listViewport,
+		key: () => gamesStore.current?.app_id ?? null,
+		saved: () => libraryColumnsStore.savedScrollOffset,
+		hasRows: () => libraryFilterStore.visibleMods.length > 0,
+		isFiltered: () => libraryFilterStore.isFiltered,
+		save: (appId, offset) =>
+			void libraryColumnsStore.setScrollOffset(appId, offset),
 	});
 
 	const visibleRows = $derived(
@@ -99,75 +105,6 @@
 			return mod ? [{ mod, top: item.start }] : [];
 		})
 	);
-
-	let restoredAppId: number | null = null;
-	let unfilteredScroll: ScrollPosition | null = null;
-	let pendingScroll: ScrollPosition | null = null;
-	let scrollTimer: ReturnType<typeof setTimeout> | undefined;
-
-	$effect(() => {
-		const appId = gamesStore.current?.app_id ?? null;
-		const saved = libraryColumnsStore.savedScrollOffset;
-		const hasRows = libraryFilterStore.visibleMods.length > 0;
-		if (
-			appId === null ||
-			restoredAppId === appId ||
-			saved === null ||
-			!listViewport ||
-			!hasRows ||
-			libraryFilterStore.isFiltered
-		)
-			return;
-		restoredAppId = appId;
-		unfilteredScroll = { appId, offset: saved };
-		scrollTo(saved);
-	});
-
-	$effect(() => {
-		if (libraryFilterStore.isFiltered) return;
-		untrack(() => {
-			const position = unfilteredScroll;
-			if (position && position.appId === gamesStore.current?.app_id)
-				scrollTo(position.offset);
-		});
-	});
-
-	$effect(() => () => {
-		clearTimeout(scrollTimer);
-		saveScroll();
-	});
-
-	function scrollTo(offset: number): void {
-		void tick().then(() => {
-			if (listViewport) virtualList.scrollToOffset(offset);
-		});
-	}
-
-	function rememberScroll(offset: number): void {
-		const appId = gamesStore.current?.app_id;
-		if (
-			appId === undefined ||
-			restoredAppId !== appId ||
-			libraryFilterStore.isFiltered
-		)
-			return;
-		clearTimeout(scrollTimer);
-		const rounded = Math.round(offset);
-		unfilteredScroll = { appId, offset: rounded };
-		pendingScroll =
-			rounded === libraryColumnsStore.savedScrollOffset
-				? null
-				: unfilteredScroll;
-		if (pendingScroll !== null)
-			scrollTimer = setTimeout(saveScroll, SCROLL_SAVE_DELAY);
-	}
-
-	function saveScroll(): void {
-		if (pendingScroll === null) return;
-		const { appId, offset } = pendingScroll;
-		void libraryColumnsStore.setScrollOffset(appId, offset);
-		pendingScroll = null;
-	}
 
 	let searchInput = $state<HTMLInputElement | null>(null);
 	let isTableOpen = $state(false);
