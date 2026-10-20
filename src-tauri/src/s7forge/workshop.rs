@@ -21,6 +21,47 @@ pub struct WorkshopItem {
     pub tags: Vec<String>,
     #[serde(default)]
     pub required_items: Vec<u64>,
+    #[serde(default)]
+    pub file_type: String,
+    #[serde(default)]
+    pub file_size: u64,
+    #[serde(default)]
+    pub consumer_steam_game_id: Option<u32>,
+    #[serde(default)]
+    pub state: ItemState,
+}
+
+#[derive(Default, Deserialize)]
+pub struct ItemState {
+    pub subscribed: bool,
+    pub installed: bool,
+    pub needs_update: bool,
+    pub downloading: bool,
+    pub download_pending: bool,
+}
+
+#[derive(Deserialize)]
+pub struct CollectionInfo {
+    pub id: u64,
+    pub title: String,
+    pub creator_id: String,
+    pub creator_name: String,
+    pub preview_url: Option<String>,
+    pub time_updated: u64,
+}
+
+#[derive(Deserialize)]
+pub struct CollectionDetails {
+    pub details: CollectionInfo,
+    pub items: Vec<WorkshopItem>,
+}
+
+#[derive(Deserialize)]
+pub struct DownloadProgress {
+    pub item_id: u64,
+    pub state: ItemState,
+    pub downloaded_bytes: Option<u64>,
+    pub total_bytes: Option<u64>,
 }
 
 #[derive(Deserialize)]
@@ -46,6 +87,8 @@ pub struct WorkshopStateItem {
     pub installed_time_updated: Option<u64>,
     pub latest_time_updated: Option<u64>,
     pub needs_update: bool,
+    #[serde(default)]
+    pub download_pending: bool,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -81,6 +124,28 @@ pub async fn workshop_items(
         return Ok(Vec::new());
     }
     run(app, with_item_ids("workshop-items", app_id, item_ids)).await
+}
+
+pub async fn collection_items(
+    app: &AppHandle,
+    app_id: u32,
+    item_id: u64,
+) -> Result<CollectionDetails, AppError> {
+    let mut args = with_app_id("collection-items", app_id);
+    args.push("--item-id".to_owned());
+    args.push(item_id.to_string());
+    run(app, args).await
+}
+
+pub async fn download_progress(
+    app: &AppHandle,
+    app_id: u32,
+    item_ids: &[u64],
+) -> Result<Vec<DownloadProgress>, AppError> {
+    if item_ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    run(app, with_item_ids("download-progress", app_id, item_ids)).await
 }
 
 pub async fn subscribe(

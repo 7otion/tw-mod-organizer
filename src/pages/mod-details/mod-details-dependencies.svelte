@@ -8,7 +8,12 @@
 
 	import { t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
-	import { LibraryStore, ProfilesStore } from '@/lib/store';
+	import {
+		LibraryStore,
+		ProfilesStore,
+		WorkshopDownloadsStore,
+		type Requirement,
+	} from '@/lib/store';
 	import { cn } from '@/lib/utils';
 	import ModContextMenuItems from '@/pages/library/mod-context-menu-items.svelte';
 	import ModCover from '@/pages/library/mod-cover.svelte';
@@ -24,6 +29,7 @@
 
 	const libraryStore = LibraryStore.get();
 	const profilesStore = ProfilesStore.get();
+	const downloadsStore = WorkshopDownloadsStore.get();
 
 	let isSubscribing = $state(false);
 
@@ -55,10 +61,17 @@
 		return t('modDetails.dependencies.absent', { profile: activeName });
 	}
 
-	async function subscribe(refs: readonly string[]): Promise<void> {
+	async function subscribe(
+		requirements: readonly Requirement[]
+	): Promise<void> {
 		isSubscribing = true;
 		try {
-			await libraryStore.subscribe(refs);
+			await downloadsStore.subscribe(
+				requirements.map(({ dependency }) => ({
+					source_ref: dependency.required_ref,
+					title: dependency.required_title ?? dependency.required_ref,
+				}))
+			);
 		} finally {
 			isSubscribing = false;
 		}
@@ -134,12 +147,7 @@
 			<Button
 				size="sm"
 				disabled={isSubscribing}
-				onclick={() =>
-					subscribe(
-						missing.map(
-							(requirement) => requirement.dependency.required_ref
-						)
-					)}
+				onclick={() => subscribe(missing)}
 			>
 				{t('modDetails.dependencies.subscribeMissing')}
 			</Button>
@@ -188,10 +196,7 @@
 								variant="secondary"
 								size="sm"
 								disabled={isSubscribing}
-								onclick={() =>
-									subscribe([
-										requirement.dependency.required_ref,
-									])}
+								onclick={() => subscribe([requirement])}
 							>
 								{t('modDetails.dependencies.subscribe')}
 							</Button>

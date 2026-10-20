@@ -1,12 +1,16 @@
 <script lang="ts">
 	import { t } from '@/lib/i18n';
-	import { LibraryScanStore } from '@/lib/store';
+	import { LibraryScanStore, WorkshopDownloadsStore } from '@/lib/store';
 
 	import AnimatedEllipsis from './animated-ellipsis.svelte';
 
 	const libraryScanStore = LibraryScanStore.get();
+	const downloadsStore = WorkshopDownloadsStore.get();
 
-	const label = $derived.by(() => {
+	const PILL_CLASSES =
+		'flex h-6.5 items-center gap-2 self-center rounded-full bg-fill-1 px-3 text-sm font-semibold tabular-nums';
+
+	const scanLabel = $derived.by(() => {
 		const enrichment = libraryScanStore.enrichment;
 		if (enrichment?.step === 'times') return t('header.enrich.times');
 		if (enrichment)
@@ -21,14 +25,37 @@
 			total: progress.total,
 		});
 	});
+	const hasDownloads = $derived(
+		downloadsStore.total > 0 && !downloadsStore.isOpen
+	);
 </script>
 
 {#if libraryScanStore.isScanning}
-	<span
-		class="flex h-6.5 items-center gap-2 self-center rounded-full bg-fill-1 px-3 text-sm font-semibold tabular-nums"
-	>
+	<span class={PILL_CLASSES}>
 		<span class="size-1.5 animate-pulse rounded-full bg-status-update"
 		></span>
-		{label}<AnimatedEllipsis />
+		{scanLabel}<AnimatedEllipsis />
 	</span>
+{:else if hasDownloads}
+	<button
+		type="button"
+		class="{PILL_CLASSES} clickable-content cursor-pointer hover:bg-fill-2"
+		onclick={() => (downloadsStore.isOpen = true)}
+	>
+		<span
+			class="size-1.5 rounded-full bg-status-update"
+			class:animate-pulse={downloadsStore.isActive}
+		></span>
+		{#if downloadsStore.isActive}
+			{t('header.downloads.progress', {
+				done: downloadsStore.done,
+				total: downloadsStore.total,
+			})}<AnimatedEllipsis />
+		{:else}
+			{t('header.downloads.finished', {
+				done: downloadsStore.done,
+				total: downloadsStore.total,
+			})}
+		{/if}
+	</button>
 {/if}

@@ -12,13 +12,18 @@
 
 	import { t } from '@/lib/i18n';
 	import type { MessageKey } from '@/lib/i18n/message-key';
+	import ImportCollectionDialog from '@/pages/library/import-collection-dialog.svelte';
+	import WorkshopDownloadsDialog from '@/pages/library/workshop-downloads-dialog.svelte';
 
 	type HeaderAction = {
 		labelKey: MessageKey;
 		icon: LucideIcon;
 		isPrimary?: boolean;
 		opensDialog?: boolean;
+		onclick?: () => void;
 	};
+
+	let isImporting = $state(false);
 
 	const LOAD_ORDER_ACTIONS: HeaderAction[] = [
 		{
@@ -41,7 +46,12 @@
 			icon: PackageIcon,
 			isPrimary: true,
 		},
-		{ labelKey: 'header.library.importCollection', icon: LayersIcon },
+		{
+			labelKey: 'header.library.importCollection',
+			icon: LayersIcon,
+			opensDialog: true,
+			onclick: () => (isImporting = true),
+		},
 		{ labelKey: 'header.library.forceUpdate', icon: RefreshCwIcon },
 	];
 
@@ -63,9 +73,13 @@
 					? 'bg-pink-deep/70 text-bone hover:bg-pink-deep/50'
 					: 'bg-raised hover:bg-active aria-expanded:bg-active',
 			]}
+			onclick={action.onclick}
 		>
 			<action.icon class="size-3.5" />
 			{t(action.labelKey)}
 		</Button>
 	{/each}
 </div>
+
+<ImportCollectionDialog bind:open={isImporting} />
+<WorkshopDownloadsDialog />

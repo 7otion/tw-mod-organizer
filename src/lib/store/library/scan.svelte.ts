@@ -8,6 +8,8 @@ import { Mod, ModDependency, ModTag, Tag, type ModSource } from '@/lib/models';
 import { GamesStore, type GameEntry } from '@/lib/store';
 import { unixNow } from '@/lib/utils';
 
+import { WorkshopDownloadsStore } from './workshop-downloads.svelte';
+
 type SteamDetails = {
 	title: string;
 	description: string;
@@ -33,6 +35,7 @@ type LibraryMod = {
 	installed_updated_at: number | null;
 	added_at: number | null;
 	unchanged: boolean;
+	download_pending: boolean;
 };
 
 type LibraryScan = {
@@ -156,6 +159,7 @@ export class LibraryScanStore extends ConnectionStore {
 					`scan ${full ? 'full' : 'light'}: rust ${Math.round(scannedAt - startedAt)} ms, store ${Math.round(performance.now() - scannedAt)} ms, ${scan.mods.length} mods, ${scan.pending_details.length} to enrich`
 				);
 			await this.requestThumbnails(game.app_id);
+			this.resumeDownloads(game.app_id, scan);
 			if (!scan.pending_details.length) {
 				if (full && scan.steam_view === 'subscriptions')
 					await game.row!.update({ steam_synced_at: unixNow() });
@@ -192,6 +196,16 @@ export class LibraryScanStore extends ConnectionStore {
 				url: mod.preview_url,
 			})),
 		});
+	}
+
+	private resumeDownloads(appId: number, scan: LibraryScan): void {
+		const pending = scan.mods.flatMap((mod) =>
+			mod.source === 'steam' && mod.download_pending
+				? [mod.source_ref]
+				: []
+		);
+		if (pending.length)
+			void WorkshopDownloadsStore.get().resume(appId, pending);
 	}
 
 	private cancel(gameId: number): void {

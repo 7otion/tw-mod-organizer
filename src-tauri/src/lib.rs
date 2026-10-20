@@ -42,6 +42,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {
             tracing::debug!("A second instance was refused");
         }))
@@ -72,6 +73,8 @@ pub fn run() {
             languages::list_language_packs::list_language_packs,
             languages::read_language_file::read_language_file,
             library::cancel_library_scan::cancel_library_scan,
+            library::fetch_collection::fetch_collection,
+            library::fetch_download_progress::fetch_download_progress,
             library::fetch_mod_details::fetch_mod_details,
             library::fetch_subscription_times::fetch_subscription_times,
             library::open_in_rpfm::open_in_rpfm,

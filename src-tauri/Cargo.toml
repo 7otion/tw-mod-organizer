@@ -15,6 +15,7 @@ tauri-build = { version = "2.7.1", features = [] }
 
 [dependencies]
 tauri = { version = "2.12.1", features = ["protocol-asset"] }
+tauri-plugin-clipboard-manager = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-7otion-sqlite = { path = "../../7otion-tauri/orm/backend" }

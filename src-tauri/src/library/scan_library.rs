@@ -52,6 +52,7 @@ struct LibraryMod {
     installed_updated_at: Option<u64>,
     added_at: Option<u64>,
     unchanged: bool,
+    download_pending: bool,
 }
 
 #[derive(Clone, Copy, Serialize)]
@@ -332,6 +333,7 @@ fn state_mod(game: &dyn GameSupport, item: WorkshopStateItem, is_changed: bool) 
             installed_updated_at: item.installed_time_updated,
             added_at: None,
             unchanged: true,
+            download_pending: item.download_pending,
         };
     }
     let files = match item
@@ -344,6 +346,7 @@ fn state_mod(game: &dyn GameSupport, item: WorkshopStateItem, is_changed: bool) 
     LibraryMod {
         size_bytes: item.size_on_disk.or(files.size_bytes),
         installed_updated_at: item.installed_time_updated,
+        download_pending: item.download_pending,
         ..files
     }
 }
@@ -370,6 +373,7 @@ fn read_mod(
             problem: info.problem,
             installed_updated_at: None,
             unchanged: false,
+            download_pending: false,
         },
         Err(error) => {
             tracing::warn!(folder = %folder.display(), "can't read the mod folder: {error}");
@@ -396,6 +400,7 @@ fn without_files(
         installed_updated_at: None,
         added_at: None,
         unchanged: false,
+        download_pending: false,
     }
 }
 

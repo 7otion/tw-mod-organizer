@@ -1,4 +1,6 @@
 pub mod cancel_library_scan;
+pub mod fetch_collection;
+pub mod fetch_download_progress;
 pub mod fetch_mod_details;
 pub mod fetch_subscription_times;
 pub mod open_in_rpfm;

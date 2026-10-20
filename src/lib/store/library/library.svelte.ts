@@ -21,11 +21,6 @@ import {
 import { t } from '@/lib/i18n';
 import { unixNow } from '@/lib/utils';
 
-type SubscribedMods = {
-	subscribed: number[];
-	failures: string[];
-};
-
 type RemovedMods = {
 	unsubscribed: number[];
 	trashed: string[];
@@ -279,18 +274,8 @@ export class LibraryStore extends ConnectionStore {
 		await mod.update({ seen_updated_at: mod.remote_updated_at });
 	}
 
-	async subscribe(itemRefs: readonly string[]): Promise<void> {
-		const result = await invoke<SubscribedMods>('subscribe_mods', {
-			app_id: this.#gamesStore.current!.app_id,
-			item_ids: itemRefs.map(Number),
-		});
-		if (result.subscribed.length) await this.#scanStore.scan();
-		if (result.failures.length)
-			throw new Error(
-				t('library.subscribe.failed', {
-					failures: result.failures.join('; '),
-				})
-			);
+	hasSteamMod(itemRef: string): boolean {
+		return itemRef in this.#steamModsByRef;
 	}
 
 	async openInSteam(mod: Mod): Promise<void> {

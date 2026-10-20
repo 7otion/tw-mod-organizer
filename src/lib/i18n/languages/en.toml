@@ -102,6 +102,11 @@ progress = "Scanning {done} / {total}"
 progress = "Fetching Steam details {done} / {total}"
 times = "Reading subscription dates"
 
+# Workshop downloads being watched; the pill opens the downloads dialog.
+[header.downloads]
+progress = "Downloading {done} / {total}"
+finished = "Downloaded {done} / {total}"
+
 # File sizes. {size} is already formatted for the language (3.4 or 3,4).
 [size]
 bytes = "{size} B"
@@ -387,9 +392,69 @@ title = "Library"
 tableButton = "Table configuration"
 noMatch = "No mod matches the search or filters."
 
-[library.subscribe]
-# {failures} lists each item that failed, with the reason from Steam.
-failed = "Couldn't subscribe to everything: {failures}"
+[library.importCollection]
+title = "Import Steam collection"
+description = "Subscribe to a whole Workshop collection in one go."
+linkLabel = "Collection link"
+linkPlaceholder = "https://steamcommunity.com/sharedfiles/filedetails/?id=…"
+load = "Load"
+# Under the collection's name. {date} is already formatted for the language.
+meta = { one = "by {author} · {count} item · updated {date}", other = "by {author} · {count} items · updated {date}" }
+item = "Item"
+size = "Size"
+status = "Status"
+include = "Include"
+empty = "This collection has no items."
+toSubscribe = { one = "{count} to subscribe", other = "{count} to subscribe" }
+toDownload = "{size} to download"
+inLibrary = { one = "{count} already in library", other = "{count} already in library" }
+createGroup = "Also create a group “{title}” in collection order"
+steamHint = "Steam must be running."
+steamOff = "Steam is not running."
+subscribeTo = "Subscribe to {count}"
+
+[library.importCollection.statuses]
+new = "New"
+inLibrary = "In library"
+skipped = "Skipped"
+collection = "Collection"
+otherGame = "Other game"
+
+[library.importCollection.errors]
+invalidLink = "Paste a Workshop collection link or its ID."
+notCollection = "This Workshop item is not a collection."
+notFound = "No Workshop item has this ID."
+
+# Progress dialog for Workshop items the Steam client is downloading.
+[workshopDownloads]
+description = "Steam downloads each item. You can keep using TMO."
+finishedTitle = "Downloads finished"
+minimise = "Minimise to status bar"
+done = "{done} of {total} done"
+failed = "{count} failed"
+minutesLeft = "about {minutes} min left"
+lessThanMinute = "less than a minute left"
+onlyProblems = "Show only problems"
+noProblems = "No problems."
+stop = "Stop"
+background = "Run in background"
+
+[workshopDownloads.title]
+import = "Downloading collection"
+resume = "Downloading Workshop items"
+
+[workshopDownloads.statuses]
+queued = "Queued"
+downloading = "Downloading"
+percent = "{percent}%"
+installed = "Downloaded"
+subscribe_failed = "Couldn't subscribe"
+unsubscribed = "Unsubscribed"
+
+[workshopDownloads.stopConfirm]
+title = "Stop downloading?"
+description = { one = "The {count} item still downloading is unsubscribed and dropped from the library. Downloaded items stay.", other = "The {count} items still downloading are unsubscribed and dropped from the library. Downloaded items stay." }
+confirm = "Unsubscribe and stop"
 
 # Why a mod can't be used. Codes come from the scan; the Total War ones
 # (no_pack_file, many_pack_files) only appear for Total War games.
