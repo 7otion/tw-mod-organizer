@@ -11,23 +11,23 @@
 
 	import { DragOrder } from '@/lib/drag-order.svelte';
 	import { t } from '@/lib/i18n';
-	import {
-		LibraryColumnsStore,
-		COVER_SIZES,
-		type LibraryColumn,
-		type CoverSize,
-	} from '@/lib/store';
+	import type { TableLayout } from '@/lib/store';
 
+	import { COVER_SIZES, type CoverSize, type ModColumn } from './mod-columns';
 	import TableColumnRow from './table-column-row.svelte';
 
-	let { open = $bindable(false) }: { open: boolean } = $props();
+	type Props = {
+		open: boolean;
+		layout: TableLayout<ModColumn>;
+		title: string;
+	};
 
-	const libraryColumnsStore = LibraryColumnsStore.get();
+	let { open = $bindable(false), layout, title }: Props = $props();
 
 	const order = new DragOrder(
-		() => libraryColumnsStore.columns,
+		() => layout.columns,
 		(column) => column.key,
-		(keys: LibraryColumn[]) => libraryColumnsStore.reorder(keys)
+		(keys: ModColumn[]) => layout.reorder(keys)
 	);
 
 	let list = $state<HTMLUListElement | null>(null);
@@ -36,21 +36,20 @@
 <Dialog.Root bind:open>
 	<Dialog.Content class="sm:max-w-[460px]">
 		<Dialog.Header>
-			<Dialog.Title>{t('library.table.title')}</Dialog.Title>
+			<Dialog.Title>{title}</Dialog.Title>
 		</Dialog.Header>
 
 		<div class="flex flex-col gap-2">
 			<span class="text-sm font-semibold">
-				{t('library.table.coverSize')}
+				{t('modTable.settings.coverSize')}
 			</span>
 			<ToggleGroup.Root
 				type="single"
-				aria-label={t('library.table.coverSize')}
+				aria-label={t('modTable.settings.coverSize')}
 				bind:value={
-					() => libraryColumnsStore.coverSize,
+					() => layout.coverSize,
 					(coverSize) =>
-						coverSize &&
-						libraryColumnsStore.setCoverSize(coverSize as CoverSize)
+						coverSize && layout.setCoverSize(coverSize as CoverSize)
 				}
 			>
 				{#each COVER_SIZES as coverSize (coverSize)}
@@ -64,25 +63,24 @@
 		<div class="flex items-center justify-between gap-3">
 			<span class="flex flex-col gap-0.5">
 				<span class="text-sm font-semibold">
-					{t('library.table.rowDivider')}
+					{t('modTable.settings.rowDivider')}
 				</span>
 				<span class="text-sm text-muted-foreground">
-					{t('library.table.rowDividerHint')}
+					{t('modTable.settings.rowDividerHint')}
 				</span>
 			</span>
 			<Switch
-				aria-label={t('library.table.rowDivider')}
+				aria-label={t('modTable.settings.rowDivider')}
 				bind:checked={
-					() => libraryColumnsStore.hasRowDivider,
-					(hasRowDivider) =>
-						void libraryColumnsStore.setRowDivider(hasRowDivider)
+					() => layout.hasRowDivider,
+					(hasRowDivider) => void layout.setRowDivider(hasRowDivider)
 				}
 			/>
 		</div>
 
 		<div class="flex flex-col gap-2">
 			<span class="text-sm font-semibold">
-				{t('library.table.columns')}
+				{t('modTable.settings.columns')}
 			</span>
 			<div class="flex flex-col gap-px">
 				<ul bind:this={list} class="flex flex-col gap-px">
@@ -97,7 +95,7 @@
 						onDragEnd={(event) => order.end(event.canceled)}
 					>
 						{#each order.items as column, index (column.key)}
-							<TableColumnRow {column} {index} />
+							<TableColumnRow {layout} {column} {index} />
 						{/each}
 					</DragDropProvider>
 				</ul>
@@ -105,9 +103,9 @@
 		</div>
 
 		<Dialog.Footer class="items-center sm:justify-between">
-			<Button variant="ghost" onclick={() => libraryColumnsStore.reset()}>
+			<Button variant="ghost" onclick={() => layout.reset()}>
 				<RotateCcwIcon />
-				{t('library.table.reset')}
+				{t('modTable.settings.reset')}
 			</Button>
 			<Dialog.Close>
 				{#snippet child({ props })}

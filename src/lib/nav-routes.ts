@@ -32,7 +32,7 @@ export const navRoutes: NavRoute[] = [
 	},
 	{
 		id: 'groups',
-		path: '/',
+		path: '/groups',
 		labelKey: 'nav.groups',
 		shortcutKey: '3',
 		icon: Layers2Icon,

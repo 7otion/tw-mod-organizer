@@ -1,8 +1,14 @@
 import { invoke } from '@tauri-apps/api/core';
 import { SvelteSet } from 'svelte/reactivity';
 
+import type { Mod } from '@/lib/models';
 import { parseWorkshopId } from '@/lib/steam-links';
-import { GamesStore, LibraryStore, WorkshopDownloadsStore } from '@/lib/store';
+import {
+	GamesStore,
+	GroupsStore,
+	LibraryStore,
+	WorkshopDownloadsStore,
+} from '@/lib/store';
 
 export type CollectionItem = {
 	source_ref: string;
@@ -42,6 +48,7 @@ export class CollectionImport {
 	readonly #gamesStore = GamesStore.get();
 	readonly #libraryStore = LibraryStore.get();
 	readonly #downloadsStore = WorkshopDownloadsStore.get();
+	readonly #groupsStore = GroupsStore.get();
 	readonly #skipped = new SvelteSet<string>();
 
 	link = $state('');
@@ -120,19 +127,42 @@ export class CollectionImport {
 		}
 	}
 
-	async subscribe(): Promise<void> {
+	async subscribe(createGroup: boolean): Promise<void> {
+		const collection = this.collection!;
 		const items = this.ticked.map((row) => ({
 			source_ref: row.item.source_ref,
 			title: row.item.title,
 		}));
 		if (!items.length) return;
+		const memberRefs = this.rows
+			.filter((row) => row.status === 'new' || row.status === 'inLibrary')
+			.map((row) => row.item.source_ref);
 		this.isSubscribing = true;
 		try {
 			await this.#downloadsStore.subscribe(items);
+			if (createGroup) await this.createGroup(collection, memberRefs);
 			this.reset();
 		} finally {
 			this.isSubscribing = false;
 		}
+	}
+
+	private async createGroup(
+		collection: Collection,
+		refs: readonly string[]
+	): Promise<void> {
+		const byRef = Object.fromEntries(
+			this.#libraryStore.list
+				.filter((mod) => mod.source === 'steam')
+				.map((mod) => [mod.source_ref, mod])
+		) as Record<string, Mod | undefined>;
+		const mods = refs.flatMap((ref) => byRef[ref] ?? []);
+		let name = collection.title;
+		for (let number = 2; this.#groupsStore.isNameTaken(name); number++)
+			name = `${collection.title} (${number})`;
+		await this.#groupsStore.create(name, mods, {
+			steamCollectionId: collection.source_ref,
+		});
 	}
 
 	reset(): void {

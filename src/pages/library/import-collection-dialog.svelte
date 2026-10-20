@@ -58,7 +58,7 @@
 	}
 
 	async function subscribe(): Promise<void> {
-		await importer.subscribe();
+		await importer.subscribe(createGroup);
 		open = false;
 	}
 </script>

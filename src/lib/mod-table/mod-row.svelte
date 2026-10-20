@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" generics="Row, ScrollKey">
 	import type { LucideIcon } from '@lucide/svelte';
 	import CircleAlertIcon from '@lucide/svelte/icons/circle-alert';
 	import CircleArrowUpIcon from '@lucide/svelte/icons/circle-arrow-up';
@@ -11,30 +11,20 @@
 	import { Checkbox } from '@/components/ui/checkbox';
 
 	import { formatDate, formatSize, problemText, t } from '@/lib/i18n';
-	import type { Mod } from '@/lib/models';
-	import type { Selection } from '@/lib/selection.svelte';
 	import { selectCellText } from '@/lib/select-cell-text';
+	import { LibraryStore } from '@/lib/store';
 	import { tagTextColor } from '@/lib/tag-swatches';
-	import {
-		LibraryColumnsStore,
-		LibraryStore,
-		type LibraryColumn,
-	} from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
-	import {
-		DIVIDER_GAP,
-		ROW_HEIGHTS,
-		SOURCE_ICON_SIZES,
-	} from './library-columns';
+	import { SOURCE_ICON_SIZES, type ModColumn } from './mod-columns';
 	import ModCover from './mod-cover.svelte';
 	import ModSourceIcon from './mod-source-icon.svelte';
+	import type { ModTable } from './mod-table-state.svelte';
 
 	type Props = {
-		mod: Mod;
+		table: ModTable<Row, ScrollKey>;
+		row: Row;
 		top: number;
-		selection: Selection<number>;
-		onopendetails: (mod: Mod) => void;
 	};
 
 	type Mark = {
@@ -46,23 +36,22 @@
 	const SHOWN_TAGS = 2;
 	const SHOWN_PROFILES = 2;
 
-	let { mod, top, selection, onopendetails }: Props = $props();
+	let { table, row, top }: Props = $props();
 
 	const libraryStore = LibraryStore.get();
-	const libraryColumnsStore = LibraryColumnsStore.get();
 
-	const isSelected = $derived(selection.has(mod.id));
+	const mod = $derived(table.modOf(row));
+	const key = $derived(table.keyOf(row));
+	const isSelected = $derived(table.selection?.has(key) ?? false);
 	const hasVersionColumn = $derived(
-		libraryColumnsStore.visibleColumns.some(
-			(column) => column.key === 'version'
-		)
+		table.layout.visibleColumns.some((column) => column.key === 'version')
 	);
 	const tags = $derived(libraryStore.tagsOf(mod));
 	const placement = $derived(libraryStore.placementOf(mod));
 
 	const inlineVersion = $derived(
 		mod.version && !hasVersionColumn
-			? t('library.row.version', { version: mod.version })
+			? t('modTable.row.version', { version: mod.version })
 			: null
 	);
 
@@ -70,7 +59,7 @@
 		if (mod.isMissing)
 			return {
 				icon: UnlinkIcon,
-				label: t('library.row.missing', {
+				label: t('modTable.row.missing', {
 					problem: problemText(mod.problem!),
 				}),
 				class: 'text-status-missing',
@@ -92,18 +81,18 @@
 				icon: PuzzleIcon,
 				label:
 					missing.length > 1
-						? t('library.row.needsMore', {
+						? t('modTable.row.needsMore', {
 								title,
 								count: missing.length - 1,
 							})
-						: t('library.row.needs', { title }),
+						: t('modTable.row.needs', { title }),
 				class: 'text-status-dep',
 			};
 		}
 		if (mod.hasUnseenUpdate)
 			return {
 				icon: CircleArrowUpIcon,
-				label: t('library.row.newVersion'),
+				label: t('modTable.row.newVersion'),
 				class: 'text-status-update',
 			};
 		return null;
@@ -113,19 +102,15 @@
 		placement.profiles.map(({ profile, isEnabled }) =>
 			isEnabled
 				? profile.name
-				: t('library.row.profileOff', { name: profile.name })
+				: t('modTable.row.profileOff', { name: profile.name })
 		)
 	);
 	const firstGroup = $derived(placement.groups[0] ?? null);
-	const rowHeight = $derived(
-		ROW_HEIGHTS[libraryColumnsStore.coverSize] +
-			(libraryColumnsStore.hasRowDivider ? DIVIDER_GAP : 0)
-	);
 </script>
 
-{#snippet cell(key: LibraryColumn)}
-	{#if key === 'mod'}
-		{@const coverSize = libraryColumnsStore.coverSize}
+{#snippet cell(column: ModColumn)}
+	{#if column === 'mod'}
+		{@const coverSize = table.layout.coverSize}
 		{#if coverSize !== 'none'}
 			<ModCover {mod} size={coverSize} />
 		{/if}
@@ -156,18 +141,18 @@
 			<Button
 				variant="ghost"
 				size="icon-sm"
-				aria-label={t('library.row.openDetails')}
+				aria-label={t('modTable.row.openDetails')}
 				class="ml-auto opacity-0 transition-opacity duration-120 group-hover:opacity-100 focus-visible:opacity-100"
 				onclick={(event) => {
 					event.stopPropagation();
-					onopendetails(mod);
+					table.openDetails(mod);
 				}}
 				ondblclick={(event) => event.stopPropagation()}
 			>
 				<PanelRightOpenIcon />
 			</Button>
 		</span>
-	{:else if key === 'source'}
+	{:else if column === 'source'}
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<span
 			class="grid place-items-center"
@@ -179,12 +164,12 @@
 		>
 			<ModSourceIcon
 				source={mod.source}
-				size={SOURCE_ICON_SIZES[libraryColumnsStore.coverSize]}
+				size={SOURCE_ICON_SIZES[table.layout.coverSize]}
 			/>
 		</span>
-	{:else if key === 'author'}
+	{:else if column === 'author'}
 		<span data-cell class="truncate">{mod.author_name ?? '—'}</span>
-	{:else if key === 'tags'}
+	{:else if column === 'tags'}
 		<span data-cell class="flex min-w-0 gap-1.5 overflow-hidden">
 			{#each tags.slice(0, SHOWN_TAGS) as tag, index (tag.id)}
 				{#if index > 0}
@@ -204,7 +189,7 @@
 				>
 			{/if}
 		</span>
-	{:else if key === 'profiles'}
+	{:else if column === 'profiles'}
 		<span
 			data-cell
 			class="flex min-w-0 items-center gap-1.5 text-foreground-2"
@@ -221,28 +206,28 @@
 			{:else if firstGroup}
 				<span class="inline-flex min-w-0 items-center gap-1 truncate">
 					<LinkIcon class="size-3.5 shrink-0" />
-					{t('library.row.viaGroup', {
+					{t('modTable.row.viaGroup', {
 						group: firstGroup.group.name,
 						count: firstGroup.profiles.length,
 					})}
 				</span>
 			{/if}
 		</span>
-	{:else if key === 'size'}
+	{:else if column === 'size'}
 		<span data-cell class="text-right font-mono">
 			{mod.size_bytes === null || mod.isMissing
 				? '—'
 				: formatSize(mod.size_bytes)}
 		</span>
-	{:else if key === 'updated'}
+	{:else if column === 'updated'}
 		<span data-cell class="text-right font-mono">
 			{mod.isMissing || !mod.updatedAt ? '—' : formatDate(mod.updatedAt)}
 		</span>
-	{:else if key === 'added'}
+	{:else if column === 'added'}
 		<span data-cell class="text-right font-mono"
 			>{mod.added_at ? formatDate(mod.added_at) : '—'}</span
 		>
-	{:else if key === 'version'}
+	{:else if column === 'version'}
 		<span data-cell class="truncate">{mod.version ?? '—'}</span>
 	{/if}
 {/snippet}
@@ -250,23 +235,25 @@
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 <li
 	class={cn(
-		'group absolute inset-x-6 top-0 grid grid-cols-(--library-columns) items-center gap-x-3 rounded-md px-5 text-sm text-muted-foreground transition-colors duration-120 select-none hover:bg-fill-1',
+		'group absolute inset-x-6 top-0 grid grid-cols-(--table-columns) items-center gap-x-3 rounded-md px-5 text-sm text-muted-foreground transition-colors duration-120 select-none hover:bg-fill-1',
 		isSelected && 'bg-pink-tint hover:bg-pink-tint-2',
-		libraryColumnsStore.hasRowDivider &&
+		table.layout.hasRowDivider &&
 			'after:absolute after:inset-x-5 after:bottom-0 after:h-px after:bg-border'
 	)}
-	style:height="{rowHeight}px"
+	style:height="{table.rowHeight}px"
 	style:transform="translateY({top}px)"
-	onclick={(event) => selection.select(mod.id, event)}
+	onclick={(event) => table.selection?.select(key, event)}
 	ondblclick={selectCellText}
 >
-	<Checkbox
-		checked={isSelected}
-		aria-label={t('common.selectItem', { name: mod.displayTitle })}
-		onclick={(event) => event.stopPropagation()}
-		onCheckedChange={() => selection.toggle(mod.id)}
-	/>
-	{#each libraryColumnsStore.visibleColumns as column (column.key)}
+	{#if table.selection}
+		<Checkbox
+			checked={isSelected}
+			aria-label={t('common.selectItem', { name: mod.displayTitle })}
+			onclick={(event) => event.stopPropagation()}
+			onCheckedChange={() => table.selection!.toggle(key)}
+		/>
+	{/if}
+	{#each table.layout.visibleColumns as column (column.key)}
 		{@render cell(column.key)}
 	{/each}
 </li>

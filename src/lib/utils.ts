@@ -53,7 +53,7 @@ export function oneOf<T extends string>(
 }
 
 export function nameError(
-	kind: 'tag' | 'profile',
+	kind: 'tag' | 'profile' | 'group',
 	name: string,
 	isTaken: boolean
 ): MessageKey | null {

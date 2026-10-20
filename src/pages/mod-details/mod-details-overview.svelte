@@ -7,6 +7,8 @@
 	import { LibraryStore, ProfilesStore } from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
+	import AddToGroupMenu from '@/pages/library/add-to-group-menu.svelte';
+
 	import { readDescription } from './description';
 
 	let { mod }: { mod: Mod } = $props();
@@ -93,4 +95,7 @@
 			{t('modDetails.overview.noProfiles')}
 		</p>
 	{/if}
+	<div class="mt-2">
+		<AddToGroupMenu mods={[mod]} variant="secondary" size="sm" />
+	</div>
 </section>

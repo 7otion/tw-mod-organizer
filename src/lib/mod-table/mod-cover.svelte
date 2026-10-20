@@ -3,8 +3,10 @@
 	import { convertFileSrc } from '@tauri-apps/api/core';
 
 	import type { Mod } from '@/lib/models';
-	import { LibraryScanStore, type CoverSize } from '@/lib/store';
+	import { LibraryScanStore } from '@/lib/store';
 	import { cn } from '@/lib/utils';
+
+	import type { CoverSize } from './mod-columns';
 
 	type Props = {
 		mod: Mod;

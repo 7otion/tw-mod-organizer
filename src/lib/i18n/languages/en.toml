@@ -129,6 +129,10 @@ taken = "A tag with this name already exists."
 empty = "A profile needs a name."
 taken = "A profile with this name already exists."
 
+[names.group]
+empty = "A group needs a name."
+taken = "A group with this name already exists."
+
 # Section headings in the sidebar. They are shown in capital letters.
 [sidebar.outline]
 title = "Outline"
@@ -138,6 +142,14 @@ collapseAllTooltip = "Collapse all separators"
 [sidebar.profiles]
 title = "Profiles"
 newTooltip = "New profile"
+
+[sidebar.groups]
+title = "Groups"
+newTooltip = "New group"
+hint = "A group is a reusable, ordered set of mods. Profiles link it as one block and can only switch members on or off."
+mods = { one = "{count} mod", other = "{count} mods" }
+linked = { one = "in {count} profile", other = "in {count} profiles" }
+notLinked = "not linked"
 
 [sidebar.loadOrder]
 rebuildFromSave = "Rebuild profile from a save…"
@@ -206,6 +218,104 @@ mods = "MODS"
 actions = "A"
 actionsTooltip = "Actions"
 empty = "No tags yet. Tags label mods for filtering; they never change what a profile loads."
+
+[groups]
+nameLabel = "Group name"
+noneTitle = "No groups yet"
+noneDescription = "A group is a reusable, ordered set of mods. Profiles link it as one block and can only switch members on or off."
+newGroup = "New group…"
+renameEllipsis = "Rename…"
+deleteEllipsis = "Delete group…"
+duplicate = "Duplicate"
+changeColour = "Change colour"
+noColour = "No colour"
+colourTitle = "Colour of “{name}”"
+linkedCount = { one = "linked in {count} profile", other = "linked in {count} profiles" }
+addMods = "Add mods to group…"
+callout = { one = "Changes here apply immediately to the {count} linked profile. Order is set here only.", other = "Changes here apply immediately to all {count} linked profiles. Order is set here only." }
+calloutUnlinked = "No profile links this group yet. Order is set here only."
+linkedIn = "Linked in"
+linkedNone = "Not linked in any profile yet."
+selected = "Selected"
+selectedNone = "Select a mod to see it here."
+details = "Details"
+removeFromGroup = "Remove from group"
+empty = "This group has no mods yet. Select mods in the Library and use Add to group."
+
+# After a drop from the picker; {position} is 1-based.
+[groups.drop]
+line = { one = "Insert {count} at position {position}", other = "Insert {count} at position {position}" }
+end = { one = "Add {count} at the end · position {position}", other = "Add {count} at the end · position {position}" }
+zone = "Drop mods here from the Library, or use “Add mods to group…”"
+endZone = "Drop here to add at the end"
+
+# The drag-only library picker shared by Groups and Load order.
+[modPicker]
+title = "Library"
+dragInto = "Drag into {name}"
+appliesTo = { one = "applies to {count} linked profile", other = "applies to {count} linked profiles" }
+hideAdded = "Hide added"
+unplaced = "Not in any profile"
+source = "Source"
+tags = "Tags"
+noTags = "No tags yet"
+listLabel = "Library mods"
+available = { one = "{count} available", other = "{count} available" }
+noMatch = "No mods match “{query}”"
+nothingLeft = "Nothing left to add"
+noMatchHint = "Check the spelling or clear filters. Not in your library yet?"
+clearFilters = "Clear filters"
+searchWorkshop = "Search the Workshop"
+selected = { one = "{count} selected", other = "{count} selected" }
+dragStack = "Drag the stack, or any selected row"
+idleTitle = "Drag mods into the list"
+idleClick = "Click to select several"
+idleRange = "range"
+idleAddOne = "add one"
+idleAll = "all"
+
+[modPicker.added]
+group = "In group"
+profile = "In profile"
+
+[modPicker.addedHidden]
+group = { one = "{count} already in the group, hidden", other = "{count} already in the group, hidden" }
+profile = { one = "{count} already added, hidden", other = "{count} already added, hidden" }
+
+[modPicker.addedGreyed]
+group = { one = "{count} already in the group, shown greyed", other = "{count} already in the group, shown greyed" }
+profile = { one = "{count} already added, shown greyed", other = "{count} already added, shown greyed" }
+
+[modPicker.dropInto]
+group = "Dragging · drop into the group"
+profile = "Dragging · drop into the list"
+
+[groups.columns]
+number = "#"
+mod = "MOD"
+tags = "TAGS"
+sourceShort = "S"
+
+[groups.new]
+title = "New group"
+name = "Name"
+withMods = { one = "Starts with the {count} selected mod.", other = "Starts with the {count} selected mods." }
+create = "Create group"
+
+[groups.rename]
+title = "Rename group"
+save = "Rename"
+
+[groups.delete]
+title = "Delete “{name}”?"
+description = { one = "{count} mod leaves the group; it stays in your library.", other = "{count} mods leave the group; they stay in your library." }
+linked = { one = "The group is also removed from {count} profile: {names}.", other = "The group is also removed from {count} profiles: {names}." }
+confirm = "Delete group"
+
+[groups.remove]
+title = "Remove “{mod}” from “{group}”?"
+description = { one = "It also leaves the {count} profile that links this group: {names}.", other = "It also leaves the {count} profiles that link this group: {names}." }
+confirm = "Remove"
 
 [profiles]
 nameLabel = "Profile name"
@@ -573,8 +683,12 @@ scope = "Profile filter"
 has = "has"
 lacks = "lacks"
 
+# The mod table shared by every page that lists mods.
+[modTable]
+selected = "{count} Selected"
+
 # Column headers. The Mod header is shown in capital letters.
-[library.columns]
+[modTable.columns]
 source = "SOURCE"
 sourceShort = "S"
 mod = "MOD"
@@ -592,7 +706,7 @@ nexus = "Nexus"
 base = "Base"
 manual = "Manual"
 
-[library.row]
+[modTable.row]
 version = "v{version}"
 missing = "missing · {problem}"
 newVersion = "new version"
@@ -609,8 +723,7 @@ title = "Your library is empty"
 install = "Install mod…"
 workshop = "Open Steam Workshop"
 
-[library.table]
-title = "Table · Library"
+[modTable.settings]
 coverSize = "Cover size"
 rowDivider = "Row divider"
 rowDividerHint = "A line between rows."
@@ -618,18 +731,21 @@ columns = "Columns"
 reset = "Reset to default"
 show = "Show {column}"
 
-# Width shown next to each column in Table…
-[library.table.width]
+# Width shown next to each column in the table settings dialog.
+[modTable.settings.width]
 hidden = "hidden"
 auto = "auto"
 pixels = "{width} px"
 fixed = "fixed"
 rest = "rest"
 
+[library.table]
+title = "Table · Library"
+
 [library.bulk]
-selected = "{count} Selected"
 addToProfile = "Add to profile"
 addToGroup = "Add to group"
+newGroup = "New group…"
 tag = "Tag"
 newTag = "New tag…"
 remove = "Unsubscribe / remove…"

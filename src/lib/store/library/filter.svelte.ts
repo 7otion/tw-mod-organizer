@@ -1,5 +1,6 @@
 import { ConnectionStore } from '@7otion-tauri/orm';
 
+import { MOD_SORTS, type ModSort } from '@/lib/mod-table/mod-columns';
 import type { Mod, ModSource, Profile } from '@/lib/models';
 import {
 	LibraryStore,
@@ -25,16 +26,6 @@ export const MOD_STATES = [
 ] as const;
 export type ModState = (typeof MOD_STATES)[number];
 
-export const LIBRARY_SORTS = [
-	'title',
-	'author',
-	'source',
-	'size',
-	'updated',
-	'added',
-] as const;
-export type LibrarySort = (typeof LIBRARY_SORTS)[number];
-
 type FilterSection = 'scope' | 'sources' | 'states' | 'tagIds';
 
 type LibraryCounts = {
@@ -49,7 +40,7 @@ export class LibraryFilterStore extends ConnectionStore {
 	private static readonly collator = new Intl.Collator();
 
 	private static readonly compare: Record<
-		LibrarySort,
+		ModSort,
 		(a: Mod, b: Mod) => number
 	> = {
 		title: (a, b) =>
@@ -82,11 +73,11 @@ export class LibraryFilterStore extends ConnectionStore {
 			value === null || Number.isInteger(value),
 	};
 
-	private static readonly sortField: UiStateField<LibrarySort> = {
+	private static readonly sortField: UiStateField<ModSort> = {
 		key: 'library.sort',
 		initial: 'updated',
-		is: (value): value is LibrarySort =>
-			LIBRARY_SORTS.some((sort) => sort === value),
+		is: (value): value is ModSort =>
+			MOD_SORTS.some((sort) => sort === value),
 	};
 
 	private static readonly isDescendingField: UiStateField<boolean> = {
@@ -217,7 +208,7 @@ export class LibraryFilterStore extends ConnectionStore {
 		this.tagIds = [];
 	}
 
-	async sortBy(sort: LibrarySort): Promise<void> {
+	async sortBy(sort: ModSort): Promise<void> {
 		const isDescending =
 			sort === this.sort
 				? !this.isDescending

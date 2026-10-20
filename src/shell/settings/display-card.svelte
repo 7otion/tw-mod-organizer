@@ -11,9 +11,9 @@
 	import * as ToggleGroup from '@/components/ui/toggle-group';
 
 	import { formatDate, t } from '@/lib/i18n';
+	import { COVER_SIZES } from '@/lib/mod-table/mod-columns';
 	import { DATE_FORMATS, type DateFormat } from '@/lib/models';
 	import {
-		COVER_SIZES,
 		LanguageStore,
 		type LanguageOption,
 		SettingsStore,

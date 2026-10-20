@@ -15,8 +15,8 @@
 		type Requirement,
 	} from '@/lib/store';
 	import { cn } from '@/lib/utils';
+	import ModCover from '@/lib/mod-table/mod-cover.svelte';
 	import ModContextMenuItems from '@/pages/library/mod-context-menu-items.svelte';
-	import ModCover from '@/pages/library/mod-cover.svelte';
 
 	type Props = {
 		mod: Mod;

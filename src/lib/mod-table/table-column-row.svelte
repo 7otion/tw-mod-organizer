@@ -4,20 +4,19 @@
 
 	import { Checkbox } from '@/components/ui/checkbox';
 
-	import { LibraryColumnsStore, type LibraryColumnState } from '@/lib/store';
 	import { t } from '@/lib/i18n';
+	import type { ColumnState, TableLayout } from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
-	import { COLUMN_INFO } from './library-columns';
+	import { MOD_COLUMN_SPECS, type ModColumn } from './mod-columns';
 
 	type Props = {
-		column: LibraryColumnState;
+		layout: TableLayout<ModColumn>;
+		column: ColumnState<ModColumn>;
 		index: number;
 	};
 
-	let { column, index }: Props = $props();
-
-	const libraryColumnsStore = LibraryColumnsStore.get();
+	let { layout, column, index }: Props = $props();
 
 	const sortable = createSortable({
 		get id() {
@@ -29,12 +28,12 @@
 	});
 
 	const widthLabel = $derived.by(() => {
-		if (!column.isVisible) return t('library.table.width.hidden');
-		const { width } = COLUMN_INFO[column.key];
-		if (width) return t(`library.table.width.${width}`);
+		if (!column.isVisible) return t('modTable.settings.width.hidden');
+		const { width } = MOD_COLUMN_SPECS[column.key];
+		if (width) return t(`modTable.settings.width.${width}`);
 		return column.width
-			? t('library.table.width.pixels', { width: column.width })
-			: t('library.table.width.auto');
+			? t('modTable.settings.width.pixels', { width: column.width })
+			: t('modTable.settings.width.auto');
 	});
 </script>
 
@@ -54,14 +53,14 @@
 	<Checkbox
 		checked={column.isVisible}
 		disabled={column.key === 'mod'}
-		aria-label={t('library.table.show', {
-			column: t(COLUMN_INFO[column.key].labelKey),
+		aria-label={t('modTable.settings.show', {
+			column: t(MOD_COLUMN_SPECS[column.key].labelKey),
 		})}
 		onCheckedChange={(isChecked) =>
-			libraryColumnsStore.setVisible(column.key, isChecked)}
+			layout.setVisible(column.key, isChecked)}
 	/>
 	<span class={cn(!column.isVisible && 'text-muted-foreground')}>
-		{t(COLUMN_INFO[column.key].labelKey)}
+		{t(MOD_COLUMN_SPECS[column.key].labelKey)}
 	</span>
 	<span class="font-mono text-xs text-muted-foreground">{widthLabel}</span>
 </li>
