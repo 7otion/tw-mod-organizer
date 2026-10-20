@@ -26,8 +26,57 @@ pub struct ModInfo {
     pub problem: Option<&'static str>,
 }
 
+#[derive(Serialize)]
+pub struct InstallInputs {
+    pub extensions: &'static [&'static str],
+    pub folders: bool,
+}
+
+pub struct SourceEntry {
+    pub path: String,
+    pub size: u64,
+}
+
+#[derive(Clone, Serialize)]
+pub struct Candidate {
+    pub id: String,
+    pub name: String,
+    pub identity: Fact,
+    pub facts: Vec<Fact>,
+    pub size_bytes: u64,
+    pub entries: Vec<String>,
+    pub problem: Option<String>,
+}
+
+#[derive(Clone, Serialize)]
+pub struct Fact {
+    pub label: &'static str,
+    pub value: String,
+}
+
+#[derive(Serialize)]
+pub struct Installable {
+    pub candidates: Vec<Candidate>,
+    pub selection: Selection,
+    pub identities_can_coexist: bool,
+}
+
+#[derive(Clone, Copy, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Selection {
+    Single,
+    #[allow(dead_code)]
+    Multiple,
+}
+
 pub trait GameSupport: Sync {
     fn info(&self) -> GameInfo;
+
+    fn install_inputs(&self) -> InstallInputs;
+
+    fn find_installable(&self, entries: &[SourceEntry]) -> Installable;
+
+    fn nothing_installable_reason(&self) -> &'static str;
 
     fn mods_folder_name(&self) -> &'static str;
 

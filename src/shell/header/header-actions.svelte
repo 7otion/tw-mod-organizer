@@ -12,8 +12,11 @@
 
 	import { t } from '@/lib/i18n';
 	import type { MessageKey } from '@/lib/i18n/message-key';
+	import { AppStore } from '@/lib/store';
+
 	import ForceUpdateDialog from '@/pages/library/force-update-dialog.svelte';
 	import ImportCollectionDialog from '@/pages/library/import-collection-dialog.svelte';
+	import InstallModDialog from '@/pages/library/install-mod-dialog.svelte';
 	import WorkshopDownloadsDialog from '@/pages/library/workshop-downloads-dialog.svelte';
 
 	type HeaderAction = {
@@ -23,6 +26,8 @@
 		opensDialog?: boolean;
 		onclick?: () => void;
 	};
+
+	const appStore = AppStore.get();
 
 	let isImporting = $state(false);
 	let isForceUpdating = $state(false);
@@ -47,6 +52,8 @@
 			labelKey: 'header.library.installMod',
 			icon: PackageIcon,
 			isPrimary: true,
+			opensDialog: true,
+			onclick: () => appStore.openInstallMod(),
 		},
 		{
 			labelKey: 'header.library.importCollection',
@@ -88,6 +95,7 @@
 	{/each}
 </div>
 
+<InstallModDialog />
 <ImportCollectionDialog bind:open={isImporting} />
 <ForceUpdateDialog bind:open={isForceUpdating} />
 <WorkshopDownloadsDialog />

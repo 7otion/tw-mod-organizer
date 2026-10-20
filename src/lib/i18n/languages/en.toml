@@ -398,6 +398,73 @@ title = "Library"
 tableButton = "Table configuration"
 noMatch = "No mod matches the search or filters."
 
+[library.installMod]
+title = "Install a mod"
+forGame = "for {game}"
+installingTitle = { one = "Installing {name}", other = "Installing {count} mods" }
+installingOf = "{name} · {index} of {total}"
+dropHere = "Drop a file here"
+orChoose = "or choose one from your computer"
+accepted = "Accepted for this game:"
+acceptedFilter = "Mods and archives"
+chooseFile = "Choose file…"
+note = "The mod is copied into TMO's mods folder for this game; your original file stays where it is."
+unsupportedDrop = "Drop one of: {formats}"
+# Under the source name: "118 MB · from Downloads".
+sourceMeta = "{size} · from {folder}"
+foundPickOne = { one = "Found {count} installable", other = "Found {count} installable · pick one" }
+foundRecognised = { one = "Found {count} mod this game can recognise", other = "Found {count} mods this game can recognise" }
+foundInstallable = "{count} can be installed"
+candidates = "Mods found"
+nameLabel = "Name in TMO"
+addToProfile = "Also add to “{profile}”"
+back = "Back"
+install = { one = "Install", other = "Install {count} mods" }
+installed = { one = "{count} mod installed", other = "{count} mods installed" }
+# {problem} is one of the [problems] texts.
+problem = "{name} couldn't be installed: {problem}"
+
+[library.installMod.steps]
+pick = "Pick"
+choose = "Choose"
+install = "Install"
+
+# Field names a game adapter can return for a candidate; unknown names are shown as given.
+[library.installMod.facts]
+identifiedBy = "Identified by"
+role = "Role"
+
+[library.installMod.values]
+main = "Main mod"
+patch = "Compatibility patch"
+alternative = "Alternative version"
+
+# The "Bytes" variants take over once sizes are known; the "Done" variants after the step.
+[library.installMod.progress]
+unpacking = "Unpacking archive"
+unpackingBytes = "Unpacking archive · {done} / {total}"
+unpackingDone = "Unpacked archive"
+copying = "Copying file"
+copyingBytes = "Copying file · {done} / {total}"
+copyingDone = "Copied file"
+checking = "Checking with the game"
+checkingDone = "Checked with the game"
+adding = "Adding to library"
+addingDone = "Added to library"
+
+[library.installMod.nothing]
+title = "Nothing to install"
+description = "TMO couldn't find a mod {game} can load in “{file}”."
+expects = "What {game} expects"
+pickAnother = "Pick another file…"
+
+[library.installMod.duplicate]
+title = "Already installed"
+description = "“{name}” has the same identity as a mod in your library: {owner} ({source})."
+skip = "Skip"
+keepBoth = "Keep both"
+replace = "Replace"
+
 [library.importCollection]
 title = "Import Steam collection"
 description = "Subscribe to a whole Workshop collection in one go."

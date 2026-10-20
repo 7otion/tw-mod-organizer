@@ -11,7 +11,7 @@
 		"check": "bun src/lib/i18n/write-message-keys.ts && svelte-kit sync && rm -rf .svelte-kit/.svelte-check && svelte-check --tsconfig ./tsconfig.json --tsgo",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write .",
+		"format": "prettier --write . && cargo fmt --manifest-path src-tauri/Cargo.toml",
 		"verify": "prettier --write . --cache && bun run --parallel check \"eslint .\"",
 		"tauri": "tauri"
 	},

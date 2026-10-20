@@ -38,6 +38,12 @@ export const LICENCES: { group: MessageKey; items: Licence[] }[] = [
 			{ name: 'image', licence: 'MIT or Apache-2.0' },
 			{ name: 'fast_image_resize', licence: 'MIT or Apache-2.0' },
 			{ name: 'rayon', licence: 'MIT or Apache-2.0' },
+			{ name: 'zip', licence: 'MIT' },
+			{ name: 'sevenz-rust2', licence: 'MIT or Apache-2.0' },
+			{
+				name: 'unrar (bundles the UnRAR library)',
+				licence: 'MIT or Apache-2.0 · UnRAR licence',
+			},
 			{ name: 'tracing', licence: 'MIT' },
 			{ name: 'trash', licence: 'MIT' },
 		],

@@ -18,6 +18,12 @@ pub enum AppError {
     Json(#[from] serde_json::Error),
     #[error("Not a valid TOML file: {0}")]
     Toml(#[from] toml::de::Error),
+    #[error("Archive error: {0}")]
+    Zip(#[from] zip::result::ZipError),
+    #[error("Archive error: {0}")]
+    SevenZip(#[from] sevenz_rust2::Error),
+    #[error("Archive error: {0}")]
+    Rar(#[from] unrar::error::UnrarError),
     #[error("{0}")]
     Custom(String),
 }

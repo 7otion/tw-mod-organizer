@@ -5,6 +5,8 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 export class AppStore extends Store {
 	isMaximized = $state(false);
 	version = $state('');
+	isInstallingMod = $state(false);
+	installPath = $state<string | null>(null);
 
 	constructor() {
 		super();
@@ -25,5 +27,10 @@ export class AppStore extends Store {
 				void unlisten.then((off) => off());
 			};
 		});
+	}
+
+	openInstallMod(path: string | null = null): void {
+		this.installPath = path;
+		this.isInstallingMod = true;
 	}
 }

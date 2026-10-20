@@ -1,8 +1,10 @@
+mod archive;
 mod error;
 mod games;
 mod languages;
 mod library;
 mod migrations;
+mod paths;
 #[cfg(windows)]
 mod process;
 mod s7forge;
@@ -58,6 +60,7 @@ pub fn run() {
         )
         .manage(library::request_thumbnails::ThumbnailRequests::default())
         .manage(library::scan_library::LibraryScans::default())
+        .manage(library::install_mod::Installs::default())
         .setup(|app| {
             install_panic_hook(app.handle().clone());
             tauri::async_runtime::block_on(settings::ensure_folders(app.handle()))?;
@@ -72,12 +75,16 @@ pub fn run() {
             languages::install_language_pack::install_language_pack,
             languages::list_language_packs::list_language_packs,
             languages::read_language_file::read_language_file,
+            library::cancel_install::cancel_install,
             library::cancel_library_scan::cancel_library_scan,
             library::fetch_collection::fetch_collection,
             library::fetch_download_progress::fetch_download_progress,
             library::fetch_mod_details::fetch_mod_details,
             library::fetch_subscription_times::fetch_subscription_times,
             library::force_update_mods::force_update_mods,
+            library::inspect_install_source::inspect_install_source,
+            library::install_inputs::install_inputs,
+            library::install_mod::install_mod,
             library::open_in_rpfm::open_in_rpfm,
             library::open_mod_folder::open_mod_folder,
             library::remove_mods::remove_mods,

@@ -1,8 +1,12 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use super::{GameInfo, GameSupport, ModInfo};
+use super::{
+    Candidate, Fact, GameInfo, GameSupport, InstallInputs, Installable, ModInfo, Selection,
+    SourceEntry,
+};
 use crate::error::AppError;
+use crate::paths::{extension_of, file_name_of, stem_of};
 
 mod three_kingdoms;
 mod warhammer_2;
@@ -14,6 +18,12 @@ pub use warhammer_3::WARHAMMER_3;
 
 const IMAGE_EXTENSIONS: [&str; 3] = ["png", "jpg", "jpeg"];
 const IGNORED_STEAM_TAGS: [&str; 1] = ["mod"];
+const PACK_EXTENSION: &str = "pack";
+const INSTALL_INPUTS: InstallInputs = InstallInputs {
+    extensions: &[PACK_EXTENSION],
+    folders: false,
+};
+const PATCH_SUFFIX: &str = "_patch";
 
 pub struct TotalWar {
     info: GameInfo,
@@ -38,6 +48,61 @@ impl GameSupport for TotalWar {
         self.mods_folder_name
     }
 
+    fn install_inputs(&self) -> InstallInputs {
+        INSTALL_INPUTS
+    }
+
+    fn find_installable(&self, entries: &[SourceEntry]) -> Installable {
+        let mut packs: Vec<&SourceEntry> = entries
+            .iter()
+            .filter(|entry| extension_of(&entry.path) == Some(PACK_EXTENSION.to_owned()))
+            .collect();
+        packs.sort_by(|a, b| b.size.cmp(&a.size));
+        let candidates = packs
+            .iter()
+            .enumerate()
+            .map(|(index, pack)| {
+                let file_name = file_name_of(&pack.path);
+                let stem = stem_of(file_name);
+                let role = if stem.to_ascii_lowercase().ends_with(PATCH_SUFFIX) {
+                    "patch"
+                } else if index == 0 {
+                    "main"
+                } else {
+                    "alternative"
+                };
+                let mut candidate_entries = vec![pack.path.clone()];
+                if let Some(image) = companion_image(entries, stem) {
+                    candidate_entries.push(image.path.clone());
+                }
+                Candidate {
+                    id: pack.path.clone(),
+                    name: stem.to_owned(),
+                    identity: Fact {
+                        label: "identifiedBy",
+                        value: file_name.to_owned(),
+                    },
+                    facts: vec![Fact {
+                        label: "role",
+                        value: role.to_owned(),
+                    }],
+                    size_bytes: pack.size,
+                    entries: candidate_entries,
+                    problem: None,
+                }
+            })
+            .collect();
+        Installable {
+            candidates,
+            selection: Selection::Single,
+            identities_can_coexist: false,
+        }
+    }
+
+    fn nothing_installable_reason(&self) -> &'static str {
+        "Mods for this game are .pack files, and there is none inside."
+    }
+
     #[cfg(windows)]
     fn holds_game(&self, path: &Path) -> bool {
         path.join(self.exe).is_file()
@@ -59,6 +124,15 @@ impl GameSupport for TotalWar {
     fn ignored_steam_tags(&self) -> &'static [&'static str] {
         &IGNORED_STEAM_TAGS
     }
+}
+
+fn companion_image<'a>(entries: &'a [SourceEntry], stem: &str) -> Option<&'a SourceEntry> {
+    entries.iter().find(|entry| {
+        let name = file_name_of(&entry.path);
+        stem_of(name) == stem
+            && extension_of(name)
+                .is_some_and(|extension| IMAGE_EXTENSIONS.contains(&extension.as_str()))
+    })
 }
 
 impl FolderContents {

@@ -18,6 +18,7 @@
 	import { Selection } from '@/lib/selection.svelte';
 	import { VirtualList } from '@/lib/virtual-list.svelte';
 	import {
+		AppStore,
 		GamesStore,
 		LibraryColumnsStore,
 		LibraryFilterStore,
@@ -44,6 +45,7 @@
 
 	const LIST_PADDING = 4;
 
+	const appStore = AppStore.get();
 	const gamesStore = GamesStore.get();
 	const libraryStore = LibraryStore.get();
 	const libraryScanStore = LibraryScanStore.get();
@@ -181,11 +183,13 @@
 	style:--library-columns={layout.template}
 >
 	<div class="flex items-center gap-6 px-9 pt-7 pb-5">
-		<h1 class="font-blackletter text-title font-medium">
+		<h1
+			class="font-blackletter text-title leading-none font-medium [text-box:trim-both_cap_alphabetic]"
+		>
 			{t('library.title')}
 		</h1>
 		<p
-			class="flex items-center gap-4 pt-1.5 text-md font-medium text-muted-foreground"
+			class="flex items-center gap-4 text-md font-medium text-muted-foreground"
 		>
 			<span>
 				<Message key="library.stats.mods" values={{ count: modCount }}>
@@ -356,7 +360,7 @@
 					: t('library.empty.title')}
 			</p>
 			<div class="flex gap-2">
-				<Button>
+				<Button onclick={() => appStore.openInstallMod()}>
 					<PackageIcon />
 					{t('library.empty.install')}
 				</Button>
