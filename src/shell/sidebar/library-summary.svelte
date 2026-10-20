@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { t, timeAgo } from '@/lib/i18n';
 	import Message from '@/lib/i18n/message.svelte';
-	import { GamesStore, LibraryStore } from '@/lib/store';
+	import { GamesStore, LibraryScanStore, LibraryStore } from '@/lib/store';
 
 	const gamesStore = GamesStore.get();
 	const libraryStore = LibraryStore.get();
+	const libraryScanStore = LibraryScanStore.get();
 
 	const scanned = $derived.by(() => {
 		const scannedAt = gamesStore.current!.row!.scanned_at;
-		if (libraryStore.isScanning) return t('sidebar.summary.scanning');
+		if (libraryScanStore.isScanning) return t('sidebar.summary.scanning');
 		if (!scannedAt) return t('sidebar.summary.notScanned');
 		return t('sidebar.summary.scanned', { time: timeAgo(scannedAt) });
 	});

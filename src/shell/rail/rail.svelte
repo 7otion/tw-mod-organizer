@@ -8,7 +8,7 @@
 
 	import { t } from '@/lib/i18n';
 	import { navRoutes } from '@/lib/nav-routes';
-	import { LibraryStore } from '@/lib/store';
+	import { LibraryScanStore } from '@/lib/store';
 	import SettingsRailButton from '@/shell/settings/rail-button.svelte';
 	import ManageProfilesDialog from '@/shell/sidebar/manage-profiles-dialog.svelte';
 	import ManageTagsDialog from '@/shell/sidebar/manage-tags-dialog.svelte';
@@ -18,7 +18,7 @@
 
 	const ACTIVE_DOWNLOADS = 2;
 
-	const libraryStore = LibraryStore.get();
+	const libraryScanStore = LibraryScanStore.get();
 
 	let isManagingTags = $state(false);
 	let isManagingProfiles = $state(false);
@@ -61,11 +61,11 @@
 		<RailAction
 			icon={RefreshCwIcon}
 			label={t('nav.rescan')}
-			busy={libraryStore.isScanning}
-			iconClass={libraryStore.isScanning
+			busy={libraryScanStore.isScanning}
+			iconClass={libraryScanStore.isScanning
 				? 'animate-spin text-status-lose'
 				: 'text-status-ok'}
-			onclick={() => libraryStore.scan({ full: true })}
+			onclick={() => libraryScanStore.scan({ full: true })}
 		/>
 		<SettingsRailButton />
 	</Tooltip.Provider>

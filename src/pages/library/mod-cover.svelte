@@ -3,7 +3,7 @@
 	import { convertFileSrc } from '@tauri-apps/api/core';
 
 	import type { Mod } from '@/lib/models';
-	import { LibraryStore, type CoverSize } from '@/lib/store';
+	import { LibraryScanStore, type CoverSize } from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
 	type Props = {
@@ -20,11 +20,11 @@
 
 	let { mod, size }: Props = $props();
 
-	const libraryStore = LibraryStore.get();
+	const libraryScanStore = LibraryScanStore.get();
 
 	let failedFile = $state<string | null>(null);
 
-	const thumbnail = $derived(libraryStore.thumbnails[mod.id] ?? null);
+	const thumbnail = $derived(libraryScanStore.thumbnails[mod.id] ?? null);
 	const hasCoverSource = $derived(
 		mod.coverFile !== null || mod.preview_url !== null
 	);
