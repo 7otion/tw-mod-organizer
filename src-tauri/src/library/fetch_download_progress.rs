@@ -10,6 +10,7 @@ pub struct ItemDownload {
     status: DownloadStatus,
     downloaded_bytes: u64,
     total_bytes: Option<u64>,
+    installed_updated_at: Option<u64>,
 }
 
 #[derive(Serialize)]
@@ -46,6 +47,7 @@ pub async fn fetch_download_progress(
                 status,
                 downloaded_bytes: item.downloaded_bytes.unwrap_or(0),
                 total_bytes: item.total_bytes.filter(|total| *total > 0),
+                installed_updated_at: item.installed_time_updated,
             }
         })
         .collect())

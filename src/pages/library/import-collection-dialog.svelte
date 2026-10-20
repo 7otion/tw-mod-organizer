@@ -110,7 +110,7 @@
 
 		{#if importer.collection}
 			{@const collection = importer.collection}
-			<div class="flex items-center gap-4">
+			<div class="flex min-w-0 items-center gap-4">
 				<span
 					class="flex h-10 w-18 shrink-0 overflow-hidden rounded-md bg-fill-1"
 				>
@@ -137,7 +137,7 @@
 			</div>
 
 			{#if importer.rows.length}
-				<div class="flex flex-col rounded-lg bg-tone-1">
+				<div class="flex min-w-0 flex-col rounded-lg bg-tone-1">
 					<div
 						class="grid h-8 grid-cols-(--collection-columns) items-center gap-x-3 border-b px-2 text-sm font-semibold text-muted-foreground uppercase"
 					>
@@ -157,7 +157,7 @@
 							{t('library.importCollection.status')}
 						</span>
 					</div>
-					<ScrollArea class="max-h-[min(324px,40vh)]">
+					<ScrollArea class="max-h-[min(324px,40vh)] min-w-0">
 						<ul class="flex flex-col py-1">
 							{#each importer.rows as row (row.item.source_ref)}
 								<CollectionItemRow

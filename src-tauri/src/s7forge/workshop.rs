@@ -62,6 +62,24 @@ pub struct DownloadProgress {
     pub state: ItemState,
     pub downloaded_bytes: Option<u64>,
     pub total_bytes: Option<u64>,
+    pub installed_time_updated: Option<u64>,
+}
+
+#[derive(Deserialize)]
+pub struct DownloadRequest {
+    pub item_id: u64,
+    pub outcome: DownloadOutcome,
+    #[serde(default)]
+    pub error: Option<String>,
+}
+
+#[derive(Clone, Copy, PartialEq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DownloadOutcome {
+    Pending,
+    Completed,
+    Refused,
+    Failed,
 }
 
 #[derive(Deserialize)]
@@ -135,6 +153,17 @@ pub async fn collection_items(
     args.push("--item-id".to_owned());
     args.push(item_id.to_string());
     run(app, args).await
+}
+
+pub async fn download_items(
+    app: &AppHandle,
+    app_id: u32,
+    item_ids: &[u64],
+) -> Result<Vec<DownloadRequest>, AppError> {
+    if item_ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    run(app, with_item_ids("download-items", app_id, item_ids)).await
 }
 
 pub async fn download_progress(

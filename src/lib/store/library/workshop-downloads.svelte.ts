@@ -4,13 +4,16 @@ import { invoke } from '@tauri-apps/api/core';
 import { Mod } from '@/lib/models';
 import { GamesStore, LibraryScanStore } from '@/lib/store';
 
-export type WorkshopDownloadKind = 'import' | 'resume';
+export type WorkshopDownloadKind = 'import' | 'resume' | 'update';
 
 export type WorkshopDownloadStatus =
 	| 'queued'
 	| 'downloading'
 	| 'installed'
+	| 'up_to_date'
+	| 'updated'
 	| 'subscribe_failed'
+	| 'update_failed'
 	| 'unsubscribed';
 
 export type WorkshopDownload = {
@@ -19,6 +22,7 @@ export type WorkshopDownload = {
 	status: WorkshopDownloadStatus;
 	downloaded_bytes: number;
 	total_bytes: number | null;
+	installed_updated_at: number | null;
 	error: string | null;
 };
 
@@ -27,9 +31,19 @@ export type WatchItem = {
 	title: string;
 };
 
+export type UpdateItem = WatchItem & {
+	installed_updated_at: number | null;
+};
+
 type SubscribedMods = {
 	subscribed: number[];
 	failures: { item_id: number; reason: string }[];
+};
+
+type UpdateRequest = {
+	source_ref: string;
+	status: 'queued' | 'up_to_date' | 'update_failed';
+	error: string | null;
 };
 
 type ItemDownload = {
@@ -37,6 +51,7 @@ type ItemDownload = {
 	status: 'queued' | 'downloading' | 'installed' | 'unsubscribed';
 	downloaded_bytes: number;
 	total_bytes: number | null;
+	installed_updated_at: number | null;
 };
 
 type Sample = {
@@ -47,8 +62,14 @@ type Sample = {
 const POLL_EVERY_MS = 2000;
 const RATE_WINDOW_MS = 30_000;
 const PENDING: readonly WorkshopDownloadStatus[] = ['queued', 'downloading'];
+const DONE: readonly WorkshopDownloadStatus[] = [
+	'installed',
+	'up_to_date',
+	'updated',
+];
 const PROBLEMS: readonly WorkshopDownloadStatus[] = [
 	'subscribe_failed',
+	'update_failed',
 	'unsubscribed',
 ];
 
@@ -77,13 +98,14 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 		this.items.filter((item) => PENDING.includes(item.status))
 	);
 	readonly done = $derived(
-		this.items.filter((item) => item.status === 'installed').length
+		this.items.filter((item) => DONE.includes(item.status)).length
 	);
 	readonly failed = $derived(
 		this.items.filter((item) => PROBLEMS.includes(item.status)).length
 	);
 	readonly isActive = $derived(this.pending.length > 0);
 	readonly isFinished = $derived(this.total > 0 && !this.isActive);
+	readonly canStop = $derived(this.isActive && this.#kind !== 'update');
 	readonly secondsLeft = $derived.by((): number | null => {
 		if (!this.isActive) return null;
 		const [first] = this.#samples;
@@ -127,6 +149,52 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 		if (result.subscribed.length) await this.#scanStore.scan();
 	}
 
+	async forceUpdate(items: readonly UpdateItem[]): Promise<void> {
+		const game = this.#gamesStore.current!;
+		this.start(
+			game.app_id,
+			'update',
+			items.map((item) =>
+				WorkshopDownloadsStore.entry(
+					item,
+					'queued',
+					null,
+					item.installed_updated_at
+				)
+			),
+			false
+		);
+		this.isOpen = true;
+		let requests: UpdateRequest[];
+		try {
+			requests = await invoke<UpdateRequest[]>('force_update_mods', {
+				app_id: game.app_id,
+				item_ids: items.map((item) => Number(item.source_ref)),
+			});
+		} catch (error) {
+			if (this.#appId !== game.app_id) return;
+			this.#items = this.#items.map((item) => ({
+				...item,
+				status: 'update_failed',
+				error: String(error),
+			}));
+			return;
+		}
+		if (this.#appId !== game.app_id || this.#kind !== 'update') return;
+		const byRef = Object.fromEntries(
+			requests.map((request) => [request.source_ref, request])
+		) as Record<string, UpdateRequest | undefined>;
+		this.#items = this.#items.map((item) => {
+			const request = byRef[item.source_ref];
+			return {
+				...item,
+				status: request?.status ?? 'update_failed',
+				error: request?.error ?? null,
+			};
+		});
+		this.schedule(0);
+	}
+
 	async resume(appId: number, refs: readonly string[]): Promise<void> {
 		if (this.#appId === appId && this.isActive) return;
 		const mods = await Mod.query()
@@ -148,7 +216,7 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 
 	async stop(): Promise<void> {
 		const refs = this.pending.map((item) => item.source_ref);
-		if (!refs.length) return;
+		if (!refs.length || !this.canStop) return;
 		this.#isStopping = true;
 		try {
 			await invoke('remove_mods', {
@@ -186,7 +254,8 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 	private start(
 		appId: number,
 		kind: WorkshopDownloadKind,
-		items: readonly WorkshopDownload[]
+		items: readonly WorkshopDownload[],
+		poll = true
 	): void {
 		this.stopPolling();
 		this.#appId = appId;
@@ -194,7 +263,7 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 		this.#items = items;
 		this.#samples = [];
 		this.#needsScan = false;
-		this.schedule(0);
+		if (poll) this.schedule(0);
 	}
 
 	private schedule(delay: number): void {
@@ -232,10 +301,11 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 		this.#items = this.#items.map((item) => {
 			const found = byRef[item.source_ref];
 			if (!found || !PENDING.includes(item.status)) return item;
-			if (found.status === 'installed') finished++;
+			const status = this.statusOf(item, found);
+			if (status === 'installed' || status === 'updated') finished++;
 			return {
 				...item,
-				status: found.status,
+				status,
 				downloaded_bytes: found.downloaded_bytes,
 				total_bytes: found.total_bytes ?? item.total_bytes,
 			};
@@ -247,12 +317,24 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 			this.schedule(POLL_EVERY_MS);
 	}
 
+	private statusOf(
+		item: WorkshopDownload,
+		found: ItemDownload
+	): WorkshopDownloadStatus {
+		if (found.status !== 'installed' || this.#kind !== 'update')
+			return found.status;
+		const isNewer =
+			found.installed_updated_at !== null &&
+			found.installed_updated_at !== item.installed_updated_at;
+		return isNewer ? 'updated' : 'up_to_date';
+	}
+
 	private sample(): void {
 		const now = Date.now();
 		const bytes = this.#items.reduce(
 			(sum, item) =>
 				sum +
-				(item.status === 'installed'
+				(DONE.includes(item.status)
 					? (item.total_bytes ?? item.downloaded_bytes)
 					: item.downloaded_bytes),
 			0
@@ -275,7 +357,8 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 	private static entry(
 		item: WatchItem,
 		status: WorkshopDownloadStatus,
-		error: string | null
+		error: string | null,
+		installedUpdatedAt: number | null = null
 	): WorkshopDownload {
 		return {
 			source_ref: item.source_ref,
@@ -283,6 +366,7 @@ export class WorkshopDownloadsStore extends ConnectionStore {
 			status,
 			downloaded_bytes: 0,
 			total_bytes: null,
+			installed_updated_at: installedUpdatedAt,
 			error,
 		};
 	}

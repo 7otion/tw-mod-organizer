@@ -77,6 +77,7 @@ pub fn run() {
             library::fetch_download_progress::fetch_download_progress,
             library::fetch_mod_details::fetch_mod_details,
             library::fetch_subscription_times::fetch_subscription_times,
+            library::force_update_mods::force_update_mods,
             library::open_in_rpfm::open_in_rpfm,
             library::open_mod_folder::open_mod_folder,
             library::remove_mods::remove_mods,

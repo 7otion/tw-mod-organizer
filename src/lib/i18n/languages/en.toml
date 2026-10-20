@@ -103,9 +103,15 @@ progress = "Fetching Steam details {done} / {total}"
 times = "Reading subscription dates"
 
 # Workshop downloads being watched; the pill opens the downloads dialog.
-[header.downloads]
-progress = "Downloading {done} / {total}"
-finished = "Downloaded {done} / {total}"
+[header.downloads.progress]
+import = "Downloading {done} / {total}"
+resume = "Downloading {done} / {total}"
+update = "Updating {done} / {total}"
+
+[header.downloads.finished]
+import = "Downloaded {done} / {total}"
+resume = "Downloaded {done} / {total}"
+update = "Updated {done} / {total}"
 
 # File sizes. {size} is already formatted for the language (3.4 or 3,4).
 [size]
@@ -420,6 +426,11 @@ skipped = "Skipped"
 collection = "Collection"
 otherGame = "Other game"
 
+[library.forceUpdate]
+title = { one = "Force update {count} Steam mod?", other = "Force update {count} Steam mods?" }
+description = "Steam checks every subscribed item and re-downloads the ones with a newer version. {size} installed now."
+confirm = "Force update"
+
 [library.importCollection.errors]
 invalidLink = "Paste a Workshop collection link or its ID."
 notCollection = "This Workshop item is not a collection."
@@ -427,8 +438,6 @@ notFound = "No Workshop item has this ID."
 
 # Progress dialog for Workshop items the Steam client is downloading.
 [workshopDownloads]
-description = "Steam downloads each item. You can keep using TMO."
-finishedTitle = "Downloads finished"
 minimise = "Minimise to status bar"
 done = "{done} of {total} done"
 failed = "{count} failed"
@@ -442,13 +451,27 @@ background = "Run in background"
 [workshopDownloads.title]
 import = "Downloading collection"
 resume = "Downloading Workshop items"
+update = "Force updating Steam mods"
+
+[workshopDownloads.finished]
+import = "Downloads finished"
+resume = "Downloads finished"
+update = "Update finished"
+
+[workshopDownloads.description]
+import = "Steam downloads each item. You can keep using TMO."
+resume = "Steam downloads each item. You can keep using TMO."
+update = "Steam checks every subscribed item and re-downloads the ones with a newer version. You can keep using TMO."
 
 [workshopDownloads.statuses]
 queued = "Queued"
 downloading = "Downloading"
 percent = "{percent}%"
 installed = "Downloaded"
+up_to_date = "Up to date"
+updated = "Updated"
 subscribe_failed = "Couldn't subscribe"
+update_failed = "Couldn't update"
 unsubscribed = "Unsubscribed"
 
 [workshopDownloads.stopConfirm]

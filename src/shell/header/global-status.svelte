@@ -47,12 +47,12 @@
 			class:animate-pulse={downloadsStore.isActive}
 		></span>
 		{#if downloadsStore.isActive}
-			{t('header.downloads.progress', {
+			{t(`header.downloads.progress.${downloadsStore.kind}`, {
 				done: downloadsStore.done,
 				total: downloadsStore.total,
 			})}<AnimatedEllipsis />
 		{:else}
-			{t('header.downloads.finished', {
+			{t(`header.downloads.finished.${downloadsStore.kind}`, {
 				done: downloadsStore.done,
 				total: downloadsStore.total,
 			})}

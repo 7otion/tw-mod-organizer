@@ -12,6 +12,7 @@
 
 	import { t } from '@/lib/i18n';
 	import type { MessageKey } from '@/lib/i18n/message-key';
+	import ForceUpdateDialog from '@/pages/library/force-update-dialog.svelte';
 	import ImportCollectionDialog from '@/pages/library/import-collection-dialog.svelte';
 	import WorkshopDownloadsDialog from '@/pages/library/workshop-downloads-dialog.svelte';
 
@@ -24,6 +25,7 @@
 	};
 
 	let isImporting = $state(false);
+	let isForceUpdating = $state(false);
 
 	const LOAD_ORDER_ACTIONS: HeaderAction[] = [
 		{
@@ -52,7 +54,12 @@
 			opensDialog: true,
 			onclick: () => (isImporting = true),
 		},
-		{ labelKey: 'header.library.forceUpdate', icon: RefreshCwIcon },
+		{
+			labelKey: 'header.library.forceUpdate',
+			icon: RefreshCwIcon,
+			opensDialog: true,
+			onclick: () => (isForceUpdating = true),
+		},
 	];
 
 	const actions = $derived(
@@ -82,4 +89,5 @@
 </div>
 
 <ImportCollectionDialog bind:open={isImporting} />
+<ForceUpdateDialog bind:open={isForceUpdating} />
 <WorkshopDownloadsDialog />

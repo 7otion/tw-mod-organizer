@@ -38,7 +38,17 @@
 
 	function isProblem(item: WorkshopDownload): boolean {
 		return (
-			item.status === 'subscribe_failed' || item.status === 'unsubscribed'
+			item.status === 'subscribe_failed' ||
+			item.status === 'update_failed' ||
+			item.status === 'unsubscribed'
+		);
+	}
+
+	function isDone(item: WorkshopDownload): boolean {
+		return (
+			item.status === 'installed' ||
+			item.status === 'updated' ||
+			item.status === 'up_to_date'
 		);
 	}
 
@@ -53,6 +63,7 @@
 	}
 
 	async function stop(): Promise<void> {
+		isConfirmingStop = false;
 		await downloadsStore.stop();
 	}
 </script>
@@ -67,21 +78,30 @@
 		<Dialog.Header>
 			<Dialog.Title>
 				{downloadsStore.isFinished
-					? t('workshopDownloads.finishedTitle')
+					? t(`workshopDownloads.finished.${downloadsStore.kind}`)
 					: t(`workshopDownloads.title.${downloadsStore.kind}`)}
 			</Dialog.Title>
 			<Dialog.Description>
-				{t('workshopDownloads.description')}
+				{t(`workshopDownloads.description.${downloadsStore.kind}`)}
 			</Dialog.Description>
 		</Dialog.Header>
 		<Button
 			variant="ghost"
 			size="icon-sm"
 			class="absolute top-4 right-4"
-			aria-label={t('workshopDownloads.minimise')}
-			onclick={() => (downloadsStore.isOpen = false)}
+			aria-label={downloadsStore.isActive
+				? t('workshopDownloads.minimise')
+				: t('common.close')}
+			onclick={() =>
+				downloadsStore.isActive
+					? (downloadsStore.isOpen = false)
+					: downloadsStore.dismiss()}
 		>
-			<Minimize2Icon />
+			{#if downloadsStore.isActive}
+				<Minimize2Icon />
+			{:else}
+				<XIcon />
+			{/if}
 		</Button>
 
 		<p class="flex items-baseline gap-2 text-sm text-muted-foreground">
@@ -112,7 +132,9 @@
 			max={downloadsStore.total || 1}
 		/>
 
-		<ScrollArea class="max-h-[min(300px,40vh)] rounded-lg bg-tone-1">
+		<ScrollArea
+			class="max-h-[min(300px,40vh)] min-w-0 rounded-lg bg-tone-1"
+		>
 			<ul class="flex flex-col py-1">
 				{#each rows as item (item.source_ref)}
 					<li
@@ -123,8 +145,15 @@
 					>
 						{#if item.status === 'downloading'}
 							<Spinner class="size-3.5" />
-						{:else if item.status === 'installed'}
-							<CheckIcon class="size-3.5 text-status-update" />
+						{:else if isDone(item)}
+							<CheckIcon
+								class={cn(
+									'size-3.5',
+									item.status === 'up_to_date'
+										? 'text-status-ok'
+										: 'text-status-update'
+								)}
+							/>
 						{:else if isProblem(item)}
 							<XIcon class="size-3.5 text-status-missing" />
 						{:else}
@@ -141,9 +170,11 @@
 						<span
 							class={cn(
 								'shrink-0 text-right font-semibold tabular-nums',
-								item.status === 'installed' &&
-									'text-status-update',
-								item.status === 'downloading' &&
+								item.status === 'up_to_date' &&
+									'text-status-ok',
+								(item.status === 'installed' ||
+									item.status === 'updated' ||
+									item.status === 'downloading') &&
 									'text-status-update',
 								isProblem(item) && 'text-status-missing'
 							)}
@@ -171,13 +202,17 @@
 
 		<Dialog.Footer class="sm:justify-between">
 			{#if downloadsStore.isActive}
-				<Button
-					variant="destructive-outline"
-					disabled={downloadsStore.isStopping}
-					onclick={() => (isConfirmingStop = true)}
-				>
-					{t('workshopDownloads.stop')}
-				</Button>
+				{#if downloadsStore.canStop}
+					<Button
+						variant="destructive-outline"
+						disabled={downloadsStore.isStopping}
+						onclick={() => (isConfirmingStop = true)}
+					>
+						{t('workshopDownloads.stop')}
+					</Button>
+				{:else}
+					<span></span>
+				{/if}
 				<Button
 					variant="secondary"
 					onclick={() => (downloadsStore.isOpen = false)}
