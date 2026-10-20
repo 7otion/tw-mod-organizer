@@ -46,5 +46,12 @@ export default defineConfig({
 		watch: {
 			ignored: ['**/src-tauri/**'],
 		},
+		warmup: {
+			clientFiles: [
+				'./src/routes/**/*.svelte',
+				'./src/pages/**/*.svelte',
+				'./src/shell/**/*.svelte',
+			],
+		},
 	},
 });
