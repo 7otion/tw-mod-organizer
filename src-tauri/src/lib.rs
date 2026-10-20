@@ -72,6 +72,8 @@ pub fn run() {
             languages::list_language_packs::list_language_packs,
             languages::read_language_file::read_language_file,
             library::cancel_library_scan::cancel_library_scan,
+            library::fetch_mod_details::fetch_mod_details,
+            library::fetch_subscription_times::fetch_subscription_times,
             library::open_in_rpfm::open_in_rpfm,
             library::open_mod_folder::open_mod_folder,
             library::remove_mods::remove_mods,

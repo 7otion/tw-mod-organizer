@@ -13,6 +13,7 @@ impl Migration for CreateGamesTable {
             table.integer("pin_position").nullable();
             table.date("last_opened_at", DateStorage::Unix).nullable();
             table.date("scanned_at", DateStorage::Unix).nullable();
+            table.date("steam_synced_at", DateStorage::Unix).nullable();
             table.date("created_at", DateStorage::Unix).default_now();
         });
     }

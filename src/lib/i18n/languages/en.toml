@@ -93,9 +93,14 @@ installMod = "Install mod"
 importCollection = "Import collection"
 forceUpdate = "Force update"
 
+# The header adds an animated ellipsis after these.
 [header.scan]
-starting = "Scanning library…"
-progress = "Scanning {done} / {total}…"
+starting = "Scanning library"
+progress = "Scanning {done} / {total}"
+
+[header.enrich]
+progress = "Fetching Steam details {done} / {total}"
+times = "Reading subscription dates"
 
 # File sizes. {size} is already formatted for the language (3.4 or 3,4).
 [size]

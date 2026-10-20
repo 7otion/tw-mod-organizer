@@ -58,6 +58,8 @@ export type MessageKey =
 	| 'gameSelector.title.browsing'
 	| 'gameSelector.title.choose'
 	| 'gameSelector.title.firstRun'
+	| 'header.enrich.progress'
+	| 'header.enrich.times'
 	| 'header.games.all'
 	| 'header.games.choose'
 	| 'header.games.close'

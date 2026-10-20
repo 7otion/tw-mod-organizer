@@ -1,18 +1,18 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::UNIX_EPOCH;
+use std::time::{Instant, UNIX_EPOCH};
 
-use serde::Serialize;
+use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, State};
 
 use crate::error::AppError;
 use crate::games::{self, GameSupport};
-use crate::s7forge::workshop::{self, WorkshopItem};
+use crate::s7forge::workshop::{self, StateRoute, WorkshopStateItem};
 use crate::settings;
-use crate::steam::tags::tag_from_steam_tag;
 
 const PROGRESS_EVERY: usize = 25;
 
@@ -20,6 +20,7 @@ const PROGRESS_EVERY: usize = 25;
 pub struct LibraryScan {
     steam_view: SteamView,
     mods: Vec<LibraryMod>,
+    pending_details: Vec<String>,
 }
 
 #[derive(Clone, Copy, Serialize)]
@@ -28,6 +29,14 @@ enum SteamView {
     Subscriptions,
     WorkshopFolder,
     Unreachable,
+}
+
+#[derive(Deserialize)]
+pub struct KnownMod {
+    source_ref: String,
+    installed_updated_at: Option<u64>,
+    remote_updated_at: Option<u64>,
+    size_bytes: Option<u64>,
 }
 
 #[derive(Serialize)]
@@ -42,7 +51,7 @@ struct LibraryMod {
     problem: Option<&'static str>,
     installed_updated_at: Option<u64>,
     added_at: Option<u64>,
-    steam: Option<SteamDetails>,
+    unchanged: bool,
 }
 
 #[derive(Clone, Copy, Serialize)]
@@ -53,30 +62,28 @@ enum ScanSource {
 }
 
 #[derive(Serialize)]
-struct SteamDetails {
-    title: String,
-    description: String,
-    author_name: String,
-    author_ref: String,
-    page_url: String,
-    preview_url: Option<String>,
-    published_at: u64,
-    remote_updated_at: u64,
-    tags: Vec<String>,
-    required: Vec<RequiredItem>,
-}
-
-#[derive(Serialize)]
-struct RequiredItem {
-    item_ref: String,
-    title: Option<String>,
-}
-
-#[derive(Serialize)]
 struct ScanProgress {
     app_id: u32,
     done: usize,
     total: usize,
+}
+
+struct Progress {
+    app: AppHandle,
+    app_id: u32,
+    total: usize,
+    done: AtomicUsize,
+}
+
+enum Job {
+    State {
+        item: WorkshopStateItem,
+        is_changed: bool,
+    },
+    Local {
+        source_ref: String,
+        folder: PathBuf,
+    },
 }
 
 #[derive(Default)]
@@ -89,100 +96,185 @@ struct RunningScan {
     is_cancelled: Arc<AtomicBool>,
 }
 
+struct SteamState {
+    route: StateRoute,
+    items: Vec<WorkshopStateItem>,
+    changed: HashSet<u64>,
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub async fn scan_library(
     app: AppHandle,
     scans: State<'_, LibraryScans>,
     app_id: u32,
+    full: bool,
+    known: Vec<KnownMod>,
 ) -> Result<Option<LibraryScan>, AppError> {
+    let started = Instant::now();
     let is_cancelled = scans.start(app_id);
     let game = games::find(app_id)?;
     let mods_folder = settings::mods_dir(&app)
         .await?
         .join(game.mods_folder_name());
-    let subscribed = workshop::subscribed_items(&app, app_id)
-        .await
-        .inspect_err(|error| tracing::debug!(app_id, "Steam unavailable: {error}"))
-        .ok();
-    let workshop_folder = match subscribed {
-        Some(_) => None,
-        None => workshop::workshop_path(&app, app_id)
-            .await
-            .inspect_err(|error| tracing::debug!(app_id, "no workshop folder: {error}"))
-            .ok(),
+    let steam = steam_state(&app, app_id, &known).await;
+    let steam_view = match &steam {
+        Some(SteamState {
+            route: StateRoute::Folder,
+            ..
+        }) => SteamView::WorkshopFolder,
+        Some(_) => SteamView::Subscriptions,
+        None => SteamView::Unreachable,
     };
-    let required_titles = match &subscribed {
-        Some(items) => required_titles(&app, app_id, items).await,
-        None => HashMap::new(),
-    };
-    let steam_view = match (&subscribed, &workshop_folder) {
-        (Some(_), _) => SteamView::Subscriptions,
-        (None, Some(_)) => SteamView::WorkshopFolder,
-        (None, None) => SteamView::Unreachable,
-    };
+    tracing::info!(
+        app_id,
+        full,
+        elapsed_ms = started.elapsed().as_millis() as u64,
+        "steam source ready"
+    );
 
     let scan = tauri::async_runtime::spawn_blocking({
         let is_cancelled = is_cancelled.clone();
         move || {
             fs::create_dir_all(&mods_folder)?;
-            let local_folders = subfolders(&mods_folder)?;
-            let mut workshop_folders = match workshop_folder {
-                Some(workshop_folder) => subfolders(&workshop_folder)?,
+            let mut jobs: Vec<Job> = match steam {
+                Some(SteamState { items, changed, .. }) => items
+                    .into_iter()
+                    .map(|item| Job::State {
+                        is_changed: changed.contains(&item.item_id),
+                        item,
+                    })
+                    .collect(),
                 None => Vec::new(),
             };
-            workshop_folders.retain(|(name, _)| name.parse::<u64>().is_ok());
-            let steam_count = match &subscribed {
-                Some(items) => items.len(),
-                None => workshop_folders.len(),
-            };
-
-            let mut progress = ScanProgress {
-                app_id,
-                done: 0,
-                total: steam_count + local_folders.len(),
-            };
-            report_progress(&app, &progress);
-            let mut mods = Vec::with_capacity(progress.total);
-            let mut add = |library_mod: LibraryMod| {
-                mods.push(library_mod);
-                progress.done += 1;
-                report_progress(&app, &progress);
-                !is_cancelled.load(Ordering::SeqCst)
-            };
-
-            match subscribed {
-                Some(items) => {
-                    for item in items {
-                        if !add(steam_mod(game, item, &required_titles)) {
-                            return Ok(None);
-                        }
-                    }
-                }
-                None => {
-                    for (item_id, folder) in workshop_folders {
-                        if !add(read_mod(game, ScanSource::Steam, item_id, folder)) {
-                            return Ok(None);
-                        }
-                    }
-                }
+            for (name, folder) in subfolders(&mods_folder)? {
+                jobs.push(Job::Local {
+                    source_ref: game.local_source_ref(&name),
+                    folder,
+                });
             }
-            for (name, folder) in local_folders {
-                let source_ref = game.local_source_ref(&name);
-                if !add(read_mod(game, ScanSource::Local, source_ref, folder)) {
-                    return Ok(None);
-                }
-            }
+            let pending_details = jobs
+                .iter()
+                .filter_map(|job| match job {
+                    Job::State { item, is_changed } if full || *is_changed => {
+                        Some(item.item_id.to_string())
+                    }
+                    _ => None,
+                })
+                .collect();
 
-            Ok(Some(LibraryScan { steam_view, mods }))
+            let progress = Progress::start(app, app_id, jobs.len());
+            let mods: Vec<Option<LibraryMod>> = jobs
+                .into_par_iter()
+                .map(|job| {
+                    if is_cancelled.load(Ordering::SeqCst) {
+                        return None;
+                    }
+                    let library_mod = match job {
+                        Job::State { item, is_changed } => state_mod(game, item, is_changed),
+                        Job::Local { source_ref, folder } => {
+                            read_mod(game, ScanSource::Local, source_ref, folder)
+                        }
+                    };
+                    progress.done();
+                    Some(library_mod)
+                })
+                .collect();
+            if is_cancelled.load(Ordering::SeqCst) {
+                return Ok(None);
+            }
+            Ok(Some(LibraryScan {
+                steam_view,
+                mods: mods.into_iter().flatten().collect(),
+                pending_details,
+            }))
         }
     })
     .await
     .map_err(|error| AppError::Custom(error.to_string()))?;
     scans.finish(&is_cancelled);
+    tracing::info!(
+        app_id,
+        elapsed_ms = started.elapsed().as_millis() as u64,
+        "library scan built"
+    );
     if is_cancelled.load(Ordering::SeqCst) {
         return Ok(None);
     }
     scan
+}
+
+async fn steam_state(app: &AppHandle, app_id: u32, known: &[KnownMod]) -> Option<SteamState> {
+    let state = workshop::workshop_state(app, app_id)
+        .await
+        .inspect_err(|error| tracing::debug!(app_id, "no workshop state: {error}"))
+        .ok()?;
+    let fingerprints: HashMap<&str, &KnownMod> = known
+        .iter()
+        .map(|mod_| (mod_.source_ref.as_str(), mod_))
+        .collect();
+    let changed: HashSet<u64> = state
+        .items
+        .iter()
+        .filter(|item| {
+            fingerprints
+                .get(item.item_id.to_string().as_str())
+                .is_none_or(|known| known.differs_from(item))
+        })
+        .map(|item| item.item_id)
+        .collect();
+    tracing::debug!(
+        app_id,
+        "{} of {} subscriptions changed",
+        changed.len(),
+        state.items.len()
+    );
+    Some(SteamState {
+        route: state.route,
+        items: state.items,
+        changed,
+    })
+}
+
+impl KnownMod {
+    fn differs_from(&self, item: &WorkshopStateItem) -> bool {
+        self.installed_updated_at != item.installed_time_updated
+            || self.size_bytes != item.size_on_disk
+            || item
+                .latest_time_updated
+                .is_some_and(|latest| self.remote_updated_at != Some(latest))
+            || (item.latest_time_updated.is_none() && item.needs_update)
+    }
+}
+
+impl Progress {
+    fn start(app: AppHandle, app_id: u32, total: usize) -> Self {
+        let progress = Self {
+            app,
+            app_id,
+            total,
+            done: AtomicUsize::new(0),
+        };
+        progress.report(0);
+        progress
+    }
+
+    fn done(&self) {
+        let done = self.done.fetch_add(1, Ordering::SeqCst) + 1;
+        if done % PROGRESS_EVERY == 0 || done == self.total {
+            self.report(done);
+        }
+    }
+
+    fn report(&self, done: usize) {
+        let progress = ScanProgress {
+            app_id: self.app_id,
+            done,
+            total: self.total,
+        };
+        if let Err(error) = self.app.emit("library-scan-progress", &progress) {
+            tracing::debug!("couldn't report scan progress: {error}");
+        }
+    }
 }
 
 impl LibraryScans {
@@ -225,75 +317,35 @@ impl LibraryScans {
     }
 }
 
-fn steam_mod(
-    game: &dyn GameSupport,
-    item: WorkshopItem,
-    required_titles: &HashMap<u64, String>,
-) -> LibraryMod {
-    let source_ref = item.published_file_id.to_string();
-    let files = match &item.install {
-        Some(install) => read_mod(game, ScanSource::Steam, source_ref, install.folder.clone()),
+fn state_mod(game: &dyn GameSupport, item: WorkshopStateItem, is_changed: bool) -> LibraryMod {
+    let source_ref = item.item_id.to_string();
+    if !is_changed {
+        return LibraryMod {
+            source: ScanSource::Steam,
+            source_ref,
+            folder: item.folder,
+            game_ref: None,
+            title: None,
+            preview_file: None,
+            size_bytes: item.size_on_disk,
+            problem: None,
+            installed_updated_at: item.installed_time_updated,
+            added_at: None,
+            unchanged: true,
+        };
+    }
+    let files = match item
+        .folder
+        .filter(|folder| item.installed && folder.is_dir())
+    {
+        Some(folder) => read_mod(game, ScanSource::Steam, source_ref, folder),
         None => without_files(ScanSource::Steam, source_ref, None, "not_downloaded"),
     };
-    let mut tags = Vec::new();
-    for steam_tag in &item.tags {
-        if let Some(tag) = tag_from_steam_tag(steam_tag, game.ignored_steam_tags()) {
-            tags.push(tag);
-        }
-    }
-    let mut required = Vec::with_capacity(item.required_items.len());
-    for item_id in &item.required_items {
-        required.push(RequiredItem {
-            item_ref: item_id.to_string(),
-            title: required_titles.get(item_id).cloned(),
-        });
-    }
     LibraryMod {
-        size_bytes: item.install.as_ref().map(|install| install.size_on_disk),
-        installed_updated_at: item.install.as_ref().map(|install| install.time_updated),
-        added_at: item.time_subscribed,
-        steam: Some(SteamDetails {
-            title: item.title,
-            description: item.description,
-            author_name: item.creator_name,
-            author_ref: item.creator_id,
-            page_url: item.url,
-            preview_url: item.preview_url,
-            published_at: item.time_created,
-            remote_updated_at: item.time_updated,
-            tags,
-            required,
-        }),
+        size_bytes: item.size_on_disk.or(files.size_bytes),
+        installed_updated_at: item.installed_time_updated,
         ..files
     }
-}
-
-async fn required_titles(
-    app: &AppHandle,
-    app_id: u32,
-    items: &[WorkshopItem],
-) -> HashMap<u64, String> {
-    let mut titles = HashMap::with_capacity(items.len());
-    for item in items {
-        titles.insert(item.published_file_id, item.title.clone());
-    }
-    let mut missing = Vec::new();
-    for item in items {
-        for item_id in &item.required_items {
-            if !titles.contains_key(item_id) && !missing.contains(item_id) {
-                missing.push(*item_id);
-            }
-        }
-    }
-    match workshop::workshop_items(app, app_id, &missing).await {
-        Ok(found) => {
-            for item in found {
-                titles.insert(item.published_file_id, item.title);
-            }
-        }
-        Err(error) => tracing::debug!(app_id, "no titles for missing requirements: {error}"),
-    }
-    titles
 }
 
 fn read_mod(
@@ -317,7 +369,7 @@ fn read_mod(
             size_bytes: Some(info.size_bytes),
             problem: info.problem,
             installed_updated_at: None,
-            steam: None,
+            unchanged: false,
         },
         Err(error) => {
             tracing::warn!(folder = %folder.display(), "can't read the mod folder: {error}");
@@ -343,7 +395,7 @@ fn without_files(
         problem: Some(problem),
         installed_updated_at: None,
         added_at: None,
-        steam: None,
+        unchanged: false,
     }
 }
 
@@ -367,13 +419,4 @@ fn created_at(folder: &Path) -> Option<u64> {
         .ok()
         .and_then(|created| created.duration_since(UNIX_EPOCH).ok())
         .map(|since| since.as_secs())
-}
-
-fn report_progress(app: &AppHandle, progress: &ScanProgress) {
-    if progress.done % PROGRESS_EVERY != 0 && progress.done != progress.total {
-        return;
-    }
-    if let Err(error) = app.emit("library-scan-progress", progress) {
-        tracing::debug!("couldn't report scan progress: {error}");
-    }
 }

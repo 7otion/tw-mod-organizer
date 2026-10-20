@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { untrack } from 'svelte';
+import { SvelteSet } from 'svelte/reactivity';
 
 import {
 	Group,
@@ -15,7 +16,12 @@ import {
 	type ModSource,
 	type Profile,
 } from '@/lib/models';
-import { GamesStore, ProfilesStore, TagsStore } from '@/lib/store';
+import {
+	GamesStore,
+	ProfilesStore,
+	TagsStore,
+	type GameEntry,
+} from '@/lib/store';
 import { t } from '@/lib/i18n';
 import { unixNow } from '@/lib/utils';
 
@@ -43,7 +49,35 @@ type LibraryMod = {
 	problem: string | null;
 	installed_updated_at: number | null;
 	added_at: number | null;
-	steam: SteamDetails | null;
+	unchanged: boolean;
+};
+
+type ModDetails = {
+	source_ref: string;
+	steam: SteamDetails;
+};
+
+type SubscriptionTime = {
+	item_id: number;
+	time_subscribed: number;
+};
+
+export type Enrichment = {
+	app_id: number;
+	step: 'details' | 'times';
+	done: number;
+	total: number;
+};
+
+type KnownMod = {
+	source_ref: string;
+	installed_updated_at: number | null;
+	remote_updated_at: number | null;
+	size_bytes: number | null;
+};
+
+type ScanOptions = {
+	full?: boolean;
 };
 
 type SubscribedMods = {
@@ -73,6 +107,7 @@ export type Thumbnail = {
 type LibraryScan = {
 	steam_view: 'subscriptions' | 'workshop_folder' | 'unreachable';
 	mods: LibraryMod[];
+	pending_details: string[];
 };
 
 export type ModPlacement = {
@@ -92,6 +127,9 @@ export type ModDependencies = {
 };
 
 const NO_PLACEMENT: ModPlacement = { profiles: [], groups: [], profileIds: [] };
+
+const STEAM_SYNC_EVERY_MS = 7 * 24 * 60 * 60 * 1000;
+const DETAILS_CHUNK = 100;
 
 export class LibraryStore extends ConnectionStore {
 	readonly #gamesStore = GamesStore.get();
@@ -208,7 +246,12 @@ export class LibraryStore extends ConnectionStore {
 	readonly unusedCount = $derived(
 		this.list.filter((mod) => this.isUnused(mod)).length
 	);
+	#enrichment = $state.raw<Enrichment | null>(null);
+
 	readonly isScanning = $derived(this.#gameId in this.#scans);
+	readonly enrichment = $derived(
+		this.#enrichment?.app_id === this.#gameId ? this.#enrichment : null
+	);
 	readonly scanProgress = $derived(
 		this.#scanProgress?.app_id === this.#gameId ? this.#scanProgress : null
 	);
@@ -391,81 +434,41 @@ export class LibraryStore extends ConnectionStore {
 		});
 	}
 
-	async scan(): Promise<void> {
+	async scan(options: ScanOptions = {}): Promise<void> {
 		const game = this.#gamesStore.current!;
 		if (game.app_id in this.#scans) return;
 		const scanId = Symbol();
 		this.#scans = { ...this.#scans, [game.app_id]: scanId };
 		try {
+			const full = options.full || LibraryStore.isSyncDue(game);
+			const startedAt = performance.now();
 			const scan = await invoke<LibraryScan | null>('scan_library', {
 				app_id: game.app_id,
+				full,
+				known: await LibraryStore.knownSteamMods(game.app_id),
 			});
 			if (!scan) return;
-			await Model.database.transaction(async (tx) => {
-				const known = await Mod.query()
-					.where('game_id', game.app_id)
-					.toArray(tx);
-				const scanned = Map.groupBy(scan.mods, (mod) =>
-					LibraryStore.identityKey(mod.source, mod.source_ref)
+			const scannedAt = performance.now();
+			const createdRefs = await this.applyScan(game, scan);
+			if (import.meta.env.DEV)
+				console.debug(
+					`scan ${full ? 'full' : 'light'}: rust ${Math.round(scannedAt - startedAt)} ms, store ${Math.round(performance.now() - scannedAt)} ms, ${scan.mods.length} mods, ${scan.pending_details.length} to enrich`
 				);
-				const now = unixNow();
-				const withSteam: { mod: Mod; steam: SteamDetails }[] = [];
-				for (const mod of known) {
-					const key = LibraryStore.identityKey(
-						mod.source,
-						mod.source_ref
-					);
-					const found = scanned.get(key)?.[0];
-					if (found) {
-						mod.fill(LibraryStore.scannedColumns(found));
-						if (found.steam) {
-							withSteam.push({ mod, steam: found.steam });
-							if (mod.seen_updated_at === null)
-								mod.fill({
-									seen_updated_at:
-										found.steam.remote_updated_at,
-								});
-						}
-						scanned.delete(key);
-					} else if (LibraryStore.canGoMissing(mod, scan)) {
-						mod.fill({
-							missing_since: mod.missing_since ?? now,
-							problem:
-								mod.source === 'steam' &&
-								scan.steam_view === 'subscriptions'
-									? 'unsubscribed'
-									: 'folder_removed',
-						});
-					}
-				}
-				await Mod.updateMany(known, tx);
-				const added = [...scanned.values()].map(([mod]) => mod);
-				const created = await Mod.createMany(
-					added.map((mod) => ({
-						game_id: game.app_id,
-						source: mod.source === 'steam' ? 'steam' : 'manual',
-						source_ref: mod.source_ref,
-						title: LibraryStore.titleOf(mod),
-						seen_updated_at: mod.steam?.remote_updated_at ?? null,
-						...LibraryStore.scannedColumns(mod),
-					})),
-					tx
-				);
-				await LibraryStore.applySteamTags(
-					game.app_id,
-					created.map((mod, index) => ({
-						mod,
-						names: added[index].steam?.tags ?? [],
-					})),
-					tx
-				);
-				created.forEach((mod, index) => {
-					const steam = added[index].steam;
-					if (steam) withSteam.push({ mod, steam });
-				});
-				await LibraryStore.saveSteamDependencies(withSteam, tx);
-				await game.row!.update({ scanned_at: now }, tx);
-			});
+			await this.requestThumbnails(game.app_id);
+			if (!scan.pending_details.length) {
+				if (full && scan.steam_view === 'subscriptions')
+					await game.row!.update({ steam_synced_at: unixNow() });
+				return;
+			}
+			const isEnriched = await this.enrich(
+				game,
+				scanId,
+				scan.pending_details,
+				createdRefs,
+				full
+			);
+			if (isEnriched && full)
+				await game.row!.update({ steam_synced_at: unixNow() });
 			await this.requestThumbnails(game.app_id);
 		} finally {
 			if (this.#scans[game.app_id] === scanId) {
@@ -473,6 +476,172 @@ export class LibraryStore extends ConnectionStore {
 				this.#scanProgress = null;
 			}
 		}
+	}
+
+	private async applyScan(
+		game: GameEntry,
+		scan: LibraryScan
+	): Promise<ReadonlySet<string>> {
+		const createdRefs = new SvelteSet<string>();
+		await Model.database.transaction(async (tx) => {
+			const known = await Mod.query()
+				.where('game_id', game.app_id)
+				.toArray(tx);
+			const scanned = Map.groupBy(scan.mods, (mod) =>
+				LibraryStore.identityKey(mod.source, mod.source_ref)
+			);
+			const now = unixNow();
+			for (const mod of known) {
+				const key = LibraryStore.identityKey(
+					mod.source,
+					mod.source_ref
+				);
+				const found = scanned.get(key)?.[0];
+				if (found?.unchanged) {
+					mod.fill({ missing_since: null });
+					scanned.delete(key);
+				} else if (found) {
+					mod.fill(LibraryStore.scannedColumns(found));
+					scanned.delete(key);
+				} else if (LibraryStore.canGoMissing(mod, scan)) {
+					mod.fill({
+						missing_since: mod.missing_since ?? now,
+						problem:
+							mod.source === 'steam' &&
+							scan.steam_view === 'subscriptions'
+								? 'unsubscribed'
+								: 'folder_removed',
+					});
+				}
+			}
+			await Mod.updateMany(known, tx);
+			const added = [...scanned.values()].map(([mod]) => mod);
+			await Mod.createMany(
+				added.map((mod) => ({
+					game_id: game.app_id,
+					source: mod.source === 'steam' ? 'steam' : 'manual',
+					source_ref: mod.source_ref,
+					title: LibraryStore.titleOf(mod),
+					seen_updated_at: null,
+					...LibraryStore.scannedColumns(mod),
+				})),
+				tx
+			);
+			for (const mod of added)
+				if (mod.source === 'steam') createdRefs.add(mod.source_ref);
+			await game.row!.update({ scanned_at: now }, tx);
+		});
+		return createdRefs;
+	}
+
+	private async enrich(
+		game: GameEntry,
+		scanId: symbol,
+		refs: readonly string[],
+		createdRefs: ReadonlySet<string>,
+		full: boolean
+	): Promise<boolean> {
+		this.#enrichment = {
+			app_id: game.app_id,
+			step: 'details',
+			done: 0,
+			total: refs.length,
+		};
+		try {
+			for (let start = 0; start < refs.length; start += DETAILS_CHUNK) {
+				if (this.#scans[game.app_id] !== scanId) return false;
+				const chunk = refs.slice(start, start + DETAILS_CHUNK);
+				const details = await invoke<ModDetails[]>(
+					'fetch_mod_details',
+					{
+						app_id: game.app_id,
+						item_ids: chunk.map(Number),
+					}
+				);
+				await this.applyDetails(game.app_id, details, createdRefs);
+				this.#enrichment = {
+					...this.#enrichment,
+					done: Math.min(start + chunk.length, refs.length),
+				};
+			}
+			if (!full) return true;
+			if (this.#scans[game.app_id] !== scanId) return false;
+			this.#enrichment = { ...this.#enrichment, step: 'times' };
+			const times = await invoke<SubscriptionTime[]>(
+				'fetch_subscription_times',
+				{ app_id: game.app_id }
+			);
+			await this.applySubscriptionTimes(game.app_id, times);
+			return true;
+		} catch (error) {
+			console.debug('Steam details unavailable', error);
+			return false;
+		} finally {
+			this.#enrichment = null;
+		}
+	}
+
+	private async applyDetails(
+		gameId: number,
+		details: readonly ModDetails[],
+		createdRefs: ReadonlySet<string>
+	): Promise<void> {
+		await Model.database.transaction(async (tx) => {
+			const mods = await Mod.query().where('game_id', gameId).toArray(tx);
+			const byRef = Object.fromEntries(
+				mods
+					.filter((mod) => mod.source === 'steam')
+					.map((mod) => [mod.source_ref, mod])
+			) as Record<string, Mod>;
+			const detailed: { mod: Mod; steam: SteamDetails }[] = [];
+			for (const { source_ref, steam } of details) {
+				const mod = byRef[source_ref];
+				if (!mod) continue;
+				mod.fill({
+					...LibraryStore.steamColumns(steam),
+					...(mod.seen_updated_at === null && {
+						seen_updated_at: steam.remote_updated_at,
+					}),
+				});
+				detailed.push({ mod, steam });
+			}
+			await Mod.updateMany(
+				detailed.map(({ mod }) => mod),
+				tx
+			);
+			await LibraryStore.applySteamTags(
+				gameId,
+				detailed
+					.filter(({ mod }) => createdRefs.has(mod.source_ref))
+					.map(({ mod, steam }) => ({ mod, names: steam.tags })),
+				tx
+			);
+			await LibraryStore.saveSteamDependencies(detailed, tx);
+		});
+	}
+
+	private async applySubscriptionTimes(
+		gameId: number,
+		times: readonly SubscriptionTime[]
+	): Promise<void> {
+		await Model.database.transaction(async (tx) => {
+			const mods = await Mod.query().where('game_id', gameId).toArray(tx);
+			const byRef = Object.fromEntries(
+				times.map((time) => [
+					String(time.item_id),
+					time.time_subscribed,
+				])
+			) as Record<string, number>;
+			const changed = mods.filter(
+				(mod) =>
+					mod.source === 'steam' &&
+					mod.source_ref in byRef &&
+					LibraryStore.unix(mod.added_at) !== byRef[mod.source_ref]
+			);
+			for (const mod of changed)
+				mod.fill({ added_at: byRef[mod.source_ref] });
+			await Mod.updateMany(changed, tx);
+		});
 	}
 
 	private cancelScan(gameId: number): void {
@@ -524,6 +693,32 @@ export class LibraryStore extends ConnectionStore {
 		return { profiles, groups, profileIds };
 	}
 
+	private static isSyncDue(game: GameEntry): boolean {
+		const syncedAt = game.row?.steam_synced_at ?? null;
+		return (
+			syncedAt === null ||
+			Date.now() - syncedAt.getTime() > STEAM_SYNC_EVERY_MS
+		);
+	}
+
+	private static async knownSteamMods(gameId: number): Promise<KnownMod[]> {
+		const mods = await Mod.query().where('game_id', gameId).toArray();
+		return mods
+			.filter((mod) => mod.source === 'steam')
+			.map((mod) => ({
+				source_ref: mod.source_ref,
+				installed_updated_at: LibraryStore.unix(
+					mod.installed_updated_at
+				),
+				remote_updated_at: LibraryStore.unix(mod.remote_updated_at),
+				size_bytes: mod.size_bytes,
+			}));
+	}
+
+	private static unix(date: Date | null): number | null {
+		return date === null ? null : Math.round(date.getTime() / 1000);
+	}
+
 	private static identityKey(
 		source: ModSource | LibraryMod['source'],
 		sourceRef: string
@@ -537,7 +732,7 @@ export class LibraryStore extends ConnectionStore {
 	}
 
 	private static titleOf(mod: LibraryMod): string {
-		return mod.steam?.title ?? mod.title ?? mod.source_ref;
+		return mod.title ?? mod.source_ref;
 	}
 
 	private static scannedColumns(mod: LibraryMod) {
@@ -550,16 +745,19 @@ export class LibraryStore extends ConnectionStore {
 			installed_updated_at: mod.installed_updated_at,
 			missing_since: null,
 			...(mod.added_at !== null && { added_at: mod.added_at }),
-			...(mod.steam && {
-				title: mod.steam.title,
-				description: mod.steam.description,
-				author_name: mod.steam.author_name,
-				author_ref: mod.steam.author_ref,
-				page_url: mod.steam.page_url,
-				preview_url: mod.steam.preview_url,
-				published_at: mod.steam.published_at,
-				remote_updated_at: mod.steam.remote_updated_at,
-			}),
+		};
+	}
+
+	private static steamColumns(steam: SteamDetails) {
+		return {
+			title: steam.title,
+			description: steam.description,
+			author_name: steam.author_name,
+			author_ref: steam.author_ref,
+			page_url: steam.page_url,
+			preview_url: steam.preview_url,
+			published_at: steam.published_at,
+			remote_updated_at: steam.remote_updated_at,
 		};
 	}
 

@@ -10,6 +10,7 @@ export class Game extends Model<typeof Game.schema> {
 			pin_position: Column.integer().nullable(),
 			last_opened_at: Column.date('unix').nullable(),
 			scanned_at: Column.date('unix').nullable(),
+			steam_synced_at: Column.date('unix').nullable(),
 			created_at: Column.date('unix'),
 		},
 	});

@@ -37,6 +37,7 @@ export const LICENCES: { group: MessageKey; items: Licence[] }[] = [
 			{ name: 'fs4', licence: 'MIT or Apache-2.0' },
 			{ name: 'image', licence: 'MIT or Apache-2.0' },
 			{ name: 'fast_image_resize', licence: 'MIT or Apache-2.0' },
+			{ name: 'rayon', licence: 'MIT or Apache-2.0' },
 			{ name: 'tracing', licence: 'MIT' },
 			{ name: 'trash', licence: 'MIT' },
 		],

@@ -2,9 +2,18 @@
 	import { t } from '@/lib/i18n';
 	import { LibraryStore } from '@/lib/store';
 
+	import AnimatedEllipsis from './animated-ellipsis.svelte';
+
 	const libraryStore = LibraryStore.get();
 
 	const label = $derived.by(() => {
+		const enrichment = libraryStore.enrichment;
+		if (enrichment?.step === 'times') return t('header.enrich.times');
+		if (enrichment)
+			return t('header.enrich.progress', {
+				done: enrichment.done,
+				total: enrichment.total,
+			});
 		const progress = libraryStore.scanProgress;
 		if (!progress?.total) return t('header.scan.starting');
 		return t('header.scan.progress', {
@@ -20,6 +29,6 @@
 	>
 		<span class="size-1.5 animate-pulse rounded-full bg-status-update"
 		></span>
-		{label}
+		{label}<AnimatedEllipsis />
 	</span>
 {/if}

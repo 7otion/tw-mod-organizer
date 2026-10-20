@@ -500,9 +500,14 @@
 			class="flex flex-1 flex-col items-center justify-center gap-4 pb-16"
 		>
 			<span
-				class="grid size-18 place-items-center rounded-full bg-fill-1"
+				class="relative grid size-18 place-items-center rounded-full bg-fill-1"
 			>
-				<span class="size-2 rounded-full bg-pink"></span>
+				{#if libraryStore.isScanning}
+					<span
+						class="absolute size-4 animate-ping rounded-full bg-pink/50"
+					></span>
+				{/if}
+				<span class="relative size-2 rounded-full bg-pink"></span>
 			</span>
 			<p class="text-lg font-semibold">
 				{libraryStore.isScanning

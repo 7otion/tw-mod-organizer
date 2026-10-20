@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 
 use super::{run, with_app_id};
@@ -11,13 +11,10 @@ pub struct WorkshopItem {
     pub published_file_id: u64,
     pub creator_id: String,
     pub creator_name: String,
-    pub install: Option<Install>,
     pub title: String,
     pub description: String,
     pub time_created: u64,
     pub time_updated: u64,
-    #[serde(default)]
-    pub time_subscribed: Option<u64>,
     pub url: String,
     pub preview_url: Option<String>,
     #[serde(default)]
@@ -27,10 +24,34 @@ pub struct WorkshopItem {
 }
 
 #[derive(Deserialize)]
-pub struct Install {
-    pub folder: PathBuf,
-    pub size_on_disk: u64,
-    pub time_updated: u64,
+pub struct WorkshopState {
+    pub route: StateRoute,
+    pub items: Vec<WorkshopStateItem>,
+}
+
+#[derive(Clone, Copy, PartialEq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum StateRoute {
+    Files,
+    Steam,
+    Folder,
+}
+
+#[derive(Deserialize)]
+pub struct WorkshopStateItem {
+    pub item_id: u64,
+    pub installed: bool,
+    pub folder: Option<PathBuf>,
+    pub size_on_disk: Option<u64>,
+    pub installed_time_updated: Option<u64>,
+    pub latest_time_updated: Option<u64>,
+    pub needs_update: bool,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct SubscriptionTime {
+    pub item_id: u64,
+    pub time_subscribed: u64,
 }
 
 #[derive(Deserialize)]
@@ -40,12 +61,15 @@ pub struct ItemResult {
     pub error: Option<String>,
 }
 
-pub async fn subscribed_items(app: &AppHandle, app_id: u32) -> Result<Vec<WorkshopItem>, AppError> {
-    run(app, with_app_id("subscribed-items", app_id)).await
+pub async fn workshop_state(app: &AppHandle, app_id: u32) -> Result<WorkshopState, AppError> {
+    run(app, with_app_id("workshop-state", app_id)).await
 }
 
-pub async fn workshop_path(app: &AppHandle, app_id: u32) -> Result<PathBuf, AppError> {
-    run(app, with_app_id("workshop-path", app_id)).await
+pub async fn subscription_times(
+    app: &AppHandle,
+    app_id: u32,
+) -> Result<Vec<SubscriptionTime>, AppError> {
+    run(app, with_app_id("subscription-times", app_id)).await
 }
 
 pub async fn workshop_items(

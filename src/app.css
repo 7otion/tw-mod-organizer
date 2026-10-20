@@ -102,6 +102,17 @@
 }
 
 @theme {
+	--animate-ellipsis: ellipsis 1.2s ease-in-out infinite;
+	@keyframes ellipsis {
+		0%,
+		80%,
+		100% {
+			opacity: 0.15;
+		}
+		40% {
+			opacity: 1;
+		}
+	}
 	--text-3xs: 10.5px;
 	--text-2xs: 11.5px;
 	--text-xs: 12px;

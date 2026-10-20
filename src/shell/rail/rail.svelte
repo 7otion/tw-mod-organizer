@@ -65,7 +65,7 @@
 			iconClass={libraryStore.isScanning
 				? 'animate-spin text-status-lose'
 				: 'text-status-ok'}
-			onclick={() => libraryStore.scan()}
+			onclick={() => libraryStore.scan({ full: true })}
 		/>
 		<SettingsRailButton />
 	</Tooltip.Provider>

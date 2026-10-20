@@ -6,12 +6,13 @@ use std::io::{self, BufWriter, Cursor, Read};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use fast_image_resize::images::Image;
 use fast_image_resize::{IntoImageView, Resizer};
 use image::codecs::jpeg::JpegEncoder;
 use image::{DynamicImage, ExtendedColorType, ImageEncoder, ImageReader};
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State};
 
@@ -19,8 +20,8 @@ use crate::error::AppError;
 
 const MAX_SIDE: u32 = 150;
 const JPEG_QUALITY: u8 = 80;
-const PAUSE_BETWEEN: Duration = Duration::from_millis(40);
 const EMIT_EVERY: usize = 20;
+const THREADS: usize = 4;
 const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(15);
 const FINGERPRINT_BYTES: usize = 4096;
 
@@ -77,6 +78,7 @@ fn make_thumbnails(
     folder: &Path,
     sources: Vec<ThumbnailSource>,
 ) -> Result<(), AppError> {
+    let started = Instant::now();
     fs::create_dir_all(folder)?;
     let (cached, mut stale) = cached_thumbnails(folder)?;
     let mut wanted = HashSet::new();
@@ -113,33 +115,44 @@ fn make_thumbnails(
         .timeout(DOWNLOAD_TIMEOUT)
         .build()?;
 
-    let mut made = Vec::new();
-    for (source, key) in missing {
-        if app
-            .state::<ThumbnailRequests>()
+    let pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(THREADS)
+        .build()
+        .map_err(|error| AppError::Custom(error.to_string()))?;
+    let is_current = || {
+        app.state::<ThumbnailRequests>()
             .latest
             .load(Ordering::SeqCst)
-            != request
-        {
-            return Ok(());
-        }
-        match source_bytes(&client, &source).and_then(|bytes| write_thumbnail(&bytes, folder, &key))
-        {
-            Ok(thumbnail) => made.push(Thumbnail {
-                mod_id: source.mod_id,
-                file: thumbnail.file,
-                width: thumbnail.width,
-                height: thumbnail.height,
-            }),
-            Err(error) => tracing::debug!(mod_id = source.mod_id, "no thumbnail: {error}"),
-        }
-        if made.len() >= EMIT_EVERY {
+            == request
+    };
+    pool.install(|| {
+        missing.par_chunks(EMIT_EVERY).for_each(|chunk| {
+            let mut made = Vec::with_capacity(chunk.len());
+            for (source, key) in chunk {
+                if !is_current() {
+                    return;
+                }
+                match source_bytes(&client, source)
+                    .and_then(|bytes| write_thumbnail(&bytes, folder, key))
+                {
+                    Ok(thumbnail) => made.push(Thumbnail {
+                        mod_id: source.mod_id,
+                        file: thumbnail.file,
+                        width: thumbnail.width,
+                        height: thumbnail.height,
+                    }),
+                    Err(error) => tracing::debug!(mod_id = source.mod_id, "no thumbnail: {error}"),
+                }
+            }
             emit(app, &made);
-            made.clear();
-        }
-        thread::sleep(PAUSE_BETWEEN);
-    }
-    emit(app, &made);
+        });
+    });
+    tracing::info!(
+        ready = ready.len(),
+        made = missing.len(),
+        elapsed_ms = started.elapsed().as_millis() as u64,
+        "thumbnails done"
+    );
     Ok(())
 }
 
