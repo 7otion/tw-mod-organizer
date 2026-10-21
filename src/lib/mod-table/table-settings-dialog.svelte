@@ -4,6 +4,7 @@
 	import { DragDropProvider } from '@dnd-kit/svelte';
 	import RotateCcwIcon from '@lucide/svelte/icons/rotate-ccw';
 
+	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';
 	import { Switch } from '@/components/ui/switch';
@@ -23,6 +24,8 @@
 	};
 
 	let { open = $bindable(false), layout, title }: Props = $props();
+
+	let isConfirmingReset = $state(false);
 
 	const order = new DragOrder(
 		() => layout.columns,
@@ -103,7 +106,7 @@
 		</div>
 
 		<Dialog.Footer class="items-center sm:justify-between">
-			<Button variant="ghost" onclick={() => layout.reset()}>
+			<Button variant="ghost" onclick={() => (isConfirmingReset = true)}>
 				<RotateCcwIcon />
 				{t('modTable.settings.reset')}
 			</Button>
@@ -115,3 +118,22 @@
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
+
+<AlertDialog.Root bind:open={isConfirmingReset}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>
+				{t('modTable.settings.resetConfirm.title', { title })}
+			</AlertDialog.Title>
+			<AlertDialog.Description>
+				{t('modTable.settings.resetConfirm.description')}
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={() => layout.reset()}>
+				{t('modTable.settings.resetConfirm.confirm')}
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

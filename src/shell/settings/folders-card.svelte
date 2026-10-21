@@ -2,6 +2,7 @@
 	import { open } from '@tauri-apps/plugin-dialog';
 	import { toast } from 'svelte-sonner';
 
+	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as Card from '@/components/ui/card';
 	import { Progress } from '@/components/ui/progress';
@@ -29,19 +30,38 @@
 		},
 	];
 
+	type PendingChange = {
+		column: FolderColumn | 'game';
+		to: string;
+	};
+
 	const settingsStore = SettingsStore.get();
 	const gamesStore = GamesStore.get();
 
+	let pending = $state.raw<PendingChange | null>(null);
+
 	const folderMove = $derived(settingsStore.folderMove);
 	const game = $derived(gamesStore.current!);
+	const pendingTitle = $derived.by(() => {
+		if (!pending) return '';
+		if (pending.column === 'game')
+			return t('settings.folders.confirm.gameTitle', {
+				game: game.title,
+			});
+		const folder = FOLDERS.find(
+			(folder) => folder.column === pending!.column
+		)!;
+		return t('settings.folders.confirm.moveTitle', {
+			folder: t(folder.titleKey),
+		});
+	});
 
 	async function changeGameFolder(): Promise<void> {
 		const path = await open({
 			directory: true,
 			defaultPath: game.installPath ?? undefined,
 		});
-		if (!path) return;
-		await gamesStore.setFolder(game, path);
+		if (path) pending = { column: 'game', to: path };
 	}
 
 	async function change(column: FolderColumn): Promise<void> {
@@ -49,8 +69,20 @@
 			directory: true,
 			defaultPath: settingsStore.current![column],
 		});
-		if (!to) return;
-		const leftover = await settingsStore.moveFolder(column, to);
+		if (to) pending = { column, to };
+	}
+
+	async function confirmChange(): Promise<void> {
+		const change = pending!;
+		pending = null;
+		if (change.column === 'game') {
+			await gamesStore.setFolder(game, change.to);
+			return;
+		}
+		const leftover = await settingsStore.moveFolder(
+			change.column,
+			change.to
+		);
 		if (leftover)
 			toast.warning(t('settings.folders.moved'), {
 				description: t('settings.folders.leftover', { path: leftover }),
@@ -131,3 +163,36 @@
 		{/each}
 	</Card.Content>
 </Card.Root>
+
+<AlertDialog.Root
+	bind:open={
+		() => pending !== null,
+		(isOpen) => {
+			if (!isOpen) pending = null;
+		}
+	}
+>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>{pendingTitle}</AlertDialog.Title>
+			<AlertDialog.Description class="flex flex-col gap-2">
+				{#if pending}
+					{@render path(pending.to)}
+					<span>
+						{pending.column === 'game'
+							? t('settings.folders.confirm.gameDescription')
+							: t('settings.folders.confirm.moveDescription')}
+					</span>
+				{/if}
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={confirmChange}>
+				{pending?.column === 'game'
+					? t('settings.folders.confirm.useFolder')
+					: t('settings.folders.confirm.move')}
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

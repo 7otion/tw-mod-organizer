@@ -4,6 +4,7 @@
 	import PuzzleIcon from '@lucide/svelte/icons/puzzle';
 
 	import ModContextMenuItems from '@/components/mod-context-menu-items.svelte';
+	import SubscribeRequirementsDialog from '@/components/subscribe-requirements-dialog.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as ContextMenu from '@/components/ui/context-menu';
 
@@ -32,6 +33,7 @@
 	const downloadsStore = WorkshopDownloadsStore.get();
 
 	let isSubscribing = $state(false);
+	let confirming = $state.raw<readonly Requirement[]>([]);
 
 	const dependencies = $derived(libraryStore.dependenciesOf(mod));
 	const missing = $derived(
@@ -59,6 +61,17 @@
 		]
 			.filter(Boolean)
 			.join(' · ');
+	}
+
+	function askSubscribeMissing(): void {
+		if (missing.length > 1) confirming = missing;
+		else void subscribe(missing);
+	}
+
+	async function confirmSubscribe(): Promise<void> {
+		const requirements = confirming;
+		confirming = [];
+		await subscribe(requirements);
 	}
 
 	async function subscribe(
@@ -147,7 +160,7 @@
 			<Button
 				size="sm"
 				disabled={isSubscribing}
-				onclick={() => subscribe(missing)}
+				onclick={askSubscribeMissing}
 			>
 				{t('modDetails.dependencies.subscribeMissing')}
 			</Button>
@@ -231,3 +244,14 @@
 </section>
 
 <p class="text-sm text-muted-foreground">{t('modDetails.dependencies.hint')}</p>
+
+<SubscribeRequirementsDialog
+	bind:open={
+		() => confirming.length > 0,
+		(isOpen) => {
+			if (!isOpen) confirming = [];
+		}
+	}
+	requirements={confirming.map(({ dependency }) => dependency)}
+	onconfirm={confirmSubscribe}
+/>

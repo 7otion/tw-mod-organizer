@@ -4,6 +4,7 @@
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import DownloadIcon from '@lucide/svelte/icons/download';
 
+	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Badge } from '@/components/ui/badge';
 	import { Button } from '@/components/ui/button';
 
@@ -37,6 +38,7 @@
 	const spec = $derived(NOTICE_CATEGORY_SPECS[category]);
 
 	let isExpanded = $state(false);
+	let isConfirmingSeen = $state(false);
 
 	const isCollapsed = $derived(noticesStore.collapsed.has(category));
 	const all = $derived([...notices, ...resolved]);
@@ -120,7 +122,7 @@
 			<Button
 				variant="ghost"
 				size="xs"
-				onclick={() => noticesStore.markAllSeen()}
+				onclick={() => (isConfirmingSeen = true)}
 			>
 				<CheckCheckIcon />
 				{t('notices.actions.markAllSeen')}
@@ -154,3 +156,24 @@
 		{/if}
 	{/if}
 </section>
+
+{#if category === 'steam'}
+	<AlertDialog.Root bind:open={isConfirmingSeen}>
+		<AlertDialog.Content>
+			<AlertDialog.Header>
+				<AlertDialog.Title>
+					{t('notices.markAllSeen.title', { count: notices.length })}
+				</AlertDialog.Title>
+				<AlertDialog.Description>
+					{t('notices.markAllSeen.description')}
+				</AlertDialog.Description>
+			</AlertDialog.Header>
+			<AlertDialog.Footer>
+				<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
+				<AlertDialog.Action onclick={() => noticesStore.markAllSeen()}>
+					{t('notices.markAllSeen.confirm')}
+				</AlertDialog.Action>
+			</AlertDialog.Footer>
+		</AlertDialog.Content>
+	</AlertDialog.Root>
+{/if}

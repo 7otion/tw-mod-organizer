@@ -71,6 +71,12 @@ export type NoticesOpening = {
 	mod?: Mod;
 };
 
+export type MoveTarget = {
+	kind: 'group' | 'block' | 'entry';
+	group: Group | null;
+	profile: Profile;
+};
+
 export type LocateTarget = {
 	locate(modId: number, color: string): boolean;
 };
@@ -450,6 +456,17 @@ export class NoticesStore extends ConnectionStore {
 				notice.category === 'steam' ? [notice.mod] : []
 			)
 		);
+	}
+
+	moveOf(notice: OrderNotice): MoveTarget | null {
+		const moved = this.#slotsByModId[notice.mod.id];
+		const target = this.#slotsByModId[notice.requirement.id];
+		const profile = this.#profilesStore.active;
+		if (!moved || !target || !profile) return null;
+		if (moved.group && moved.group === target.group)
+			return { kind: 'group', group: moved.group, profile };
+		if (moved.group) return { kind: 'block', group: moved.group, profile };
+		return { kind: 'entry', group: null, profile };
 	}
 
 	async moveToFix(notice: OrderNotice): Promise<void> {

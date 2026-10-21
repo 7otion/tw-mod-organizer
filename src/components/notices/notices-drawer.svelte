@@ -9,7 +9,7 @@
 
 	import Drawer from '@/components/drawer.svelte';
 	import RemoveModsDialog from '@/components/remove-mods-dialog.svelte';
-	import * as AlertDialog from '@/components/ui/alert-dialog';
+	import SubscribeRequirementsDialog from '@/components/subscribe-requirements-dialog.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as InputGroup from '@/components/ui/input-group';
 	import { toggleVariants } from '@/components/ui/toggle';
@@ -370,38 +370,13 @@
 	onremoved={() => (removing = null)}
 />
 
-<AlertDialog.Root
+<SubscribeRequirementsDialog
 	bind:open={
 		() => subscribing.length > 0,
 		(isOpen) => {
 			if (!isOpen) subscribing = [];
 		}
 	}
->
-	<AlertDialog.Content>
-		<AlertDialog.Header>
-			<AlertDialog.Title>
-				{t('notices.subscribe.title', { count: subscribing.length })}
-			</AlertDialog.Title>
-			<AlertDialog.Description>
-				{t('notices.subscribe.description')}
-				<ul class="mt-2 flex list-disc flex-col gap-1 pl-4">
-					{#each subscribing as requirement (requirement.required_ref)}
-						<li>
-							{requirement.required_title ??
-								t('modDetails.dependencies.unknownTitle', {
-									id: requirement.required_ref,
-								})}
-						</li>
-					{/each}
-				</ul>
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={confirmSubscribe}>
-				{t('notices.subscribe.confirm')}
-			</AlertDialog.Action>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
+	requirements={subscribing}
+	onconfirm={confirmSubscribe}
+/>

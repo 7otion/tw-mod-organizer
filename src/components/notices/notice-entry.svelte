@@ -7,13 +7,19 @@
 	import LocateIcon from '@lucide/svelte/icons/locate';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
+	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 
 	import { t } from '@/lib/i18n';
 	import Message from '@/lib/i18n/message.svelte';
 	import ModCover from '@/lib/mod-table/mod-cover.svelte';
 	import type { Mod, ModDependency } from '@/lib/models';
-	import { LibraryStore, NoticesStore, type Notice } from '@/lib/store';
+	import {
+		GroupsStore,
+		LibraryStore,
+		NoticesStore,
+		type Notice,
+	} from '@/lib/store';
 
 	import { reason } from './notice-parts.svelte';
 
@@ -26,8 +32,11 @@
 
 	let { notice, isResolved, onremove, onsubscribe }: Props = $props();
 
+	const groupsStore = GroupsStore.get();
 	const libraryStore = LibraryStore.get();
 	const noticesStore = NoticesStore.get();
+
+	let isConfirmingMove = $state(false);
 
 	const mod = $derived(notice.mod);
 	const isSeen = $derived(isResolved && notice.category === 'steam');
@@ -40,6 +49,27 @@
 			? t('notices.number', { number: notice.number })
 			: t(`library.sources.${mod.source}`)
 	);
+	const moveText = $derived.by(() => {
+		if (notice.category !== 'order') return '';
+		const move = noticesStore.moveOf(notice);
+		if (!move) return '';
+		switch (move.kind) {
+			case 'group':
+				return t('notices.moveToFix.group', {
+					group: move.group!.name,
+					count: groupsStore.linkedProfiles(move.group!).length,
+				});
+			case 'block':
+				return t('notices.moveToFix.block', {
+					group: move.group!.name,
+					profile: move.profile.name,
+				});
+			case 'entry':
+				return t('notices.moveToFix.entry', {
+					profile: move.profile.name,
+				});
+		}
+	});
 	const resolvedText = $derived.by(() => {
 		switch (notice.category) {
 			case 'missing':
@@ -157,7 +187,7 @@
 						variant="secondary"
 						size="xs"
 						class="h-6.5"
-						onclick={() => noticesStore.moveToFix(notice)}
+						onclick={() => (isConfirmingMove = true)}
 					>
 						<ArrowUpDownIcon />
 						{t('notices.actions.moveToFix')}
@@ -186,3 +216,27 @@
 		{/if}
 	</span>
 </li>
+
+{#if notice.category === 'order'}
+	<AlertDialog.Root bind:open={isConfirmingMove}>
+		<AlertDialog.Content>
+			<AlertDialog.Header>
+				<AlertDialog.Title>
+					{t('notices.moveToFix.title', {
+						mod: mod.displayTitle,
+						requirement: notice.requirement.displayTitle,
+					})}
+				</AlertDialog.Title>
+				<AlertDialog.Description>{moveText}</AlertDialog.Description>
+			</AlertDialog.Header>
+			<AlertDialog.Footer>
+				<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
+				<AlertDialog.Action
+					onclick={() => noticesStore.moveToFix(notice)}
+				>
+					{t('notices.moveToFix.confirm')}
+				</AlertDialog.Action>
+			</AlertDialog.Footer>
+		</AlertDialog.Content>
+	</AlertDialog.Root>
+{/if}

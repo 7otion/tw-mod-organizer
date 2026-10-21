@@ -364,10 +364,17 @@ showInTable = "Show in table"
 [notices.steam]
 seenToast = "{title} marked as seen"
 
-[notices.subscribe]
-title = { one = "Subscribe to {count} Workshop item?", other = "Subscribe to {count} Workshop items?" }
-description = "Steam adds them to your subscriptions and downloads them. They join the library once installed."
-confirm = "Subscribe"
+[notices.markAllSeen]
+title = { one = "Mark {count} Steam update as seen?", other = "Mark {count} Steam updates as seen?" }
+description = "They leave Notices. A single Seen can be undone from its toast, this cannot."
+confirm = "Mark all as seen"
+
+[notices.moveToFix]
+title = "Move {mod} after {requirement}?"
+group = { one = "The order of the {group} group changes, which applies to the {count} profile that links it.", other = "The order of the {group} group changes, which applies to the {count} profiles that link it." }
+block = "The whole {group} block moves in the {profile} profile."
+entry = "The order of the {profile} profile changes."
+confirm = "Move"
 
 # The drag-only library picker shared by Groups and Load order.
 [modPicker]
@@ -502,6 +509,14 @@ moved = "Folder moved"
 leftover = "The old folder couldn't go to the Recycle Bin and is still at {path}."
 moving = "Moving…"
 movingProgress = "Moving… {copied} of {total} MB"
+
+[settings.folders.confirm]
+gameTitle = "Use this folder for {game}?"
+gameDescription = "TMO reads the game's files and writes its mod list there from now on."
+moveTitle = "Move the {folder} here?"
+moveDescription = "Everything inside moves to the new folder. The old folder goes to the Recycle Bin."
+useFolder = "Use folder"
+move = "Move"
 
 [settings.folders.game]
 title = "Game folder"
@@ -834,6 +849,11 @@ columns = "Columns"
 reset = "Reset to default"
 show = "Show {column}"
 
+[modTable.settings.resetConfirm]
+title = "Reset {title} to its defaults?"
+description = "Column order, widths and visibility, the cover size and the row divider go back to the defaults."
+confirm = "Reset"
+
 # Width shown next to each column in the table settings dialog.
 [modTable.settings.width]
 hidden = "hidden"
@@ -859,6 +879,11 @@ description = { one = "Added to {count} selected mod.", other = "Added to {count
 name = "Name"
 colour = "Colour"
 create = "Create tag"
+
+[library.subscribeConfirm]
+title = { one = "Subscribe to {count} Workshop item?", other = "Subscribe to {count} Workshop items?" }
+description = "Steam adds them to your subscriptions and downloads them. They join the library once installed."
+confirm = "Subscribe"
 
 [library.remove]
 title = { one = "Unsubscribe / remove {count} mod?", other = "Unsubscribe / remove {count} mods?" }
