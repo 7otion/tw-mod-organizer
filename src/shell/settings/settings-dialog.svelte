@@ -3,7 +3,6 @@
 
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';
-	import { ScrollArea } from '@/components/ui/scroll-area';
 
 	import { t } from '@/lib/i18n';
 	import type { MessageKey } from '@/lib/i18n/message-key';
@@ -139,7 +138,7 @@
 				</Dialog.Description>
 			</div>
 
-			<ScrollArea class="min-h-0 flex-1" bind:viewportRef={viewport}>
+			<div class="min-h-0 flex-1 overflow-y-auto" bind:this={viewport}>
 				<div class="flex flex-col gap-4 px-6 pb-6">
 					{#each SECTIONS as section (section.id)}
 						<section
@@ -154,7 +153,7 @@
 						</section>
 					{/each}
 				</div>
-			</ScrollArea>
+			</div>
 		</div>
 	</Dialog.Content>
 </Dialog.Root>

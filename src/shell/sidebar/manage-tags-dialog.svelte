@@ -4,7 +4,6 @@
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
-	import { ScrollArea } from '@/components/ui/scroll-area';
 	import * as Tooltip from '@/components/ui/tooltip';
 
 	import { t } from '@/lib/i18n';
@@ -84,11 +83,11 @@
 						</Tooltip.Content>
 					</Tooltip.Root>
 				</div>
-				<ScrollArea class="max-h-[min(360px,45vh)]">
+				<div class="max-h-[min(360px,45vh)] overflow-y-auto">
 					{#each tagsStore.list as tag (tag.id)}
 						<TagRow {tag} ondelete={() => (deleting = tag)} />
 					{/each}
-				</ScrollArea>
+				</div>
 			</div>
 		{:else}
 			<p class="text-md text-muted-foreground">

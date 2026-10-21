@@ -4,7 +4,6 @@
 
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';
-	import { ScrollArea } from '@/components/ui/scroll-area';
 
 	import { t } from '@/lib/i18n';
 
@@ -24,7 +23,7 @@
 			</Dialog.Description>
 		</Dialog.Header>
 
-		<ScrollArea class="-mx-5 h-[min(420px,50vh)]">
+		<div class="-mx-5 h-[min(420px,50vh)] overflow-y-auto">
 			<div class="flex flex-col gap-5 px-5">
 				{#each LICENCES as { group, items } (group)}
 					<section class="flex flex-col">
@@ -48,7 +47,7 @@
 					</section>
 				{/each}
 			</div>
-		</ScrollArea>
+		</div>
 
 		<Dialog.Footer>
 			<Button variant="ghost" onclick={() => openUrl(GPL_URL)}>

@@ -1,8 +1,6 @@
 <script lang="ts">
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
-	import { ScrollArea } from '@/components/ui/scroll-area';
-
 	import { t } from '@/lib/i18n';
 	import type { MessageKey } from '@/lib/i18n/message-key';
 	import type { Tag } from '@/lib/models';
@@ -145,7 +143,7 @@
 			{t('common.new')}
 		</SidebarHeadingAction>
 	</SidebarHeading>
-	<ScrollArea class="min-h-0 flex-1">
+	<div class="min-h-0 flex-1 overflow-y-auto">
 		<ul class="flex flex-col gap-px">
 			{#each tagsStore.list as tag (tag.id)}
 				<TagFacet {tag} ondelete={() => (deleting = tag)} />
@@ -155,7 +153,7 @@
 				</li>
 			{/each}
 		</ul>
-	</ScrollArea>
+	</div>
 </div>
 <ManageTagsDialog bind:open={isManagingTags} />
 <DeleteTagDialog bind:tag={deleting} />

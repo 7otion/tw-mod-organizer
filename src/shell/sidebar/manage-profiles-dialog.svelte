@@ -14,7 +14,6 @@
 	import { Checkbox } from '@/components/ui/checkbox';
 	import * as Dialog from '@/components/ui/dialog';
 	import * as InputGroup from '@/components/ui/input-group';
-	import { ScrollArea } from '@/components/ui/scroll-area';
 
 	import { DragOrder } from '@/lib/drag-order.svelte';
 	import { Selection } from '@/lib/selection.svelte';
@@ -135,7 +134,7 @@
 				</span>
 			</div>
 
-			<ScrollArea class="min-h-0 flex-1">
+			<div class="min-h-0 flex-1 overflow-y-auto">
 				<ul bind:this={list} class="flex flex-col gap-px py-1">
 					<DragDropProvider
 						modifiers={[
@@ -163,7 +162,7 @@
 						{t('profiles.manage.noMatch', { query: query.trim() })}
 					</p>
 				{/if}
-			</ScrollArea>
+			</div>
 
 			{#if selected.length >= 2}
 				<div

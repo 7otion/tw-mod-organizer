@@ -9,7 +9,6 @@
 	import * as Dialog from '@/components/ui/dialog';
 	import * as Field from '@/components/ui/field';
 	import { Progress } from '@/components/ui/progress';
-	import { ScrollArea } from '@/components/ui/scroll-area';
 	import { Spinner } from '@/components/ui/spinner';
 
 	import { t } from '@/lib/i18n';
@@ -132,8 +131,8 @@
 			max={downloadsStore.total || 1}
 		/>
 
-		<ScrollArea
-			class="max-h-[min(300px,40vh)] min-w-0 rounded-lg bg-tone-1"
+		<div
+			class="max-h-[min(300px,40vh)] min-w-0 overflow-y-auto rounded-lg bg-tone-1"
 		>
 			<ul class="flex flex-col py-1">
 				{#each rows as item (item.source_ref)}
@@ -188,7 +187,7 @@
 					</li>
 				{/each}
 			</ul>
-		</ScrollArea>
+		</div>
 
 		<Field.Field orientation="horizontal">
 			<Checkbox

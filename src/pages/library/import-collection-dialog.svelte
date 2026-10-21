@@ -8,7 +8,6 @@
 	import * as Dialog from '@/components/ui/dialog';
 	import * as Field from '@/components/ui/field';
 	import { Input } from '@/components/ui/input';
-	import { ScrollArea } from '@/components/ui/scroll-area';
 	import { Spinner } from '@/components/ui/spinner';
 
 	import { formatDate, formatSize, t } from '@/lib/i18n';
@@ -157,7 +156,9 @@
 							{t('library.importCollection.status')}
 						</span>
 					</div>
-					<ScrollArea class="max-h-[min(324px,40vh)] min-w-0">
+					<div
+						class="max-h-[min(324px,40vh)] min-w-0 overflow-y-auto"
+					>
 						<ul class="flex flex-col py-1">
 							{#each importer.rows as row (row.item.source_ref)}
 								<CollectionItemRow
@@ -166,7 +167,7 @@
 								/>
 							{/each}
 						</ul>
-					</ScrollArea>
+					</div>
 				</div>
 				<p class="flex gap-5 text-sm text-muted-foreground">
 					<span>

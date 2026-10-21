@@ -7,7 +7,6 @@
 
 	import { Button } from '@/components/ui/button';
 	import * as InputGroup from '@/components/ui/input-group';
-	import { ScrollArea } from '@/components/ui/scroll-area';
 	import * as ToggleGroup from '@/components/ui/toggle-group';
 
 	import { t } from '@/lib/i18n';
@@ -130,7 +129,7 @@
 		</InputGroup.Root>
 	</div>
 
-	<ScrollArea class="min-h-0 flex-1">
+	<div class="min-h-0 flex-1 overflow-y-auto">
 		<div class="flex flex-col gap-7 py-7">
 			<section>
 				<p
@@ -186,7 +185,7 @@
 				</section>
 			{/if}
 		</div>
-	</ScrollArea>
+	</div>
 
 	<footer class="flex h-18 shrink-0 items-center justify-end gap-5 border-t">
 		{#if selected}
