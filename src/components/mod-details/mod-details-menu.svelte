@@ -1,7 +1,7 @@
 <script lang="ts">
-	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 	import { open } from '@tauri-apps/plugin-dialog';
 	import { toast } from 'svelte-sonner';
+	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
 
 	import RemoveModsDialog from '@/components/remove-mods-dialog.svelte';
 	import { Button } from '@/components/ui/button';

@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { openUrl } from '@tauri-apps/plugin-opener';
 	import CircleArrowUpIcon from '@lucide/svelte/icons/circle-arrow-up';
 	import ScrollTextIcon from '@lucide/svelte/icons/scroll-text';
-	import { openUrl } from '@tauri-apps/plugin-opener';
 
 	import { Button } from '@/components/ui/button';
 

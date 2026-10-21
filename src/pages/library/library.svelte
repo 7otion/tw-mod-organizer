@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { openUrl } from '@tauri-apps/plugin-opener';
 	import Columns3CogIcon from '@lucide/svelte/icons/columns-3-cog';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import SearchIcon from '@lucide/svelte/icons/search';
-	import { openUrl } from '@tauri-apps/plugin-opener';
 
 	import ModDetailsPanel from '@/components/mod-details/mod-details-panel.svelte';
 	import { Button } from '@/components/ui/button';

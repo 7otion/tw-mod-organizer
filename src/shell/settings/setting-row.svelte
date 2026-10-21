@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { LucideIcon } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'svelte/elements';
+	import type { LucideIcon } from '@lucide/svelte';
 
 	import { cn } from '@/lib/utils';
 

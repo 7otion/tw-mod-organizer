@@ -1,6 +1,6 @@
 <script lang="ts" generics="T extends string">
-	import PlusIcon from '@lucide/svelte/icons/plus';
 	import { untrack } from 'svelte';
+	import PlusIcon from '@lucide/svelte/icons/plus';
 
 	import { Input } from '@/components/ui/input';
 	import { Slider } from '@/components/ui/slider';

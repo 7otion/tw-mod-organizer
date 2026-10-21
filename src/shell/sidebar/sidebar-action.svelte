@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { LucideIcon } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
+	import type { LucideIcon } from '@lucide/svelte';
 
 	import { Button } from '@/components/ui/button';
 

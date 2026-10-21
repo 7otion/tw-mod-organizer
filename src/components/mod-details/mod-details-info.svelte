@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { toast } from 'svelte-sonner';
 	import type { LucideIcon } from '@lucide/svelte';
 	import CalendarPlusIcon from '@lucide/svelte/icons/calendar-plus';
 	import CopyIcon from '@lucide/svelte/icons/copy';
@@ -7,7 +8,6 @@
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
 	import HashIcon from '@lucide/svelte/icons/hash';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
-	import { toast } from 'svelte-sonner';
 
 	import { Button } from '@/components/ui/button';
 	import * as Tooltip from '@/components/ui/tooltip';

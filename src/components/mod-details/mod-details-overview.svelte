@@ -1,6 +1,6 @@
 <script lang="ts">
-	import LinkIcon from '@lucide/svelte/icons/link';
 	import { openUrl } from '@tauri-apps/plugin-opener';
+	import LinkIcon from '@lucide/svelte/icons/link';
 
 	import AddToGroupMenu from '@/components/add-to-group-menu.svelte';
 

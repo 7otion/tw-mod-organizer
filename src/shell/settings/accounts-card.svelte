@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { open } from '@tauri-apps/plugin-dialog';
 	import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
 	import DownloadIcon from '@lucide/svelte/icons/download';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 	import XIcon from '@lucide/svelte/icons/x';
-	import { open } from '@tauri-apps/plugin-dialog';
 
 	import { Button } from '@/components/ui/button';
 	import * as Card from '@/components/ui/card';

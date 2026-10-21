@@ -1,7 +1,7 @@
 <script lang="ts">
-	import ImageOffIcon from '@lucide/svelte/icons/image-off';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import type { Snippet } from 'svelte';
+	import ImageOffIcon from '@lucide/svelte/icons/image-off';
 
 	import { t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';

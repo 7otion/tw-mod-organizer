@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import CopyIcon from '@lucide/svelte/icons/copy';
 	import MinusIcon from '@lucide/svelte/icons/minus';
 	import SquareIcon from '@lucide/svelte/icons/square';
 	import XIcon from '@lucide/svelte/icons/x';
-	import { getCurrentWindow } from '@tauri-apps/api/window';
 
 	import { Button } from '@/components/ui/button';
 

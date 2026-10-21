@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { open } from '@tauri-apps/plugin-dialog';
+	import { openUrl } from '@tauri-apps/plugin-opener';
 	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 	import SearchIcon from '@lucide/svelte/icons/search';
-	import { open } from '@tauri-apps/plugin-dialog';
-	import { openUrl } from '@tauri-apps/plugin-opener';
 
 	import { Button } from '@/components/ui/button';
 	import * as InputGroup from '@/components/ui/input-group';

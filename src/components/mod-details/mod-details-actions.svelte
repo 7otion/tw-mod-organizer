@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { openUrl } from '@tauri-apps/plugin-opener';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
-	import { openUrl } from '@tauri-apps/plugin-opener';
 
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';

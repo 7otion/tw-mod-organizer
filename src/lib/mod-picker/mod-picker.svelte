@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { openUrl } from '@tauri-apps/plugin-opener';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import GripVerticalIcon from '@lucide/svelte/icons/grip-vertical';
 	import SearchIcon from '@lucide/svelte/icons/search';
 	import XIcon from '@lucide/svelte/icons/x';
-	import { openUrl } from '@tauri-apps/plugin-opener';
 
 	import Drawer from '@/components/drawer.svelte';
 	import { Button } from '@/components/ui/button';

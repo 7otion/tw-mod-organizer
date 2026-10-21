@@ -1,4 +1,8 @@
 <script lang="ts">
+	import { listen } from '@tauri-apps/api/event';
+	import { getCurrentWebview } from '@tauri-apps/api/webview';
+	import { untrack } from 'svelte';
+	import { toast } from 'svelte-sonner';
 	import ArchiveIcon from '@lucide/svelte/icons/archive';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
@@ -6,10 +10,6 @@
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 	import UploadIcon from '@lucide/svelte/icons/upload';
-	import { listen } from '@tauri-apps/api/event';
-	import { getCurrentWebview } from '@tauri-apps/api/webview';
-	import { untrack } from 'svelte';
-	import { toast } from 'svelte-sonner';
 
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';

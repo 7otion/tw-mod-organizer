@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Columns3Icon from '@lucide/svelte/icons/columns-3';
-	import LanguagesIcon from '@lucide/svelte/icons/languages';
 	import { open, save } from '@tauri-apps/plugin-dialog';
 	import { toast } from 'svelte-sonner';
+	import Columns3Icon from '@lucide/svelte/icons/columns-3';
+	import LanguagesIcon from '@lucide/svelte/icons/languages';
 
 	import { Button } from '@/components/ui/button';
 	import * as Card from '@/components/ui/card';

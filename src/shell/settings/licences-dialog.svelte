@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import { openUrl } from '@tauri-apps/plugin-opener';
+	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';

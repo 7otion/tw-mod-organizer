@@ -1,7 +1,7 @@
 <script lang="ts">
-	import LayersIcon from '@lucide/svelte/icons/layers';
 	import { readText } from '@tauri-apps/plugin-clipboard-manager';
 	import { untrack } from 'svelte';
+	import LayersIcon from '@lucide/svelte/icons/layers';
 
 	import { Button } from '@/components/ui/button';
 	import { Checkbox } from '@/components/ui/checkbox';
