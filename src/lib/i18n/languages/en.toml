@@ -133,6 +133,10 @@ taken = "A profile with this name already exists."
 empty = "A group needs a name."
 taken = "A group with this name already exists."
 
+[names.mod]
+empty = "A mod needs a title."
+taken = "A mod with this title already exists."
+
 # Section headings in the sidebar. They are shown in capital letters.
 [sidebar.outline]
 title = "Outline"
@@ -813,10 +817,15 @@ manual = "Manual"
 base = "Base game"
 
 [modDetails.titleEdit]
-label = "Custom title"
-set = "Set a custom title"
+set = "Rename"
 original = "Original: {title}"
 reset = "Reset"
+
+[modDetails.rename]
+title = "Rename mod"
+label = "Title"
+save = "Save"
+reset = "Reset to original"
 
 [modDetails.byline]
 author = "by {name}"
@@ -835,7 +844,7 @@ browser = "Open in browser"
 
 [modDetails.menu]
 label = "More actions"
-rename = "Rename…"
+rename = "Rename"
 setCover = "Set cover image…"
 imageFilter = "Images"
 copySteamId = "Copy Steam ID"
@@ -892,9 +901,6 @@ requires = "Requires"
 requiredBy = "Required by"
 notInLibrary = "Not in library · Steam"
 unknownTitle = "Workshop item {id}"
-on = "In library · on"
-off = "In library · off in “{profile}”"
-absent = "In library · not in “{profile}”"
 subscribe = "Subscribe"
 enable = "Enable"
 noRequirements = "This mod doesn't list any requirements."

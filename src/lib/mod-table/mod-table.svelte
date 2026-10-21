@@ -7,6 +7,7 @@
 	import BulkBar from './bulk-bar.svelte';
 	import ModRow from './mod-row.svelte';
 	import ModTableHeader from './mod-table-header.svelte';
+	import RenameModDialog from './rename-mod-dialog.svelte';
 	import type { ModTable } from './mod-table-state.svelte';
 	import TableSettingsDialog from './table-settings-dialog.svelte';
 
@@ -143,3 +144,5 @@
 		title={t(table.settingsTitleKey)}
 	/>
 {/if}
+
+<RenameModDialog bind:mod={table.renamingMod} />

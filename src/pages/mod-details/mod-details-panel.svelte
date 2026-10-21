@@ -23,6 +23,7 @@
 	import ModDetailsTags from './mod-details-tags.svelte';
 	import ModDetailsTitle from './mod-details-title.svelte';
 	import ModDetailsUpdate from './mod-details-update.svelte';
+	import RenameModDialog from '@/lib/mod-table/rename-mod-dialog.svelte';
 
 	type Tab = (typeof TABS)[number];
 
@@ -46,7 +47,7 @@
 	const libraryStore = LibraryStore.get();
 	const uiStateStore = UiStateStore.get();
 
-	let isEditingTitle = $state(false);
+	let renaming = $state.raw<Mod | null>(null);
 
 	const tabs = $derived(
 		TABS.filter((tab) => tab !== 'conflicts' || context === 'load-order')
@@ -72,7 +73,7 @@
 			{t('modDetails.title')}
 		</span>
 		<span class="flex-1"></span>
-		<ModDetailsMenu {mod} onrename={() => (isEditingTitle = true)} />
+		<ModDetailsMenu {mod} onrename={() => (renaming = mod)} />
 		<Button
 			variant="ghost"
 			size="icon-sm"
@@ -86,7 +87,7 @@
 
 	<div class="min-h-0 flex-1 overflow-y-auto">
 		<ModDetailsCover {mod}>
-			<ModDetailsTitle {mod} bind:isEditing={isEditingTitle} />
+			<ModDetailsTitle {mod} onrename={() => (renaming = mod)} />
 			<p class="text-sm text-foreground-2">
 				{#if mod.author_name}
 					<Message
@@ -168,3 +169,5 @@
 		</div>
 	</div>
 </Drawer>
+
+<RenameModDialog bind:mod={renaming} />

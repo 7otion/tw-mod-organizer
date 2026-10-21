@@ -84,6 +84,7 @@ export class ModTable<Row, ScrollKey = never> {
 	viewport = $state<HTMLElement | null>(null);
 	bulkBar = $state<HTMLElement | null>(null);
 	isSettingsOpen = $state(false);
+	renamingMod = $state.raw<Mod | null>(null);
 	#detailsModId = $state<number | null>(null);
 
 	constructor(options: ModTableOptions<Row, ScrollKey>) {
@@ -251,6 +252,14 @@ export class ModTable<Row, ScrollKey = never> {
 		) {
 			event.preventDefault();
 			this.selection.selectAll();
+		} else if (
+			event.key === 'F2' &&
+			this.selection?.only !== null &&
+			this.selection?.only !== undefined &&
+			!ModTable.isTyping(event.target)
+		) {
+			event.preventDefault();
+			this.renamingMod = this.#libraryStore.modById(this.selection.only);
 		} else if (
 			(event.key === 'ArrowDown' || event.key === 'ArrowUp') &&
 			this.selection &&

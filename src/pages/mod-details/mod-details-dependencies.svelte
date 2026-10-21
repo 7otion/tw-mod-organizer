@@ -6,7 +6,7 @@
 	import { Button } from '@/components/ui/button';
 	import * as ContextMenu from '@/components/ui/context-menu';
 
-	import { t } from '@/lib/i18n';
+	import { formatSize, t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
 	import {
 		LibraryStore,
@@ -43,7 +43,6 @@
 				requirement.mod !== null && statusOf(requirement.mod) !== 'on'
 		).length
 	);
-	const activeName = $derived(profilesStore.active?.name ?? '');
 
 	function statusOf(other: Mod): Status {
 		const entry = libraryStore
@@ -53,12 +52,13 @@
 		return entry.isEnabled ? 'on' : 'off';
 	}
 
-	function statusText(other: Mod): string {
-		const status = statusOf(other);
-		if (status === 'on') return t('modDetails.dependencies.on');
-		if (status === 'off')
-			return t('modDetails.dependencies.off', { profile: activeName });
-		return t('modDetails.dependencies.absent', { profile: activeName });
+	function bylineOf(other: Mod): string {
+		return [
+			other.author_name,
+			other.size_bytes === null ? null : formatSize(other.size_bytes),
+		]
+			.filter(Boolean)
+			.join(' · ');
 	}
 
 	async function subscribe(
@@ -105,7 +105,7 @@
 										: 'text-status-warn'
 								)}
 							>
-								{statusText(other)}
+								{bylineOf(other)}
 							</span>
 						</span>
 						{#if status === 'on'}
