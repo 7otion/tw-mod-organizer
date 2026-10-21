@@ -18,6 +18,7 @@
 	import XIcon from '@lucide/svelte/icons/x';
 
 	import ModDetailsPanel from '@/components/mod-details/mod-details-panel.svelte';
+	import NoticeStrip from '@/components/notices/notice-strip.svelte';
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as InputGroup from '@/components/ui/input-group';
@@ -170,7 +171,7 @@
 {#if !group}
 	<div class="flex flex-1 flex-col items-center justify-center gap-4 pb-16">
 		<span class="grid size-18 place-items-center rounded-full bg-fill-1">
-			<Layers2Icon class="text-foreground-3 size-6" />
+			<Layers2Icon class="size-6 text-muted-foreground" />
 		</span>
 		<p class="text-xl font-semibold">{t('groups.noneTitle')}</p>
 		<p class="max-w-md text-center">
@@ -256,6 +257,7 @@
 					? t('groups.callout', { count: linked.length })
 					: t('groups.calloutUnlinked')}
 			</span>
+			<NoticeStrip />
 			<Button
 				variant="outline"
 				aria-haspopup="dialog"

@@ -4,6 +4,7 @@ import { MOD_SORTS, type ModSort } from '@/lib/mod-table/mod-columns';
 import type { Mod, ModSource, Profile } from '@/lib/models';
 import {
 	LibraryStore,
+	NoticesStore,
 	ProfilesStore,
 	UiStateStore,
 	type UiStateField,
@@ -19,11 +20,7 @@ export const LIBRARY_SOURCES = [
 ] as const satisfies readonly ModSource[];
 export type LibrarySource = (typeof LIBRARY_SOURCES)[number];
 
-export const MOD_STATES = [
-	'in-no-profile',
-	'update-available',
-	'missing-or-broken',
-] as const;
+export const MOD_STATES = ['in-no-profile', 'has-notices'] as const;
 export type ModState = (typeof MOD_STATES)[number];
 
 type FilterSection = 'scope' | 'sources' | 'states' | 'tagIds';
@@ -87,6 +84,7 @@ export class LibraryFilterStore extends ConnectionStore {
 	};
 
 	readonly #libraryStore = LibraryStore.get();
+	readonly #noticesStore = NoticesStore.get();
 	readonly #uiStateStore = UiStateStore.get();
 	readonly #profilesStore = ProfilesStore.get();
 
@@ -210,11 +208,7 @@ export class LibraryFilterStore extends ConnectionStore {
 			scopes: { all: 0, has: 0, lacks: 0 },
 			profiles: {},
 			sources: { steam: 0, nexus: 0, manual: 0 },
-			states: {
-				'in-no-profile': 0,
-				'update-available': 0,
-				'missing-or-broken': 0,
-			},
+			states: { 'in-no-profile': 0, 'has-notices': 0 },
 			tags: {},
 		};
 		let passingOtherThanScope = 0;
@@ -288,10 +282,8 @@ export class LibraryFilterStore extends ConnectionStore {
 		switch (state) {
 			case 'in-no-profile':
 				return this.#libraryStore.isUnused(mod);
-			case 'update-available':
-				return mod.hasUnseenUpdate;
-			case 'missing-or-broken':
-				return mod.problem !== null;
+			case 'has-notices':
+				return this.#noticesStore.noticesOf(mod).length > 0;
 		}
 	}
 

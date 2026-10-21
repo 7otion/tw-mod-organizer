@@ -10,6 +10,7 @@
 	import GameGate from '@/shell/game-gate.svelte';
 	import Header from '@/shell/header/header.svelte';
 	import WordmarkHeader from '@/shell/header/wordmark-header.svelte';
+	import NoticesSlot from '@/shell/notices-slot.svelte';
 	import Rail from '@/shell/rail/rail.svelte';
 	import Sidebar from '@/shell/sidebar/sidebar.svelte';
 
@@ -94,8 +95,9 @@
 				<div class="flex min-h-0 flex-1">
 					<Rail />
 					<Sidebar />
-					<main class="flex min-w-0 flex-1 flex-col">
+					<main class="relative flex min-w-0 flex-1 flex-col">
 						{@render children()}
+						<NoticesSlot />
 					</main>
 				</div>
 			</GameGate>

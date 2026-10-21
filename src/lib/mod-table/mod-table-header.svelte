@@ -1,6 +1,7 @@
 <script lang="ts" generics="Row, ScrollKey">
 	import ArrowDownIcon from '@lucide/svelte/icons/arrow-down';
 	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
+	import BellIcon from '@lucide/svelte/icons/bell';
 
 	import * as Tooltip from '@/components/ui/tooltip';
 
@@ -74,6 +75,17 @@
 					<span class="truncate">{t(spec.labelKey)}</span>
 				{/if}
 			</span>
+			{#if table.hasFlags}
+				<Tooltip.Root>
+					<Tooltip.Trigger
+						aria-label={t('notices.title')}
+						class="grid h-full cursor-default place-items-center text-muted-foreground outline-0"
+					>
+						<BellIcon class="size-3.5" />
+					</Tooltip.Trigger>
+					<Tooltip.Content>{t('notices.title')}</Tooltip.Content>
+				</Tooltip.Root>
+			{/if}
 		{:else}
 			<span
 				class={cn(

@@ -39,6 +39,7 @@ chooseEllipsis = "Choose…"
 close = "Close"
 error = "Error"
 clear = "Clear"
+undo = "Undo"
 
 [app]
 backendCrashed = "Backend crashed: {error}"
@@ -181,8 +182,7 @@ manual = "Manual"
 
 [sidebar.library.states]
 inNoProfile = "In no profile"
-updateAvailable = "Update available"
-missingOrBroken = "Missing or broken"
+hasNotices = "Has notices"
 downloading = "Downloading"
 
 [tags]
@@ -252,6 +252,122 @@ label = "Search group"
 
 [groups.table]
 title = "Table · Groups"
+
+[dates]
+todayAt = "today at {time}"
+yesterdayAt = "yesterday at {time}"
+dayAt = "on {date} at {time}"
+
+# The Notices drawer, the bell on the rail, the header strip and the row flags.
+[notices]
+title = "Notices"
+filterPlaceholder = "Filter by mod name"
+filtered = { one = "{count} notice for this mod. Other categories are hidden.", other = "{count} notices for this mod. Other categories are hidden." }
+showAll = "Show all"
+showMore = "Show {count} more"
+noMatch = "No notice matches."
+allClear = "All clear"
+checked = "Checked {time}"
+checking = "Checking…"
+notChecked = "Not checked yet"
+checkNow = "Check now"
+backTo = "Back to Notices"
+flagHint = "Click the flag to see it in Notices"
+moreHint = "Click to see all in Notices"
+moreFlags = { one = "{count} more notice", other = "{count} more notices" }
+number = "No. {number}"
+
+# What the drawer covers: the whole library on Library, the selected group on Groups,
+# the active profile on Load order.
+[notices.subtitle]
+library = "{game} library"
+group = "{game} library · {group} group"
+profile = "{game} library · {profile} profile"
+noProfile = "{game} library · no active profile"
+filtered = "Opened from a flag · filtered to one mod"
+
+[notices.bell]
+needAction = { one = "Notices, {count} needs action", other = "Notices, {count} need action" }
+
+[notices.scope]
+library = "Library"
+
+[notices.tabs]
+all = "All"
+action = "Needs action"
+know = "Good to know"
+
+[notices.groups]
+action = "Needs action"
+know = "Good to know"
+
+[notices.empty]
+title = "Nothing needs you right now"
+library = "Your {game} library is in good shape. New notices appear here and on the bell."
+group = "The {group} group is in good shape. New notices appear here and on the bell."
+profile = "The {profile} profile is in good shape. New notices appear here and on the bell."
+noProfile = "No profile is active. New notices appear here and on the bell."
+watches = "What Notices watches"
+planned = "Planned"
+
+[notices.categories.missing]
+name = "Missing requirements"
+description = "A mod needs another mod that is not in your library. Clears itself when the requirement arrives."
+
+[notices.categories.broken]
+name = "Missing or broken"
+description = "A mod's folder is gone or cannot be used. Clears itself when the folder is back or the mod is removed."
+
+[notices.categories.order]
+name = "Order violations"
+description = "A requirement sits on the wrong side of the mod that needs it in this profile. Clears itself when the order changes."
+
+[notices.categories.nexus]
+name = "Nexus update available"
+description = "A newer file is on Nexus for a mod you installed from there."
+
+[notices.categories.steam]
+name = "Updated by Steam"
+description = "Steam updated a Workshop mod since you last looked. Stays until you mark it as seen."
+
+[notices.categories.conflict]
+name = "Conflicts"
+description = "Mods in this profile replace each other's files."
+
+[notices.reason]
+missing = "Needs {title}, which is not in your library"
+missingMore = "Needs {title} and {count} more, not in your library"
+gone = "Gone from disk · {problem}"
+broken = "Can't be used · {problem}"
+order = "Must load after {title} {number}"
+orderPosition = "It sits at No. {position}."
+steam = "Steam updated it {when}"
+subscribing = "Subscribing to {title}"
+
+[notices.resolved]
+missing = "Resolved, the requirement is in your library"
+broken = "Resolved"
+order = "Fixed, now loads after {title}"
+steam = "Marked as seen"
+
+[notices.actions]
+subscribe = { one = "Subscribe", other = "Subscribe to {count}" }
+subscribing = "Subscribing"
+subscribeAll = "Subscribe to all"
+remove = "Remove from library"
+openFolder = "Open folder"
+moveToFix = "Move to fix"
+seen = "Seen"
+markAllSeen = "Mark all as seen"
+showInTable = "Show in table"
+
+[notices.steam]
+seenToast = "{title} marked as seen"
+
+[notices.subscribe]
+title = { one = "Subscribe to {count} Workshop item?", other = "Subscribe to {count} Workshop items?" }
+description = "Steam adds them to your subscriptions and downloads them. They join the library once installed."
+confirm = "Subscribe"
 
 # The drag-only library picker shared by Groups and Load order.
 [modPicker]
@@ -700,11 +816,6 @@ manual = "Manual"
 
 [modTable.row]
 version = "v{version}"
-missing = "missing · {problem}"
-newVersion = "new version"
-# A required mod that isn't in the library.
-needs = "needs {title}"
-needsMore = "needs {title} +{count}"
 profileOff = "{name} (off)"
 viaGroup = { one = "via {group} · {count} profile", other = "via {group} · {count} profiles" }
 openDetails = "Open details"

@@ -1,4 +1,7 @@
+export type RelativeDay = 'today' | 'yesterday' | null;
+
 const DATE_TOKEN = /'[^']*'|d{1,4}|M{1,4}|y{1,5}/g;
+const DAY_MS = 86_400_000;
 
 const TIME_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 	['year', 31_536_000],
@@ -16,6 +19,7 @@ export class DateFormatter {
 	readonly #longMonthNamesAlone: Intl.DateTimeFormat;
 	readonly #dayNames: Intl.DateTimeFormat;
 	readonly #longDayNames: Intl.DateTimeFormat;
+	readonly #times: Intl.DateTimeFormat;
 	readonly #relative: Intl.RelativeTimeFormat;
 
 	constructor(locale: string) {
@@ -36,6 +40,10 @@ export class DateFormatter {
 		this.#dayNames = new Intl.DateTimeFormat(locale, { weekday: 'short' });
 		this.#longDayNames = new Intl.DateTimeFormat(locale, {
 			weekday: 'long',
+		});
+		this.#times = new Intl.DateTimeFormat(locale, {
+			hour: '2-digit',
+			minute: '2-digit',
 		});
 		this.#relative = new Intl.RelativeTimeFormat(locale, {
 			numeric: 'auto',
@@ -79,6 +87,21 @@ export class DateFormatter {
 						: String(date.getFullYear());
 			}
 		});
+	}
+
+	time(date: Date): string {
+		return this.#times.format(date);
+	}
+
+	relativeDay(date: Date): RelativeDay {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const day = new Date(date);
+		day.setHours(0, 0, 0, 0);
+		const days = Math.round((today.getTime() - day.getTime()) / DAY_MS);
+		if (days === 0) return 'today';
+		if (days === 1) return 'yesterday';
+		return null;
 	}
 
 	timeAgo(date: Date): string {

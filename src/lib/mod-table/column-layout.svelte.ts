@@ -6,6 +6,7 @@ export type ColumnLayoutOptions<Column extends string> = {
 	layout: TableLayout<Column>;
 	specs: Record<Column, ColumnSpec>;
 	coverColumn: Column;
+	flagsWidth: string | null;
 	leadingWidths: readonly string[];
 	trailingWidths: readonly string[];
 	defaultWidths: () => Record<Column, string>;
@@ -32,15 +33,23 @@ export class ColumnLayout<Column extends string> {
 		() => `var(--thumb-${this.#options.layout.coverSize})`
 	);
 	readonly template = $derived.by(() => {
-		const { layout, coverColumn, leadingWidths, trailingWidths } =
-			this.#options;
+		const {
+			layout,
+			coverColumn,
+			flagsWidth,
+			leadingWidths,
+			trailingWidths,
+		} = this.#options;
 		return [
 			...leadingWidths,
-			...layout.visibleColumns.flatMap((column) =>
-				column.key === coverColumn && layout.hasCover
-					? [this.#coverWidth, this.widthOf(column)]
-					: [this.widthOf(column)]
-			),
+			...layout.visibleColumns.flatMap((column) => {
+				if (column.key !== coverColumn) return [this.widthOf(column)];
+				return [
+					...(layout.hasCover ? [this.#coverWidth] : []),
+					this.widthOf(column),
+					...(flagsWidth ? [flagsWidth] : []),
+				];
+			}),
 			...trailingWidths,
 		].join(' ');
 	});

@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 	import XIcon from '@lucide/svelte/icons/x';
 
 	import Drawer from '@/components/drawer.svelte';
@@ -32,6 +33,7 @@
 		context: DetailsContext;
 		onopen: (mod: Mod) => void;
 		onclose: () => void;
+		onback?: () => void;
 	};
 
 	const TABS = ['overview', 'info', 'conflicts', 'dependencies'] as const;
@@ -42,7 +44,7 @@
 		is: (value): value is Tab => TABS.some((tab) => tab === value),
 	};
 
-	let { mod, context, onopen, onclose }: Props = $props();
+	let { mod, context, onopen, onclose, onback }: Props = $props();
 
 	const libraryStore = LibraryStore.get();
 	const uiStateStore = UiStateStore.get();
@@ -69,9 +71,21 @@
 
 <Drawer label={t('modDetails.title')}>
 	<div class="flex h-11 shrink-0 items-center gap-2 border-b pr-2 pl-4">
-		<span class="text-sm font-semibold text-muted-foreground">
-			{t('modDetails.title')}
-		</span>
+		{#if onback}
+			<Button
+				variant="ghost"
+				size="sm"
+				class="-ml-2 text-muted-foreground"
+				onclick={onback}
+			>
+				<ArrowLeftIcon />
+				{t('notices.backTo')}
+			</Button>
+		{:else}
+			<span class="text-sm font-semibold text-muted-foreground">
+				{t('modDetails.title')}
+			</span>
+		{/if}
 		<span class="flex-1"></span>
 		<ModDetailsMenu {mod} onrename={() => (renaming = mod)} />
 		<Button

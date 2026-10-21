@@ -11,6 +11,8 @@
 		active?: boolean;
 		busy?: boolean;
 		iconClass?: string;
+		badge?: string | null;
+		hasDot?: boolean;
 		onclick: () => void;
 	};
 
@@ -20,6 +22,8 @@
 		active = false,
 		busy = false,
 		iconClass,
+		badge = null,
+		hasDot = false,
 		onclick,
 	}: Props = $props();
 </script>
@@ -35,6 +39,17 @@
 		{onclick}
 	>
 		<Icon class={cn('size-5', iconClass)} />
+		{#if badge}
+			<span
+				class="absolute top-1 right-[3px] h-4 min-w-4 rounded-full bg-foreground px-1 text-center text-3xs leading-4 font-bold text-background tabular-nums"
+			>
+				{badge}
+			</span>
+		{:else if hasDot}
+			<span
+				class="absolute top-2 right-2 size-2 rounded-full bg-status-update ring-2 ring-tone-0"
+			></span>
+		{/if}
 	</Tooltip.Trigger>
 	<Tooltip.Content side="right">{label}</Tooltip.Content>
 </Tooltip.Root>

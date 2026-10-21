@@ -6,6 +6,7 @@
 	import SearchIcon from '@lucide/svelte/icons/search';
 
 	import ModDetailsPanel from '@/components/mod-details/mod-details-panel.svelte';
+	import NoticeStrip from '@/components/notices/notice-strip.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as InputGroup from '@/components/ui/input-group';
 	import { Kbd } from '@/components/ui/kbd';
@@ -225,6 +226,7 @@
 			{/each}
 		</ToggleGroup.Root>
 		<span class="flex-1"></span>
+		<NoticeStrip />
 		<Button
 			variant="outline"
 			aria-haspopup="dialog"

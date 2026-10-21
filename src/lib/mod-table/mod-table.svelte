@@ -2,9 +2,11 @@
 	import { untrack, type Snippet } from 'svelte';
 
 	import { t } from '@/lib/i18n';
+	import type { NoticeCategory } from '@/lib/notices/categories';
 	import type { Selection } from '@/lib/selection.svelte';
 
 	import BulkBar from './bulk-bar.svelte';
+	import FlagTooltip, { type FlagTarget } from './flag-tooltip.svelte';
 	import ModRow from './mod-row.svelte';
 	import ModTableHeader from './mod-table-header.svelte';
 	import type { ModTable } from './mod-table-state.svelte';
@@ -35,7 +37,54 @@
 		bulkActions,
 	}: Props = $props();
 
+	const FLAG_DELAY_MS = 250;
+
 	const drag = untrack(() => table.drag);
+
+	let flagTarget = $state.raw<FlagTarget | null>(null);
+	let flagTimer: ReturnType<typeof setTimeout> | null = null;
+
+	$effect(() => table.register());
+
+	function flagOf(target: EventTarget | null): HTMLElement | null {
+		return target instanceof Element
+			? target.closest<HTMLElement>('[data-flag]')
+			: null;
+	}
+
+	function clearFlagTimer(): void {
+		if (flagTimer) clearTimeout(flagTimer);
+		flagTimer = null;
+	}
+
+	function showFlag(event: PointerEvent | FocusEvent): void {
+		const flag = flagOf(event.target);
+		if (!flag) return;
+		const key = Number(
+			flag.closest<HTMLElement>('[data-row]')?.dataset.row
+		);
+		const row = table.rowByKey(key);
+		if (!row) return;
+		const mod = table.modOf(row);
+		const category =
+			flag.dataset.flag === 'more'
+				? null
+				: (flag.dataset.flag as NoticeCategory);
+		clearFlagTimer();
+		flagTimer = setTimeout(
+			() => (flagTarget = { anchor: flag, mod, category }),
+			event.type === 'focusin' ? 0 : FLAG_DELAY_MS
+		);
+	}
+
+	function hideFlag(event: PointerEvent | FocusEvent): void {
+		const flag = flagOf(event.target);
+		if (!flag) return;
+		const next = event.relatedTarget;
+		if (next instanceof Node && flag.contains(next)) return;
+		clearFlagTimer();
+		flagTarget = null;
+	}
 </script>
 
 <div
@@ -55,6 +104,10 @@
 				class="relative"
 				style:height="{table.virtualList.totalSize}px"
 				onpointerdown={drag ? (event) => drag.arm(event) : undefined}
+				onpointerover={table.hasFlags ? showFlag : undefined}
+				onpointerout={table.hasFlags ? hideFlag : undefined}
+				onfocusin={table.hasFlags ? showFlag : undefined}
+				onfocusout={table.hasFlags ? hideFlag : undefined}
 			>
 				{#each table.visibleRows as visible (table.keyOf(visible.row))}
 					<ModRow
@@ -112,6 +165,10 @@
 		</ul>
 	{/if}
 </div>
+
+{#if table.hasFlags}
+	<FlagTooltip target={flagTarget} />
+{/if}
 
 {#if drag?.dropLine}
 	{@const line = drag.dropLine}

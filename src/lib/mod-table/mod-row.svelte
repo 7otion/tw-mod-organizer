@@ -1,18 +1,26 @@
 <script lang="ts" module>
 	import { buttonVariants } from '@/components/ui/button';
 
+	import type { NoticeCategory } from '@/lib/notices/categories';
+
+	export const SHOWN_FLAGS = 3;
+
 	const DETAILS_BUTTON = [
 		buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
 		'ml-auto opacity-0 transition-opacity duration-120 group-hover:opacity-100 focus-visible:opacity-100',
 	].join(' ');
+	const FLAG =
+		'inline-grid cursor-pointer place-items-center text-(--c) outline-0 transition-colors duration-120 bg-(--c)/15 hover:bg-(--c)/28 focus-visible:bg-(--c)/28';
+	const NO_FLAGS: NoticeCategory[] = [];
 </script>
 
 <script lang="ts" generics="Row, ScrollKey">
 	import type { Snippet } from 'svelte';
 
-	import { formatDate, formatSize, problemText, t } from '@/lib/i18n';
+	import { formatDate, formatSize, t } from '@/lib/i18n';
+	import { NOTICE_CATEGORY_SPECS } from '@/lib/notices/categories';
 	import { selectCellText } from '@/lib/select-cell-text';
-	import { LibraryScanStore, LibraryStore } from '@/lib/store';
+	import { LibraryScanStore, LibraryStore, NoticesStore } from '@/lib/store';
 	import { tagTextColor } from '@/lib/tag-swatches';
 
 	import { SOURCE_ICON_SIZES, type ModColumn } from './mod-columns';
@@ -20,15 +28,10 @@
 	import { sourceIcon } from './mod-source-icon.svelte';
 	import type { ModTable, TableInset } from './mod-table-state.svelte';
 	import {
-		CIRCLE_ALERT,
-		CIRCLE_ARROW_UP,
 		GRIP_VERTICAL,
 		LINK,
 		PANEL_RIGHT_OPEN,
-		PUZZLE,
-		UNLINK,
 		icon,
-		type IconNode,
 	} from './row-icons.svelte';
 
 	type Props = {
@@ -38,12 +41,6 @@
 		top: number;
 		rowActions?: Snippet<[Row]>;
 		isGhost?: boolean;
-	};
-
-	type Mark = {
-		icon: IconNode;
-		label: string;
-		class: string;
 	};
 
 	const SHOWN_TAGS = 2;
@@ -64,6 +61,7 @@
 
 	const libraryStore = LibraryStore.get();
 	const libraryScanStore = LibraryScanStore.get();
+	const noticesStore = NoticesStore.get();
 
 	const mod = $derived(table.modOf(row));
 	const key = $derived(table.keyOf(row));
@@ -71,6 +69,17 @@
 	const isLifted = $derived(table.drag?.isLifted(key) ?? false);
 	const isFlashed = $derived(table.drag?.isFlashed(key) ?? false);
 	const isDisabled = $derived(table.isRowDisabled(row));
+	const isLocated = $derived(table.located?.key === key);
+	const flags = $derived(
+		table.hasFlags ? noticesStore.flagsOf(mod) : NO_FLAGS
+	);
+	const shownFlags = $derived(
+		flags.length > SHOWN_FLAGS ? flags.slice(0, SHOWN_FLAGS - 1) : flags
+	);
+	const hasLargeFlags = $derived(table.rowHeight >= 56);
+	const isFlagActive = $derived(
+		noticesStore.isOpen && noticesStore.filterMod === mod
+	);
 
 	function select(event: MouseEvent): void {
 		if (!isDisabled) table.selection?.select(key, event);
@@ -84,48 +93,10 @@
 			: null
 	);
 
-	const mark = $derived.by((): Mark | null => {
-		if (mod.isMissing)
-			return {
-				icon: UNLINK,
-				label: t('modTable.row.missing', {
-					problem: problemText(mod.problem!),
-				}),
-				class: 'text-status-missing',
-			};
-		if (mod.problem)
-			return {
-				icon: CIRCLE_ALERT,
-				label: problemText(mod.problem),
-				class: 'text-status-missing',
-			};
-		const missing = libraryStore.missingRequirementsOf(mod);
-		if (missing.length) {
-			const title =
-				missing[0].required_title ??
-				t('modDetails.dependencies.unknownTitle', {
-					id: missing[0].required_ref,
-				});
-			return {
-				icon: PUZZLE,
-				label:
-					missing.length > 1
-						? t('modTable.row.needsMore', {
-								title,
-								count: missing.length - 1,
-							})
-						: t('modTable.row.needs', { title }),
-				class: 'text-status-dep',
-			};
-		}
-		if (mod.hasUnseenUpdate)
-			return {
-				icon: CIRCLE_ARROW_UP,
-				label: t('modTable.row.newVersion'),
-				class: 'text-status-update',
-			};
-		return null;
-	});
+	function openNotices(event: MouseEvent): void {
+		event.stopPropagation();
+		noticesStore.open({ mod });
+	}
 
 	const profileNames = $derived(
 		placement.profiles.map(({ profile, isEnabled }) =>
@@ -136,6 +107,54 @@
 	);
 	const firstGroup = $derived(placement.groups[0] ?? null);
 </script>
+
+{#snippet flag(category: NoticeCategory)}
+	<button
+		type="button"
+		data-flag={category}
+		aria-label={t(`notices.categories.${category}.name`)}
+		style:--c={NOTICE_CATEGORY_SPECS[category].color}
+		class={[
+			FLAG,
+			hasLargeFlags ? 'size-6 rounded-md' : 'size-5 rounded-[5px]',
+			isFlagActive && 'shadow-[0_0_0_1.5px_var(--c)]',
+		]}
+		onclick={openNotices}
+		ondblclick={(event) => event.stopPropagation()}
+	>
+		{@render icon(
+			NOTICE_CATEGORY_SPECS[category].icon,
+			hasLargeFlags ? 'size-[15px]' : 'size-[13px]'
+		)}
+	</button>
+{/snippet}
+
+{#snippet flagsCell()}
+	<span class="flex items-center gap-[3px]">
+		{#each shownFlags as category (category)}
+			{@render flag(category)}
+		{/each}
+		{#if flags.length > SHOWN_FLAGS}
+			<button
+				type="button"
+				data-flag="more"
+				aria-label={t('notices.moreFlags', {
+					count: flags.length - shownFlags.length,
+				})}
+				class={[
+					'inline-grid cursor-pointer place-items-center bg-fill-2 font-mono text-3xs font-semibold text-foreground-2 outline-0 hover:bg-fill-3 focus-visible:bg-fill-3',
+					hasLargeFlags
+						? 'size-6 rounded-md'
+						: 'size-5 rounded-[5px]',
+				]}
+				onclick={openNotices}
+				ondblclick={(event) => event.stopPropagation()}
+			>
+				+{flags.length - shownFlags.length}
+			</button>
+		{/if}
+	</span>
+{/snippet}
 
 {#snippet cell(column: ModColumn)}
 	{#if column === 'mod'}
@@ -160,17 +179,6 @@
 			</span>
 			{#if inlineVersion}
 				<span class="shrink-0">{inlineVersion}</span>
-			{/if}
-			{#if mark}
-				<span
-					class={[
-						'inline-flex shrink-0 items-center gap-1 font-semibold',
-						mark.class,
-					]}
-				>
-					{@render icon(mark.icon, 'size-3.5')}
-					{mark.label}
-				</span>
 			{/if}
 			<button
 				type="button"
@@ -275,6 +283,7 @@
 		table.drag && !table.drag.hasHandle && !isDisabled && 'cursor-grab',
 		isSelected && 'bg-pink-tint hover:bg-pink-tint-2',
 		isFlashed && 'bg-status-ok/15',
+		isLocated && 'bg-fill-2 shadow-[inset_0_0_0_1.5px_var(--loc)]',
 		isLifted && !isGhost && 'opacity-35',
 		isDisabled && !isGhost && 'opacity-45',
 		isGhost && 'bg-surface-2 shadow-pop',
@@ -283,6 +292,7 @@
 	]}
 	style:height="{table.rowHeight}px"
 	style:transform="translateY({top}px)"
+	style:--loc={isLocated ? table.located!.color : undefined}
 	onclick={select}
 	ondblclick={selectCellText}
 >
@@ -304,6 +314,9 @@
 	{/if}
 	{#each table.layout.visibleColumns as column (column.key)}
 		{@render cell(column.key)}
+		{#if column.key === 'mod' && table.hasFlags}
+			{@render flagsCell()}
+		{/if}
 	{/each}
 	{#if table.hasRowActions}
 		<span class="grid place-items-center">

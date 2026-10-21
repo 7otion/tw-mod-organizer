@@ -2,7 +2,7 @@ import { ConnectionStore } from '@7otion-tauri/orm';
 import { invoke } from '@tauri-apps/api/core';
 import { untrack } from 'svelte';
 
-import { DateFormatter } from '@/lib/i18n/dates';
+import { DateFormatter, type RelativeDay } from '@/lib/i18n/dates';
 import englishFile from '@/lib/i18n/languages/en.toml';
 import type { MessageKey } from '@/lib/i18n/message-key';
 import {
@@ -89,6 +89,14 @@ export class LanguageStore extends ConnectionStore {
 
 	timeAgo(date: Date): string {
 		return this.#dates.timeAgo(date);
+	}
+
+	formatTime(date: Date): string {
+		return this.#dates.time(date);
+	}
+
+	relativeDay(date: Date): RelativeDay {
+		return this.#dates.relativeDay(date);
 	}
 
 	async options(): Promise<LanguageOption[]> {

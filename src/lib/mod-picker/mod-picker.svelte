@@ -196,7 +196,7 @@
 				<div
 					class="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center"
 				>
-					<SearchIcon class="text-foreground-3 size-6" />
+					<SearchIcon class="size-6 text-muted-foreground" />
 					<b class="font-semibold">
 						{picker.search.trim()
 							? t('modPicker.noMatch', {

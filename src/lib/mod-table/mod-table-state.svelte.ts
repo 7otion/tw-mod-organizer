@@ -7,7 +7,12 @@ import {
 	type ScrollMemoryOptions,
 } from '@/lib/scroll-memory.svelte';
 import { Selection } from '@/lib/selection.svelte';
-import { LibraryStore, type TableLayout } from '@/lib/store';
+import {
+	LibraryStore,
+	NoticesStore,
+	type LocateTarget,
+	type TableLayout,
+} from '@/lib/store';
 import { VirtualList } from '@/lib/virtual-list.svelte';
 
 import { ColumnLayout } from './column-layout.svelte';
@@ -41,6 +46,7 @@ export type ModTableOptions<Row, ScrollKey> = {
 	keyOf: (row: Row) => number;
 	modOf: (row: Row) => Mod;
 	inset?: TableInset;
+	hasFlags?: boolean;
 	isSelectable?: boolean;
 	isRowDisabled?: (row: Row) => boolean;
 	isNumbered?: boolean;
@@ -49,6 +55,11 @@ export type ModTableOptions<Row, ScrollKey> = {
 	drag?: RowDragOptions;
 	openDetails?: (mod: Mod) => void;
 	scrollMemory?: ModTableScrollMemory<ScrollKey>;
+};
+
+export type Located = {
+	key: number;
+	color: string;
 };
 
 export type VisibleRow<Row> = {
@@ -62,17 +73,22 @@ const OVERSCAN_PX = 240;
 const MIN_OVERSCAN = 2;
 const GRIP_WIDTH = '16px';
 const NUMBER_WIDTH = '28px';
+const FLAGS_WIDTH = '68px';
+const LOCATE_MS = 1200;
 const LINE_INSETS: Record<TableInset, number> = { page: 24, drawer: 10 };
 
-export class ModTable<Row, ScrollKey = never> {
+export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 	readonly #options: ModTableOptions<Row, ScrollKey>;
 	readonly #libraryStore = LibraryStore.get();
+	readonly #noticesStore = NoticesStore.get();
 	readonly #scrollMemory: ScrollMemory<ScrollKey> | null;
+	#locateTimer: ReturnType<typeof setTimeout> | null = null;
 
 	readonly layout: TableLayout<ModColumn>;
 	readonly settingsTitleKey: MessageKey;
 	readonly inset: TableInset;
 	readonly lineInset: number;
+	readonly hasFlags: boolean;
 	readonly isNumbered: boolean;
 	readonly hasRowActions: boolean;
 	readonly sort: ModTableSort | null;
@@ -85,6 +101,7 @@ export class ModTable<Row, ScrollKey = never> {
 	bulkBar = $state<HTMLElement | null>(null);
 	isSettingsOpen = $state(false);
 	renamingMod = $state.raw<Mod | null>(null);
+	located = $state.raw<Located | null>(null);
 	#detailsModId = $state<number | null>(null);
 
 	constructor(options: ModTableOptions<Row, ScrollKey>) {
@@ -93,6 +110,7 @@ export class ModTable<Row, ScrollKey = never> {
 		this.settingsTitleKey = options.settingsTitleKey;
 		this.inset = options.inset ?? 'page';
 		this.lineInset = LINE_INSETS[this.inset];
+		this.hasFlags = options.hasFlags ?? this.inset === 'page';
 		this.isNumbered = options.isNumbered ?? false;
 		this.hasRowActions = options.rowActionsWidth !== undefined;
 		this.sort = options.sort ?? null;
@@ -104,6 +122,7 @@ export class ModTable<Row, ScrollKey = never> {
 			layout: options.layout,
 			specs: MOD_COLUMN_SPECS,
 			coverColumn: 'mod',
+			flagsWidth: this.hasFlags ? FLAGS_WIDTH : null,
 			leadingWidths: [
 				...(this.drag?.hasHandle ? [GRIP_WIDTH] : []),
 				...(this.isNumbered ? [NUMBER_WIDTH] : []),
@@ -235,6 +254,24 @@ export class ModTable<Row, ScrollKey = never> {
 
 	closeDetails(): void {
 		this.#detailsModId = null;
+	}
+
+	locate(modId: number, color: string): boolean {
+		const index = this.rows.findIndex(
+			(row) => this.#options.modOf(row).id === modId
+		);
+		if (index < 0) return false;
+		this.virtualList.scrollToIndex(index);
+		this.located = { key: this.#options.keyOf(this.rows[index]), color };
+		if (this.#locateTimer) clearTimeout(this.#locateTimer);
+		this.#locateTimer = setTimeout(() => (this.located = null), LOCATE_MS);
+		return true;
+	}
+
+	register(): () => void {
+		if (!this.hasFlags) return () => {};
+		this.#noticesStore.registerTable(this);
+		return () => this.#noticesStore.unregisterTable(this);
 	}
 
 	handleKeydown(event: KeyboardEvent): void {

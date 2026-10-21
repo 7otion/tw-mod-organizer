@@ -31,16 +31,14 @@
 
 	const STATE_NAMES: Record<ModState, MessageKey> = {
 		'in-no-profile': 'sidebar.library.states.inNoProfile',
-		'update-available': 'sidebar.library.states.updateAvailable',
-		'missing-or-broken': 'sidebar.library.states.missingOrBroken',
+		'has-notices': 'sidebar.library.states.hasNotices',
 	};
 
 	const DOWNLOADING_COUNT = 1;
 
 	const STATE_CLASSES: Record<ModState, string | undefined> = {
 		'in-no-profile': undefined,
-		'update-available': 'text-status-update',
-		'missing-or-broken': 'text-status-missing',
+		'has-notices': undefined,
 	};
 
 	const libraryFilterStore = LibraryFilterStore.get();
@@ -113,7 +111,7 @@
 	<ul class="flex flex-col gap-px">
 		{#each MOD_STATES as state (state)}
 			{@render stateItem(state)}
-			{#if state === 'update-available'}
+			{#if state === 'has-notices'}
 				<SidebarItem>
 					{@render dot(false)}
 					<span class="min-w-0 flex-1 truncate">

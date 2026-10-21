@@ -54,7 +54,7 @@
 		variant="secondary"
 		size="sm"
 		class="shrink-0"
-		onclick={() => libraryStore.markSeen(mod)}
+		onclick={() => libraryStore.markSeen([mod])}
 	>
 		{t('modDetails.update.markSeen')}
 	</Button>

@@ -14,6 +14,7 @@
 	import { navRoutes } from '@/lib/nav-routes';
 	import { LibraryScanStore } from '@/lib/store';
 
+	import NoticesRailButton from './notices-rail-button.svelte';
 	import RailAction from './rail-action.svelte';
 	import RailButton from './rail-button.svelte';
 
@@ -68,6 +69,7 @@
 				: 'text-status-ok'}
 			onclick={() => libraryScanStore.scan({ full: true })}
 		/>
+		<NoticesRailButton />
 		<SettingsRailButton />
 	</Tooltip.Provider>
 </nav>

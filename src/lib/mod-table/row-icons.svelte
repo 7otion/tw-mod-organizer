@@ -72,6 +72,35 @@
 		['path', { d: 'm6 6 12 12' }],
 	];
 	export const CHECK: IconNode = [['path', { d: 'M20 6 9 17l-5-5' }]];
+	export const REFRESH_CW: IconNode = [
+		['path', { d: 'M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8' }],
+		['path', { d: 'M21 3v5h-5' }],
+		['path', { d: 'M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16' }],
+		['path', { d: 'M8 16H3v5' }],
+	];
+	export const ARROW_UP_DOWN: IconNode = [
+		['path', { d: 'm21 16-4 4-4-4' }],
+		['path', { d: 'M17 20V4' }],
+		['path', { d: 'm3 8 4-4 4 4' }],
+		['path', { d: 'M7 4v16' }],
+	];
+	export const ZAP: IconNode = [
+		[
+			'path',
+			{
+				d: 'M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z',
+			},
+		],
+	];
+	export const BELL: IconNode = [
+		['path', { d: 'M10.268 21a2 2 0 0 0 3.464 0' }],
+		[
+			'path',
+			{
+				d: 'M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326',
+			},
+		],
+	];
 	export const DIAMOND: IconNode = [
 		[
 			'path',

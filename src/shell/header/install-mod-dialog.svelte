@@ -279,7 +279,7 @@
 				{#if install.isInspecting}
 					<Spinner class="size-6" />
 				{:else}
-					<UploadIcon class="text-foreground-3 size-8" />
+					<UploadIcon class="size-8 text-muted-foreground" />
 				{/if}
 				<b class="text-lg font-semibold"
 					>{t('library.installMod.dropHere')}</b
@@ -325,9 +325,11 @@
 			{@const inspection = install.inspection!}
 			<div class="flex items-center gap-3 rounded-lg bg-tone-1 px-4 py-3">
 				{#if inspection.source.kind === 'archive'}
-					<ArchiveIcon class="text-foreground-3 size-6 shrink-0" />
+					<ArchiveIcon
+						class="size-6 shrink-0 text-muted-foreground"
+					/>
 				{:else}
-					<FileIcon class="text-foreground-3 size-6 shrink-0" />
+					<FileIcon class="size-6 shrink-0 text-muted-foreground" />
 				{/if}
 				<span class="flex min-w-0 flex-1 flex-col leading-snug">
 					<b class="truncate text-md font-semibold"

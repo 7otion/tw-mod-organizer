@@ -96,18 +96,27 @@ export class LibraryStore extends ConnectionStore {
 			(entry) => entry.group_id
 		)
 	);
+	readonly #entriesByProfileId = $derived(
+		Object.fromEntries(
+			[
+				...Map.groupBy(this.#entries.rows, (entry) => entry.profile_id),
+			].map(([profileId, entries]) => [
+				profileId,
+				entries.toSorted((a, b) =>
+					a.position < b.position
+						? -1
+						: a.position > b.position
+							? 1
+							: 0
+				),
+			])
+		) as Record<number, ProfileEntry[]>
+	);
 	readonly #entryNumbers = $derived.by(() => {
 		const numbers: Record<number, number> = {};
-		const byProfile = Map.groupBy(
-			this.#entries.rows,
-			(entry) => entry.profile_id
-		);
-		for (const entries of byProfile.values()) {
+		for (const entries of Object.values(this.#entriesByProfileId)) {
 			let number = 0;
-			const ordered = entries.toSorted((a, b) =>
-				a.position < b.position ? -1 : a.position > b.position ? 1 : 0
-			);
-			for (const entry of ordered)
+			for (const entry of entries)
 				if (entry.mod_id !== null) numbers[entry.id] = ++number;
 		}
 		return numbers;
@@ -172,6 +181,10 @@ export class LibraryStore extends ConnectionStore {
 
 	placementOf(mod: Mod): ModPlacement {
 		return this.#placements[mod.id] ?? NO_PLACEMENT;
+	}
+
+	entriesOf(profile: Profile): readonly ProfileEntry[] {
+		return this.#entriesByProfileId[profile.id] ?? [];
 	}
 
 	isUnused(mod: Mod): boolean {
@@ -292,8 +305,14 @@ export class LibraryStore extends ConnectionStore {
 		await this.#scanStore.requestThumbnails(mod.game_id);
 	}
 
-	async markSeen(mod: Mod): Promise<void> {
-		await mod.update({ seen_updated_at: mod.remote_updated_at });
+	async markSeen(mods: readonly Mod[]): Promise<void> {
+		for (const mod of mods)
+			mod.draft().seen_updated_at = mod.remote_updated_at;
+		await Mod.updateMany(mods);
+	}
+
+	async restoreSeen(mod: Mod, seenAt: Date | null): Promise<void> {
+		await mod.update({ seen_updated_at: seenAt });
 	}
 
 	hasSteamMod(itemRef: string): boolean {

@@ -35,3 +35,15 @@ export function formatDate(date: Date, pattern?: string): string {
 export function timeAgo(date: Date): string {
 	return language().timeAgo(date);
 }
+
+export function formatWhen(date: Date): string {
+	const time = language().formatTime(date);
+	switch (language().relativeDay(date)) {
+		case 'today':
+			return t('dates.todayAt', { time });
+		case 'yesterday':
+			return t('dates.yesterdayAt', { time });
+		default:
+			return t('dates.dayAt', { date: formatDate(date), time });
+	}
+}
