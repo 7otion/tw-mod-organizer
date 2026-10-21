@@ -14,9 +14,9 @@
 	import { Input } from '@/components/ui/input';
 	import * as Tooltip from '@/components/ui/tooltip';
 
+	import { formatDate, t, timeAgo } from '@/lib/i18n';
 	import { type Profile, ProfileEntry } from '@/lib/models';
 	import type { Selection } from '@/lib/selection.svelte';
-	import { formatDate, t, timeAgo } from '@/lib/i18n';
 	import { ProfilesStore } from '@/lib/store';
 	import { cn, nameError } from '@/lib/utils';
 

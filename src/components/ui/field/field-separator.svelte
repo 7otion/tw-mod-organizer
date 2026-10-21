@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { Separator } from '@/components/ui/separator/index.js';
-	import { cn, type WithElementRef } from '@/lib/utils.js';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+
+	import { Separator } from '@/components/ui/separator/index.js';
+
+	import { cn, type WithElementRef } from '@/lib/utils.js';
 
 	let {
 		ref = $bindable(null),

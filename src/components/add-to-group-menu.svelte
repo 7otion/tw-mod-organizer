@@ -10,11 +10,12 @@
 	} from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 
+	import NewGroupDialog from '@/shell/sidebar/new-group-dialog.svelte';
+
 	import { t } from '@/lib/i18n';
 	import type { Mod, TagColor } from '@/lib/models';
 	import { GroupsStore } from '@/lib/store';
 	import { tagColor } from '@/lib/tag-swatches';
-	import NewGroupDialog from '@/shell/sidebar/new-group-dialog.svelte';
 
 	type Props = {
 		mods: readonly Mod[];

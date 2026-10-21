@@ -16,9 +16,9 @@
 	import * as InputGroup from '@/components/ui/input-group';
 
 	import { DragOrder } from '@/lib/drag-order.svelte';
-	import { Selection } from '@/lib/selection.svelte';
-	import type { Profile } from '@/lib/models';
 	import { t } from '@/lib/i18n';
+	import type { Profile } from '@/lib/models';
+	import { Selection } from '@/lib/selection.svelte';
 	import { GamesStore, ProfilesStore } from '@/lib/store';
 
 	import DeleteProfileDialog from './delete-profile-dialog.svelte';

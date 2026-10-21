@@ -10,9 +10,9 @@
 	import { isTagPreset, ModTag, type Tag, type TagColor } from '@/lib/models';
 	import { TagsStore } from '@/lib/store';
 	import { tagColor } from '@/lib/tag-swatches';
+	import { nameError } from '@/lib/utils';
 
 	import TagColorPicker from './tag-color-picker.svelte';
-	import { nameError } from '@/lib/utils';
 
 	let { tag, ondelete }: { tag: Tag; ondelete: () => void } = $props();
 

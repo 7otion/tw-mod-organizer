@@ -3,10 +3,12 @@
 	import ImageOffIcon from '@lucide/svelte/icons/image-off';
 	import PuzzleIcon from '@lucide/svelte/icons/puzzle';
 
+	import ModContextMenuItems from '@/components/mod-context-menu-items.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as ContextMenu from '@/components/ui/context-menu';
 
 	import { formatSize, t } from '@/lib/i18n';
+	import ModCover from '@/lib/mod-table/mod-cover.svelte';
 	import type { Mod } from '@/lib/models';
 	import {
 		LibraryStore,
@@ -15,8 +17,6 @@
 		type Requirement,
 	} from '@/lib/store';
 	import { cn } from '@/lib/utils';
-	import ModCover from '@/lib/mod-table/mod-cover.svelte';
-	import ModContextMenuItems from '@/pages/library/mod-context-menu-items.svelte';
 
 	type Props = {
 		mod: Mod;

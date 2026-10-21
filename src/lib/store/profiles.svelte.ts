@@ -1,12 +1,12 @@
 import { ConnectionStore, Model, type Transaction } from '@7otion-tauri/orm';
 
+import { t } from '@/lib/i18n';
 import {
 	Profile,
 	ProfileEntry,
 	ProfileGroupDisabled,
 	Separator,
 } from '@/lib/models';
-import { t } from '@/lib/i18n';
 import { GamesStore } from '@/lib/store';
 import { unixNow } from '@/lib/utils';
 

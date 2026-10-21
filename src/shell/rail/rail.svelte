@@ -6,12 +6,13 @@
 
 	import * as Tooltip from '@/components/ui/tooltip';
 
-	import { t } from '@/lib/i18n';
-	import { navRoutes } from '@/lib/nav-routes';
-	import { LibraryScanStore } from '@/lib/store';
 	import SettingsRailButton from '@/shell/settings/rail-button.svelte';
 	import ManageProfilesDialog from '@/shell/sidebar/manage-profiles-dialog.svelte';
 	import ManageTagsDialog from '@/shell/sidebar/manage-tags-dialog.svelte';
+
+	import { t } from '@/lib/i18n';
+	import { navRoutes } from '@/lib/nav-routes';
+	import { LibraryScanStore } from '@/lib/store';
 
 	import RailAction from './rail-action.svelte';
 	import RailButton from './rail-button.svelte';

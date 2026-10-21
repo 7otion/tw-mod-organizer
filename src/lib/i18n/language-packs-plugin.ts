@@ -1,6 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-
 import { parse } from 'smol-toml';
 import type { Plugin } from 'vite';
 

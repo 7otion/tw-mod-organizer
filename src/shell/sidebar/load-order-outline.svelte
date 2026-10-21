@@ -4,9 +4,9 @@
 	import { t } from '@/lib/i18n';
 	import { cn } from '@/lib/utils';
 
+	import SidebarCount from './sidebar-count.svelte';
 	import SidebarHeadingAction from './sidebar-heading-action.svelte';
 	import SidebarHeading from './sidebar-heading.svelte';
-	import SidebarCount from './sidebar-count.svelte';
 	import SidebarItem from './sidebar-item.svelte';
 
 	type SeparatorColor =

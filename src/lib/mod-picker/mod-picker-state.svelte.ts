@@ -1,7 +1,7 @@
 import { SvelteSet } from 'svelte/reactivity';
 
-import type { Mod } from '@/lib/models';
 import { ModTable } from '@/lib/mod-table/mod-table-state.svelte';
+import type { Mod } from '@/lib/models';
 import type { Selection } from '@/lib/selection.svelte';
 import {
 	LibraryStore,

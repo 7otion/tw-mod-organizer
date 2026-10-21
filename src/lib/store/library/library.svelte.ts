@@ -2,6 +2,7 @@ import { ConnectionStore, Model } from '@7otion-tauri/orm';
 import { invoke } from '@tauri-apps/api/core';
 import { openUrl } from '@tauri-apps/plugin-opener';
 
+import { t } from '@/lib/i18n';
 import {
 	Group,
 	GroupMember,
@@ -18,7 +19,6 @@ import {
 	ProfilesStore,
 	TagsStore,
 } from '@/lib/store';
-import { t } from '@/lib/i18n';
 import { unixNow } from '@/lib/utils';
 
 type RemovedMods = {

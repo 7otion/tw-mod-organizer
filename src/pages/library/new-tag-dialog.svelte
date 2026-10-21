@@ -4,11 +4,12 @@
 	import * as Field from '@/components/ui/field';
 	import { Input } from '@/components/ui/input';
 
+	import TagColorPicker from '@/shell/sidebar/tag-color-picker.svelte';
+
 	import { t } from '@/lib/i18n';
 	import type { Mod, TagColor } from '@/lib/models';
 	import { LibraryStore, TagsStore } from '@/lib/store';
 	import { nameError } from '@/lib/utils';
-	import TagColorPicker from '@/shell/sidebar/tag-color-picker.svelte';
 
 	type Props = {
 		open: boolean;

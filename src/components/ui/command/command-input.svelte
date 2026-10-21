@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from 'bits-ui';
-	import * as InputGroup from '@/components/ui/input-group/index.js';
 	import SearchIcon from '@lucide/svelte/icons/search';
+	import { Command as CommandPrimitive } from 'bits-ui';
+
+	import * as InputGroup from '@/components/ui/input-group/index.js';
+
 	import { cn } from '@/lib/utils.js';
 
 	let {

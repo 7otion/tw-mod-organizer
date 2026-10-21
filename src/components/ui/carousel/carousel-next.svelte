@@ -1,9 +1,12 @@
 <script lang="ts">
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import { Button, type Props } from '@/components/ui/button/index.js';
-	import { cn } from '@/lib/utils.js';
-	import { getEmblaContext } from './context.js';
 	import type { WithoutChildren } from 'bits-ui';
+
+	import { Button, type Props } from '@/components/ui/button/index.js';
+
+	import { cn } from '@/lib/utils.js';
+
+	import { getEmblaContext } from './context.js';
 
 	let {
 		ref = $bindable(null),

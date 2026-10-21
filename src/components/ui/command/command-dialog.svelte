@@ -1,12 +1,15 @@
 <script lang="ts">
-	import * as Dialog from '@/components/ui/dialog/index.js';
-	import { cn, type WithoutChildrenOrChild } from '@/lib/utils.js';
-	import Command from './command.svelte';
 	import type {
 		Command as CommandPrimitive,
 		Dialog as DialogPrimitive,
 	} from 'bits-ui';
 	import type { Snippet } from 'svelte';
+
+	import * as Dialog from '@/components/ui/dialog/index.js';
+
+	import { cn, type WithoutChildrenOrChild } from '@/lib/utils.js';
+
+	import Command from './command.svelte';
 
 	let {
 		open = $bindable(false),

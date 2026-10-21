@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as ResizablePrimitive from 'paneforge';
+
 	import { cn, type WithoutChildrenOrChild } from '@/lib/utils.js';
 
 	let {

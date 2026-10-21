@@ -1,8 +1,9 @@
 <script lang="ts">
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 
-	import { t } from '@/lib/i18n';
 	import RailAction from '@/shell/rail/rail-action.svelte';
+
+	import { t } from '@/lib/i18n';
 
 	import SettingsDialog from './settings-dialog.svelte';
 

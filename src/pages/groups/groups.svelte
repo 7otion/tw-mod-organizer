@@ -17,10 +17,15 @@
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import XIcon from '@lucide/svelte/icons/x';
 
+	import ModDetailsPanel from '@/components/mod-details/mod-details-panel.svelte';
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as InputGroup from '@/components/ui/input-group';
 	import { Kbd } from '@/components/ui/kbd';
+
+	import DeleteGroupDialog from '@/shell/sidebar/delete-group-dialog.svelte';
+	import NewGroupDialog from '@/shell/sidebar/new-group-dialog.svelte';
+	import RenameGroupDialog from '@/shell/sidebar/rename-group-dialog.svelte';
 
 	import { t } from '@/lib/i18n';
 	import Message from '@/lib/i18n/message.svelte';
@@ -36,10 +41,6 @@
 		TableLayoutStore,
 		type GroupMod,
 	} from '@/lib/store';
-	import ModDetailsPanel from '@/pages/mod-details/mod-details-panel.svelte';
-	import DeleteGroupDialog from '@/shell/sidebar/delete-group-dialog.svelte';
-	import NewGroupDialog from '@/shell/sidebar/new-group-dialog.svelte';
-	import RenameGroupDialog from '@/shell/sidebar/rename-group-dialog.svelte';
 
 	import { GROUPS_LAYOUT } from './groups-layout';
 

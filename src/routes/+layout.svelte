@@ -12,6 +12,7 @@
 	import WordmarkHeader from '@/shell/header/wordmark-header.svelte';
 	import Rail from '@/shell/rail/rail.svelte';
 	import Sidebar from '@/shell/sidebar/sidebar.svelte';
+
 	import S7forgeSetup from '@/pages/s7forge-setup/s7forge-setup.svelte';
 
 	import { t } from '@/lib/i18n';

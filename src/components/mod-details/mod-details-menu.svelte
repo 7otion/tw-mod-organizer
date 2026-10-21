@@ -3,13 +3,13 @@
 	import { open } from '@tauri-apps/plugin-dialog';
 	import { toast } from 'svelte-sonner';
 
+	import RemoveModsDialog from '@/components/remove-mods-dialog.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 
 	import { t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
 	import { LibraryStore } from '@/lib/store';
-	import RemoveModsDialog from '@/pages/library/remove-mods-dialog.svelte';
 
 	type Props = {
 		mod: Mod;

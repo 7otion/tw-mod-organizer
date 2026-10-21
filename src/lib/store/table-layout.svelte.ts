@@ -1,7 +1,7 @@
 import { ConnectionStore, Model } from '@7otion-tauri/orm';
 
-import { UiColumn } from '@/lib/models';
 import { COVER_SIZES, type CoverSize } from '@/lib/mod-table/mod-columns';
+import { UiColumn } from '@/lib/models';
 import { GamesStore, UiStateStore, type UiStateField } from '@/lib/store';
 
 export type TableLayoutSpec<Column extends string> = {

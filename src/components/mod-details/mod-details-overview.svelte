@@ -2,12 +2,12 @@
 	import LinkIcon from '@lucide/svelte/icons/link';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 
+	import AddToGroupMenu from '@/components/add-to-group-menu.svelte';
+
 	import { t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
 	import { LibraryStore, ProfilesStore } from '@/lib/store';
 	import { cn } from '@/lib/utils';
-
-	import AddToGroupMenu from '@/pages/library/add-to-group-menu.svelte';
 
 	import { readDescription, type DescriptionNode } from './description';
 

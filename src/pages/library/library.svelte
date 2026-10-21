@@ -5,6 +5,7 @@
 	import SearchIcon from '@lucide/svelte/icons/search';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 
+	import ModDetailsPanel from '@/components/mod-details/mod-details-panel.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as InputGroup from '@/components/ui/input-group';
 	import { Kbd } from '@/components/ui/kbd';
@@ -27,7 +28,6 @@
 		type LibraryScope,
 	} from '@/lib/store';
 	import { cn } from '@/lib/utils';
-	import ModDetailsPanel from '@/pages/mod-details/mod-details-panel.svelte';
 
 	import LibraryBulkActions from './library-bulk-actions.svelte';
 	import { LIBRARY_LAYOUT } from './library-layout';

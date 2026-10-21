@@ -10,6 +10,7 @@
 
 	import { formatSize, t } from '@/lib/i18n';
 	import Message from '@/lib/i18n/message.svelte';
+	import RenameModDialog from '@/lib/mod-table/rename-mod-dialog.svelte';
 	import type { Mod } from '@/lib/models';
 	import { LibraryStore, UiStateStore, type UiStateField } from '@/lib/store';
 	import { cn } from '@/lib/utils';
@@ -23,7 +24,6 @@
 	import ModDetailsTags from './mod-details-tags.svelte';
 	import ModDetailsTitle from './mod-details-title.svelte';
 	import ModDetailsUpdate from './mod-details-update.svelte';
-	import RenameModDialog from '@/lib/mod-table/rename-mod-dialog.svelte';
 
 	type Tab = (typeof TABS)[number];
 

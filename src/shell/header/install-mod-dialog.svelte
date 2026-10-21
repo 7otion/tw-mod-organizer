@@ -6,10 +6,10 @@
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 	import UploadIcon from '@lucide/svelte/icons/upload';
-	import { getCurrentWebview } from '@tauri-apps/api/webview';
 	import { listen } from '@tauri-apps/api/event';
-	import { toast } from 'svelte-sonner';
+	import { getCurrentWebview } from '@tauri-apps/api/webview';
 	import { untrack } from 'svelte';
+	import { toast } from 'svelte-sonner';
 
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';

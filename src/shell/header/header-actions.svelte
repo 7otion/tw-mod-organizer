@@ -14,10 +14,10 @@
 	import type { MessageKey } from '@/lib/i18n/message-key';
 	import { AppStore } from '@/lib/store';
 
-	import ForceUpdateDialog from '@/pages/library/force-update-dialog.svelte';
-	import ImportCollectionDialog from '@/pages/library/import-collection-dialog.svelte';
-	import InstallModDialog from '@/pages/library/install-mod-dialog.svelte';
-	import WorkshopDownloadsDialog from '@/pages/library/workshop-downloads-dialog.svelte';
+	import ForceUpdateDialog from './force-update-dialog.svelte';
+	import ImportCollectionDialog from './import-collection-dialog.svelte';
+	import InstallModDialog from './install-mod-dialog.svelte';
+	import WorkshopDownloadsDialog from './workshop-downloads-dialog.svelte';
 
 	type HeaderAction = {
 		labelKey: MessageKey;

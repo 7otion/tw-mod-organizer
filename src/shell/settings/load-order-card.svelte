@@ -3,8 +3,8 @@
 	import { Switch } from '@/components/ui/switch';
 	import * as ToggleGroup from '@/components/ui/toggle-group';
 
-	import { type NewModsPlacement, NEW_MODS_PLACEMENTS } from '@/lib/models';
 	import { t } from '@/lib/i18n';
+	import { type NewModsPlacement, NEW_MODS_PLACEMENTS } from '@/lib/models';
 	import { SettingsStore } from '@/lib/store';
 
 	import SettingRow from './setting-row.svelte';

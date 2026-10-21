@@ -1,10 +1,11 @@
 <script lang="ts" module>
-	import { type VariantProps, tv } from 'tailwind-variants';
-	import { cn, type WithElementRef } from '@/lib/utils.js';
 	import type {
 		HTMLAnchorAttributes,
 		HTMLButtonAttributes,
 	} from 'svelte/elements';
+	import { type VariantProps, tv } from 'tailwind-variants';
+
+	import { cn, type WithElementRef } from '@/lib/utils.js';
 
 	export const buttonVariants = tv({
 		base: "group/button inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-md font-semibold whitespace-nowrap transition-colors duration-120 outline-none select-none disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",

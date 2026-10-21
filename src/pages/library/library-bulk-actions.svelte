@@ -4,6 +4,8 @@
 	import TagIcon from '@lucide/svelte/icons/tag';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
+	import AddToGroupMenu from '@/components/add-to-group-menu.svelte';
+	import RemoveModsDialog from '@/components/remove-mods-dialog.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 
@@ -12,9 +14,7 @@
 	import { LibraryStore, TagsStore } from '@/lib/store';
 	import { tagColor } from '@/lib/tag-swatches';
 
-	import AddToGroupMenu from './add-to-group-menu.svelte';
 	import NewTagDialog from './new-tag-dialog.svelte';
-	import RemoveModsDialog from './remove-mods-dialog.svelte';
 
 	let { selection }: { selection: Selection<number> } = $props();
 
