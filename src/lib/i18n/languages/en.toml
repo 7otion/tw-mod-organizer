@@ -151,6 +151,9 @@ mods = { one = "{count} mod", other = "{count} mods" }
 linked = { one = "in {count} profile", other = "in {count} profiles" }
 notLinked = "not linked"
 
+[sidebar.linkedIn]
+title = "Linked in"
+
 [sidebar.loadOrder]
 rebuildFromSave = "Rebuild profile from a save…"
 
@@ -223,31 +226,28 @@ empty = "No tags yet. Tags label mods for filtering; they never change what a pr
 nameLabel = "Group name"
 noneTitle = "No groups yet"
 noneDescription = "A group is a reusable, ordered set of mods. Profiles link it as one block and can only switch members on or off."
-newGroup = "New group…"
-renameEllipsis = "Rename…"
-deleteEllipsis = "Delete group…"
+newGroup = "New group"
+renameGroup = "Rename"
+deleteGroup = "Delete group"
 duplicate = "Duplicate"
 changeColour = "Change colour"
 noColour = "No colour"
 colourTitle = "Colour of “{name}”"
 linkedCount = { one = "linked in {count} profile", other = "linked in {count} profiles" }
-addMods = "Add mods to group…"
-callout = { one = "Changes here apply immediately to the {count} linked profile. Order is set here only.", other = "Changes here apply immediately to all {count} linked profiles. Order is set here only." }
-calloutUnlinked = "No profile links this group yet. Order is set here only."
-linkedIn = "Linked in"
+addMods = "Add mods to group"
+callout = { one = "Changes here apply immediately to the {count} linked profile.", other = "Changes here apply immediately to all {count} linked profiles." }
+calloutUnlinked = "No profile links this group yet."
 linkedNone = "Not linked in any profile yet."
-selected = "Selected"
-selectedNone = "Select a mod to see it here."
-details = "Details"
 removeFromGroup = "Remove from group"
 empty = "This group has no mods yet. Select mods in the Library and use Add to group."
+noMatch = "No mod in this group matches the search."
 
-# After a drop from the picker; {position} is 1-based.
-[groups.drop]
-line = { one = "Insert {count} at position {position}", other = "Insert {count} at position {position}" }
-end = { one = "Add {count} at the end · position {position}", other = "Add {count} at the end · position {position}" }
-zone = "Drop mods here from the Library, or use “Add mods to group…”"
-endZone = "Drop here to add at the end"
+[groups.search]
+placeholder = { one = "Search {count} mod by title, author or tag", other = "Search {count} mods by title, author or tag" }
+label = "Search group"
+
+[groups.table]
+title = "Table · Groups"
 
 # The drag-only library picker shared by Groups and Load order.
 [modPicker]
@@ -268,33 +268,15 @@ clearFilters = "Clear filters"
 searchWorkshop = "Search the Workshop"
 selected = { one = "{count} selected", other = "{count} selected" }
 dragStack = "Drag the stack, or any selected row"
-idleTitle = "Drag mods into the list"
-idleClick = "Click to select several"
-idleRange = "range"
-idleAddOne = "add one"
-idleAll = "all"
+used = { one = "{count} used", other = "{count} used" }
 
 [modPicker.added]
 group = "In group"
 profile = "In profile"
 
-[modPicker.addedHidden]
-group = { one = "{count} already in the group, hidden", other = "{count} already in the group, hidden" }
-profile = { one = "{count} already added, hidden", other = "{count} already added, hidden" }
-
-[modPicker.addedGreyed]
-group = { one = "{count} already in the group, shown greyed", other = "{count} already in the group, shown greyed" }
-profile = { one = "{count} already added, shown greyed", other = "{count} already added, shown greyed" }
-
 [modPicker.dropInto]
 group = "Dragging · drop into the group"
 profile = "Dragging · drop into the list"
-
-[groups.columns]
-number = "#"
-mod = "MOD"
-tags = "TAGS"
-sourceShort = "S"
 
 [groups.new]
 title = "New group"
@@ -313,7 +295,7 @@ linked = { one = "The group is also removed from {count} profile: {names}.", oth
 confirm = "Delete group"
 
 [groups.remove]
-title = "Remove “{mod}” from “{group}”?"
+title = { one = "Remove “{mod}” from “{group}”?", other = "Remove {count} mods from “{group}”?" }
 description = { one = "It also leaves the {count} profile that links this group: {names}.", other = "It also leaves the {count} profiles that link this group: {names}." }
 confirm = "Remove"
 
@@ -505,7 +487,6 @@ steam = "Steam"
 
 [library]
 title = "Library"
-tableButton = "Table configuration"
 noMatch = "No mod matches the search or filters."
 
 [library.installMod]
@@ -686,9 +667,16 @@ lacks = "lacks"
 # The mod table shared by every page that lists mods.
 [modTable]
 selected = "{count} Selected"
+settingsButton = "Table configuration"
+
+# Shown while rows are dragged over the table; {position} is 1-based.
+[modTable.drop]
+line = { one = "Insert {count} at position {position}", other = "Insert {count} at position {position}" }
+end = { one = "Add {count} at the end · position {position}", other = "Add {count} at the end · position {position}" }
 
 # Column headers. The Mod header is shown in capital letters.
 [modTable.columns]
+number = "#"
 source = "SOURCE"
 sourceShort = "S"
 mod = "MOD"

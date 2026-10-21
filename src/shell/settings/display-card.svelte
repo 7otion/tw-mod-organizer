@@ -200,7 +200,7 @@
 			>
 				<Button variant="secondary" size="sm">
 					<Columns3Icon />
-					{t('library.tableButton')}
+					{t('modTable.settingsButton')}
 				</Button>
 			</SettingRow>
 			<SettingRow

@@ -19,6 +19,7 @@ import {
 	type ModColumn,
 	type ModSort,
 } from './mod-columns';
+import { RowDrag, type RowDragOptions } from './row-drag.svelte';
 
 export type ModTableSort = {
 	readonly key: ModSort | null;
@@ -31,24 +32,37 @@ export type ModTableScrollMemory<Key> = Pick<
 	'key' | 'saved' | 'isFiltered' | 'save'
 >;
 
+export type TableInset = 'page' | 'drawer';
+
 export type ModTableOptions<Row, ScrollKey> = {
 	layout: TableLayout<ModColumn>;
 	settingsTitleKey: MessageKey;
 	rows: () => readonly Row[];
 	keyOf: (row: Row) => number;
 	modOf: (row: Row) => Mod;
+	inset?: TableInset;
 	isSelectable?: boolean;
+	isRowDisabled?: (row: Row) => boolean;
+	isNumbered?: boolean;
+	rowActionsWidth?: string;
 	sort?: ModTableSort;
+	drag?: RowDragOptions;
+	openDetails?: (mod: Mod) => void;
 	scrollMemory?: ModTableScrollMemory<ScrollKey>;
 };
 
 export type VisibleRow<Row> = {
 	row: Row;
+	index: number;
 	top: number;
 };
 
 const LIST_PADDING = 4;
-const CHECKBOX_WIDTH = '16px';
+const OVERSCAN_PX = 240;
+const MIN_OVERSCAN = 2;
+const GRIP_WIDTH = '16px';
+const NUMBER_WIDTH = '28px';
+const LINE_INSETS: Record<TableInset, number> = { page: 24, drawer: 10 };
 
 export class ModTable<Row, ScrollKey = never> {
 	readonly #options: ModTableOptions<Row, ScrollKey>;
@@ -57,8 +71,13 @@ export class ModTable<Row, ScrollKey = never> {
 
 	readonly layout: TableLayout<ModColumn>;
 	readonly settingsTitleKey: MessageKey;
+	readonly inset: TableInset;
+	readonly lineInset: number;
+	readonly isNumbered: boolean;
+	readonly hasRowActions: boolean;
 	readonly sort: ModTableSort | null;
 	readonly selection: Selection<number> | null;
+	readonly drag: RowDrag<Row> | null;
 	readonly columnLayout: ColumnLayout<ModColumn>;
 	readonly virtualList: VirtualList;
 
@@ -71,15 +90,26 @@ export class ModTable<Row, ScrollKey = never> {
 		this.#options = options;
 		this.layout = options.layout;
 		this.settingsTitleKey = options.settingsTitleKey;
+		this.inset = options.inset ?? 'page';
+		this.lineInset = LINE_INSETS[this.inset];
+		this.isNumbered = options.isNumbered ?? false;
+		this.hasRowActions = options.rowActionsWidth !== undefined;
 		this.sort = options.sort ?? null;
 		this.selection = options.isSelectable
-			? new Selection<number>(() => this.keys)
+			? new Selection<number>(() => this.selectableKeys)
 			: null;
+		this.drag = options.drag ? new RowDrag(this, options.drag) : null;
 		this.columnLayout = new ColumnLayout<ModColumn>({
 			layout: options.layout,
 			specs: MOD_COLUMN_SPECS,
 			coverColumn: 'mod',
-			leadingWidths: this.selection ? [CHECKBOX_WIDTH] : [],
+			leadingWidths: [
+				...(this.drag?.hasHandle ? [GRIP_WIDTH] : []),
+				...(this.isNumbered ? [NUMBER_WIDTH] : []),
+			],
+			trailingWidths: options.rowActionsWidth
+				? [options.rowActionsWidth]
+				: [],
 			defaultWidths: () => this.defaultWidths(),
 		});
 		this.virtualList = new VirtualList({
@@ -95,6 +125,8 @@ export class ModTable<Row, ScrollKey = never> {
 			paddingStart: LIST_PADDING,
 			paddingEnd: LIST_PADDING,
 			endInset: () => this.#bulkBarInset,
+			overscan: () =>
+				Math.max(MIN_OVERSCAN, Math.ceil(OVERSCAN_PX / this.rowHeight)),
 			onScroll: (offset) => this.#scrollMemory?.remember(offset),
 		});
 		this.#scrollMemory = options.scrollMemory
@@ -108,8 +140,35 @@ export class ModTable<Row, ScrollKey = never> {
 		if (this.selection) this.followSelection(this.selection);
 	}
 
-	readonly rows = $derived.by(() => this.#options.rows());
+	readonly #baseRows = $derived.by(() => this.#options.rows());
+	readonly baseKeys = $derived.by(() =>
+		this.#baseRows.map(this.#options.keyOf)
+	);
+	readonly rows = $derived.by((): readonly Row[] => {
+		const preview = this.drag?.preview;
+		if (!preview) return this.#baseRows;
+		const keyOf = this.#options.keyOf;
+		const byKey = Object.fromEntries(
+			this.#baseRows.map((row) => [keyOf(row), row])
+		) as Record<number, Row>;
+		const previewed = preview.flatMap((key) => byKey[key] ?? []);
+		if (previewed.length === this.#baseRows.length) return previewed;
+		const placed = Object.fromEntries(
+			preview.map((key) => [key, true])
+		) as Record<number, true>;
+		return [
+			...previewed,
+			...this.#baseRows.filter((row) => !(keyOf(row) in placed)),
+		];
+	});
 	readonly keys = $derived.by(() => this.rows.map(this.#options.keyOf));
+	readonly selectableKeys = $derived.by((): readonly number[] => {
+		const isDisabled = this.#options.isRowDisabled;
+		if (!isDisabled) return this.keys;
+		return this.rows
+			.filter((row) => !isDisabled(row))
+			.map(this.#options.keyOf);
+	});
 	readonly rowHeight = $derived.by(
 		() =>
 			ROW_HEIGHTS[this.layout.coverSize] +
@@ -120,15 +179,33 @@ export class ModTable<Row, ScrollKey = never> {
 			? this.bulkBar.offsetParent!.clientHeight - this.bulkBar.offsetTop
 			: 0
 	);
-	readonly visibleRows = $derived.by(() =>
-		this.virtualList.items.flatMap((item): VisibleRow<Row>[] => {
-			const row = this.rows[item.index];
-			return row === undefined ? [] : [{ row, top: item.start }];
-		})
+	readonly visibleRows = $derived.by((): VisibleRow<Row>[] => {
+		const visible = this.virtualList.items.flatMap(
+			(item): VisibleRow<Row>[] => {
+				const row = this.rows[item.index];
+				return row === undefined
+					? []
+					: [{ row, index: item.index, top: item.start }];
+			}
+		);
+		if (!this.drag?.preview) return visible;
+		const keyOf = this.#options.keyOf;
+		const basePosition = Object.fromEntries(
+			this.baseKeys.map((key, position) => [key, position])
+		) as Record<number, number>;
+		return visible.toSorted(
+			(a, b) =>
+				(basePosition[keyOf(a.row)] ?? 0) -
+				(basePosition[keyOf(b.row)] ?? 0)
+		);
+	});
+	readonly hasVersionColumn = $derived.by(() =>
+		this.layout.visibleColumns.some((column) => column.key === 'version')
 	);
-	readonly detailsMod = $derived(
-		this.#libraryStore.list.find((mod) => mod.id === this.#detailsModId) ??
-			null
+	readonly detailsMod = $derived.by(() =>
+		this.#detailsModId === null
+			? null
+			: this.#libraryStore.modById(this.#detailsModId)
 	);
 
 	keyOf(row: Row): number {
@@ -139,8 +216,20 @@ export class ModTable<Row, ScrollKey = never> {
 		return this.#options.modOf(row);
 	}
 
+	isRowDisabled(row: Row): boolean {
+		return this.#options.isRowDisabled?.(row) ?? false;
+	}
+
+	rowByKey(key: number): Row | null {
+		return (
+			this.#baseRows.find((row) => this.#options.keyOf(row) === key) ??
+			null
+		);
+	}
+
 	openDetails(mod: Mod): void {
-		this.#detailsModId = mod.id;
+		if (this.#options.openDetails) this.#options.openDetails(mod);
+		else this.#detailsModId = mod.id;
 	}
 
 	closeDetails(): void {
@@ -148,10 +237,20 @@ export class ModTable<Row, ScrollKey = never> {
 	}
 
 	handleKeydown(event: KeyboardEvent): void {
-		if (event.defaultPrevented) return;
+		if (event.defaultPrevented || this.drag?.isSource) return;
 		if (event.key === 'Escape') {
 			if (this.#detailsModId !== null) this.closeDetails();
-			else this.selection?.clear();
+			else if (this.selection?.count) this.selection.clear();
+			else return;
+			event.preventDefault();
+		} else if (
+			event.ctrlKey &&
+			event.key.toLowerCase() === 'a' &&
+			this.selection &&
+			!ModTable.isTyping(event.target)
+		) {
+			event.preventDefault();
+			this.selection.selectAll();
 		} else if (
 			(event.key === 'ArrowDown' || event.key === 'ArrowUp') &&
 			this.selection &&
@@ -183,7 +282,7 @@ export class ModTable<Row, ScrollKey = never> {
 	}
 
 	private defaultWidths(): Record<ModColumn, string> {
-		const mods = this.rows.map(this.#options.modOf);
+		const mods = this.#libraryStore.list;
 		const hasTags = mods.some(
 			(mod) => this.#libraryStore.tagsOf(mod).length
 		);
@@ -203,7 +302,7 @@ export class ModTable<Row, ScrollKey = never> {
 		};
 	}
 
-	private static isTyping(target: EventTarget | null): boolean {
+	static isTyping(target: EventTarget | null): boolean {
 		return (
 			target instanceof HTMLElement &&
 			(target.isContentEditable ||

@@ -2,14 +2,18 @@
 	import ArrowDownIcon from '@lucide/svelte/icons/arrow-down';
 	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
 
-	import { Checkbox } from '@/components/ui/checkbox';
 	import * as Tooltip from '@/components/ui/tooltip';
 
 	import { t } from '@/lib/i18n';
 	import { cn } from '@/lib/utils';
 
 	import { MOD_COLUMN_SPECS, type ModSort } from './mod-columns';
-	import type { ModTable } from './mod-table-state.svelte';
+	import type { ModTable, TableInset } from './mod-table-state.svelte';
+
+	const INSET_CLASSES: Record<TableInset, string> = {
+		page: 'mx-6',
+		drawer: 'mx-2.5',
+	};
 
 	let { table }: { table: ModTable<Row, ScrollKey> } = $props();
 
@@ -42,16 +46,17 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="mx-6 grid h-8 shrink-0 grid-cols-(--table-columns) items-center gap-x-3 border-b px-5 text-sm font-semibold text-muted-foreground"
+	class={cn(
+		'grid h-8 shrink-0 grid-cols-(--table-columns) items-center gap-x-3 border-b text-sm font-semibold text-muted-foreground',
+		INSET_CLASSES[table.inset]
+	)}
 	oncontextmenu={() => (table.isSettingsOpen = true)}
 >
-	{#if table.selection}
-		<Checkbox
-			checked={table.selection.isAll}
-			indeterminate={table.selection.isSome}
-			aria-label={t('common.selectAll')}
-			onCheckedChange={() => table.selection!.toggleAll()}
-		/>
+	{#if table.drag?.hasHandle}
+		<span></span>
+	{/if}
+	{#if table.isNumbered}
+		<span class="text-center">{t('modTable.columns.number')}</span>
 	{/if}
 	{#each table.layout.visibleColumns as column (column.key)}
 		{@const spec = MOD_COLUMN_SPECS[column.key]}
@@ -111,4 +116,7 @@
 			</span>
 		{/if}
 	{/each}
+	{#if table.hasRowActions}
+		<span></span>
+	{/if}
 </div>

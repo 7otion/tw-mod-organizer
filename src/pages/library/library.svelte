@@ -231,7 +231,7 @@
 			onclick={() => (table.isSettingsOpen = true)}
 		>
 			<Columns3CogIcon />
-			{t('library.tableButton')}
+			{t('modTable.settingsButton')}
 		</Button>
 	</div>
 

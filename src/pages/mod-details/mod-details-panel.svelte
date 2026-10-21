@@ -4,11 +4,9 @@
 
 <script lang="ts">
 	import XIcon from '@lucide/svelte/icons/x';
-	import { cubicOut } from 'svelte/easing';
-	import { fly } from 'svelte/transition';
 
+	import Drawer from '@/components/drawer.svelte';
 	import { Button } from '@/components/ui/button';
-	import { ScrollArea } from '@/components/ui/scroll-area';
 
 	import { formatSize, t } from '@/lib/i18n';
 	import Message from '@/lib/i18n/message.svelte';
@@ -36,14 +34,7 @@
 	};
 
 	const TABS = ['overview', 'info', 'conflicts', 'dependencies'] as const;
-	const MIN_WIDTH = 420;
-	const MAX_WIDTH = 900;
 
-	const WIDTH_FIELD: UiStateField<number> = {
-		key: 'mod_details.width',
-		initial: 500,
-		is: (value): value is number => typeof value === 'number',
-	};
 	const TAB_FIELD: UiStateField<Tab> = {
 		key: 'mod_details.tab',
 		initial: 'overview',
@@ -55,10 +46,8 @@
 	const libraryStore = LibraryStore.get();
 	const uiStateStore = UiStateStore.get();
 
-	let resizingWidth = $state<number | null>(null);
 	let isEditingTitle = $state(false);
 
-	const width = $derived(resizingWidth ?? uiStateStore.get(WIDTH_FIELD));
 	const tabs = $derived(
 		TABS.filter((tab) => tab !== 'conflicts' || context === 'load-order')
 	);
@@ -75,49 +64,9 @@
 	const otherProfiles = $derived(
 		placement.profiles.slice(1).map(({ profile }) => profile.name)
 	);
-
-	function startResize(event: PointerEvent): void {
-		event.preventDefault();
-		const panel = (event.currentTarget as HTMLElement).parentElement!;
-		const limit = Math.min(
-			MAX_WIDTH,
-			panel.parentElement!.getBoundingClientRect().width
-		);
-		const startX = event.clientX;
-		const startWidth = panel.getBoundingClientRect().width;
-		const move = (moved: PointerEvent) => {
-			resizingWidth = Math.round(
-				Math.min(
-					limit,
-					Math.max(MIN_WIDTH, startWidth + startX - moved.clientX)
-				)
-			);
-		};
-		const stop = () => {
-			window.removeEventListener('pointermove', move);
-			window.removeEventListener('pointerup', stop);
-			if (resizingWidth === null) return;
-			void uiStateStore
-				.set(WIDTH_FIELD, resizingWidth)
-				.finally(() => (resizingWidth = null));
-		};
-		window.addEventListener('pointermove', move);
-		window.addEventListener('pointerup', stop);
-	}
 </script>
 
-<aside
-	transition:fly|global={{ x: 48, duration: 180, easing: cubicOut }}
-	aria-label={t('modDetails.title')}
-	class="absolute inset-y-0 right-0 z-20 flex flex-col bg-surface-1 shadow-[-20px_0_48px_rgba(0,0,0,0.55),-1px_0_0_var(--line-2)]"
-	style:width="{width}px"
->
-	<span
-		aria-hidden="true"
-		class="absolute inset-y-0 -left-1 z-10 w-2 cursor-col-resize"
-		onpointerdown={startResize}
-	></span>
-
+<Drawer label={t('modDetails.title')}>
 	<div class="flex h-11 shrink-0 items-center gap-2 border-b pr-2 pl-4">
 		<span class="text-sm font-semibold text-muted-foreground">
 			{t('modDetails.title')}
@@ -135,7 +84,7 @@
 		</Button>
 	</div>
 
-	<ScrollArea class="min-h-0 flex-1">
+	<div class="min-h-0 flex-1 overflow-y-auto">
 		<ModDetailsCover {mod}>
 			<ModDetailsTitle {mod} bind:isEditing={isEditingTitle} />
 			<p class="text-sm text-foreground-2">
@@ -217,5 +166,5 @@
 				<ModDetailsDependencies {mod} {onopen} />
 			{/if}
 		</div>
-	</ScrollArea>
-</aside>
+	</div>
+</Drawer>

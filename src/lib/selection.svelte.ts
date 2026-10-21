@@ -85,6 +85,14 @@ export class Selection<Key> {
 		this.#cursor = key;
 	}
 
+	delete(key: Key): void {
+		this.#keys.delete(key);
+	}
+
+	selectAll(): void {
+		for (const key of this.#order()) this.#keys.add(key);
+	}
+
 	toggleAll(): void {
 		const order = this.#order();
 		if (this.isAll) {

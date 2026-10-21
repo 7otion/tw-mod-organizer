@@ -17,7 +17,7 @@ export type VirtualListOptions = {
 	paddingStart?: number;
 	paddingEnd?: number;
 	endInset?: () => number;
-	overscan?: number;
+	overscan?: () => number;
 	onScroll?: (offset: number) => void;
 };
 
@@ -49,11 +49,18 @@ export class VirtualList {
 		$effect(() => {
 			options.count();
 			options.scrollElement();
-			options.sizeKey?.();
 			options.endInset?.();
+			options.overscan?.();
 			untrack(() => {
 				this.#virtualizer.setOptions(this.virtualizerOptions());
 				this.#virtualizer._willUpdate();
+				this.refresh();
+			});
+		});
+
+		$effect(() => {
+			options.sizeKey?.();
+			untrack(() => {
 				this.#virtualizer.measure();
 				this.refresh();
 			});
@@ -66,6 +73,10 @@ export class VirtualList {
 
 	scrollToOffset(offset: number): void {
 		this.#virtualizer.scrollToOffset(offset);
+	}
+
+	itemAtOffset(offset: number): VirtualItem | undefined {
+		return this.#virtualizer.getVirtualItemForOffset(offset);
 	}
 
 	private refresh(): void {
@@ -85,7 +96,7 @@ export class VirtualList {
 			scrollPaddingStart: options.paddingStart ?? 0,
 			scrollPaddingEnd:
 				(options.paddingEnd ?? 0) + (options.endInset?.() ?? 0),
-			overscan: options.overscan ?? DEFAULT_OVERSCAN,
+			overscan: options.overscan?.() ?? DEFAULT_OVERSCAN,
 			scrollToFn: elementScroll,
 			observeElementRect,
 			observeElementOffset: (instance, callback) =>

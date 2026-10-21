@@ -2,7 +2,7 @@ import { ConnectionStore, Model, type Transaction } from '@7otion-tauri/orm';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { untrack } from 'svelte';
-import { SvelteSet } from 'svelte/reactivity';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 import { Mod, ModDependency, ModTag, Tag, type ModSource } from '@/lib/models';
 import { GamesStore, type GameEntry } from '@/lib/store';
@@ -96,7 +96,8 @@ export class LibraryScanStore extends ConnectionStore {
 	#scanProgress = $state.raw<ScanProgress | null>(null);
 	#enrichment = $state.raw<Enrichment | null>(null);
 
-	thumbnails = $state.raw<Readonly<Record<number, Thumbnail>>>({});
+	readonly thumbnails = new SvelteMap<number, Thumbnail>();
+	readonly failedThumbnails = new SvelteSet<string>();
 
 	readonly isScanning = $derived(this.#gameId in this.#scans);
 	readonly scanProgress = $derived(
@@ -125,13 +126,8 @@ export class LibraryScanStore extends ConnectionStore {
 			const unlisten = listen<Thumbnail[]>(
 				'library-thumbnails',
 				(event) => {
-					const added = Object.fromEntries(
-						event.payload.map((thumbnail) => [
-							thumbnail.mod_id,
-							thumbnail,
-						])
-					);
-					this.thumbnails = { ...this.thumbnails, ...added };
+					for (const thumbnail of event.payload)
+						this.thumbnails.set(thumbnail.mod_id, thumbnail);
 				}
 			);
 			return () => void unlisten.then((off) => off());
@@ -187,7 +183,10 @@ export class LibraryScanStore extends ConnectionStore {
 	}
 
 	async requestThumbnails(gameId: number): Promise<void> {
-		const mods = await Mod.query().where('game_id', gameId).toArray();
+		const mods = await Mod.query()
+			.where('game_id', gameId)
+			.select('id', 'preview_file', 'custom_preview_file', 'preview_url')
+			.toArray();
 		await invoke('request_thumbnails', {
 			app_id: gameId,
 			sources: mods.map((mod) => ({
@@ -221,6 +220,19 @@ export class LibraryScanStore extends ConnectionStore {
 		await Model.database.transaction(async (tx) => {
 			const known = await Mod.query()
 				.where('game_id', game.app_id)
+				.select(
+					'id',
+					'source',
+					'source_ref',
+					'folder',
+					'game_ref',
+					'preview_file',
+					'size_bytes',
+					'problem',
+					'installed_updated_at',
+					'missing_since',
+					'added_at'
+				)
 				.toArray(tx);
 			const scanned = Map.groupBy(scan.mods, (mod) =>
 				LibraryScanStore.identityKey(mod.source, mod.source_ref)
@@ -322,11 +334,16 @@ export class LibraryScanStore extends ConnectionStore {
 		createdRefs: ReadonlySet<string>
 	): Promise<void> {
 		await Model.database.transaction(async (tx) => {
-			const mods = await Mod.query().where('game_id', gameId).toArray(tx);
+			const mods = await Mod.query()
+				.where('game_id', gameId)
+				.where('source', 'steam')
+				.whereIn(
+					'source_ref',
+					details.map((detail) => detail.source_ref)
+				)
+				.toArray(tx);
 			const byRef = Object.fromEntries(
-				mods
-					.filter((mod) => mod.source === 'steam')
-					.map((mod) => [mod.source_ref, mod])
+				mods.map((mod) => [mod.source_ref, mod])
 			) as Record<string, Mod>;
 			const detailed: { mod: Mod; steam: SteamDetails }[] = [];
 			for (const { source_ref, steam } of details) {
@@ -360,7 +377,11 @@ export class LibraryScanStore extends ConnectionStore {
 		times: readonly SubscriptionTime[]
 	): Promise<void> {
 		await Model.database.transaction(async (tx) => {
-			const mods = await Mod.query().where('game_id', gameId).toArray(tx);
+			const mods = await Mod.query()
+				.where('game_id', gameId)
+				.where('source', 'steam')
+				.select('id', 'source_ref', 'added_at')
+				.toArray(tx);
 			const byRef = Object.fromEntries(
 				times.map((time) => [
 					String(time.item_id),
@@ -369,7 +390,6 @@ export class LibraryScanStore extends ConnectionStore {
 			) as Record<string, number>;
 			const changed = mods.filter(
 				(mod) =>
-					mod.source === 'steam' &&
 					mod.source_ref in byRef &&
 					LibraryScanStore.unix(mod.added_at) !==
 						byRef[mod.source_ref]
@@ -389,17 +409,25 @@ export class LibraryScanStore extends ConnectionStore {
 	}
 
 	private static async knownSteamMods(gameId: number): Promise<KnownMod[]> {
-		const mods = await Mod.query().where('game_id', gameId).toArray();
-		return mods
-			.filter((mod) => mod.source === 'steam')
-			.map((mod) => ({
-				source_ref: mod.source_ref,
-				installed_updated_at: LibraryScanStore.unix(
-					mod.installed_updated_at
-				),
-				remote_updated_at: LibraryScanStore.unix(mod.remote_updated_at),
-				size_bytes: mod.size_bytes,
-			}));
+		const mods = await Mod.query()
+			.where('game_id', gameId)
+			.where('source', 'steam')
+			.select(
+				'id',
+				'source_ref',
+				'installed_updated_at',
+				'remote_updated_at',
+				'size_bytes'
+			)
+			.toArray();
+		return mods.map((mod) => ({
+			source_ref: mod.source_ref,
+			installed_updated_at: LibraryScanStore.unix(
+				mod.installed_updated_at
+			),
+			remote_updated_at: LibraryScanStore.unix(mod.remote_updated_at),
+			size_bytes: mod.size_bytes,
+		}));
 	}
 
 	private static unix(date: Date | null): number | null {

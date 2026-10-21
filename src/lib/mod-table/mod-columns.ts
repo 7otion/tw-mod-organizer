@@ -59,7 +59,7 @@ export const MOD_COLUMN_SPECS: Record<ModColumn, ColumnSpec<ModSort>> = {
 		align: 'end',
 	},
 	added: { labelKey: 'modTable.columns.added', sort: 'added', align: 'end' },
-	version: { labelKey: 'modTable.columns.version' },
+	version: { labelKey: 'modTable.columns.version', align: 'center' },
 };
 
 export const DIVIDER_GAP = 4;

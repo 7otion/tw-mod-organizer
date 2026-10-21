@@ -120,21 +120,6 @@ export class LibraryFilterStore extends ConnectionStore {
 			this.tagIds.length > 0
 	);
 
-	readonly #searchTexts = $derived(
-		Object.fromEntries(
-			this.#libraryStore.list.map((mod) => [
-				mod.id,
-				[
-					mod.displayTitle,
-					mod.author_name ?? '',
-					...this.#libraryStore.tagsOf(mod).map((tag) => tag.name),
-				]
-					.join(' ')
-					.toLowerCase(),
-			])
-		) as Record<number, string>
-	);
-
 	readonly #sortedMods = $derived.by(() => {
 		const direction = this.isDescending ? -1 : 1;
 		const compare = LibraryFilterStore.compare[this.sort];
@@ -147,7 +132,7 @@ export class LibraryFilterStore extends ConnectionStore {
 		const query = this.#search.trim().toLowerCase();
 		if (!query) return this.#sortedMods;
 		return this.#sortedMods.filter((mod) =>
-			this.#searchTexts[mod.id]?.includes(query)
+			this.#libraryStore.searchTextOf(mod).includes(query)
 		);
 	});
 

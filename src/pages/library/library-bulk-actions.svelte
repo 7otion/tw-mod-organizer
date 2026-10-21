@@ -27,15 +27,13 @@
 	const mods = $derived(
 		libraryStore.list.filter((mod) => selection.has(mod.id))
 	);
-	const taggedCounts = $derived(
-		Object.fromEntries(
-			tagsStore.list.map((tag) => [
-				tag.id,
-				mods.filter((mod) => libraryStore.tagsOf(mod).includes(tag))
-					.length,
-			])
-		) as Record<number, number>
-	);
+	const taggedCounts = $derived.by(() => {
+		const counts: Record<number, number> = {};
+		for (const mod of mods)
+			for (const tag of libraryStore.tagsOf(mod))
+				counts[tag.id] = (counts[tag.id] ?? 0) + 1;
+		return counts;
+	});
 </script>
 
 <Button

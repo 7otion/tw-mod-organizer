@@ -152,6 +152,20 @@ export class LibraryStore extends ConnectionStore {
 		) as Record<string, Mod>
 	);
 	readonly #modsById = $derived(LibraryStore.byId(this.list));
+	readonly #searchTexts = $derived(
+		Object.fromEntries(
+			this.list.map((mod) => [
+				mod.id,
+				[
+					mod.displayTitle,
+					mod.author_name ?? '',
+					...this.tagsOf(mod).map((tag) => tag.name),
+				]
+					.join(' ')
+					.toLowerCase(),
+			])
+		) as Record<number, string>
+	);
 	readonly unusedCount = $derived(
 		this.list.filter((mod) => this.isUnused(mod)).length
 	);
@@ -230,6 +244,14 @@ export class LibraryStore extends ConnectionStore {
 
 	tagsOf(mod: Mod): Tag[] {
 		return this.#tagsByModId[mod.id] ?? [];
+	}
+
+	searchTextOf(mod: Mod): string {
+		return this.#searchTexts[mod.id] ?? '';
+	}
+
+	modById(id: number): Mod | null {
+		return this.#modsById[id] ?? null;
 	}
 
 	dependenciesOf(mod: Mod): ModDependencies {
