@@ -6,6 +6,7 @@ import { untrack } from 'svelte';
 import { GamesStore } from './games.svelte';
 import { LibraryStore } from './library';
 import { SettingsStore } from './settings.svelte';
+import { UiStateStore, type UiStateField } from './ui-state.svelte';
 
 type NexusAccount = {
 	api_key: string;
@@ -26,15 +27,15 @@ export type NexusModDetails = {
 	tags: string[];
 };
 
-const CHECK_EVERY_MS = 60 * 60 * 1000;
+const CHECK_EVERY_MS = 24 * 60 * 60 * 1000;
 
 export class NexusStore extends Store {
 	readonly #gamesStore = GamesStore.get();
 	readonly #libraryStore = LibraryStore.get();
 	readonly #settingsStore = SettingsStore.get();
+	readonly #uiStateStore = UiStateStore.get();
 
 	#attempt = 0;
-	#checkedAt: Record<number, number> = {};
 	isChecking = $state(false);
 	isConnecting = $state(false);
 	ssoUrl = $state<string | null>(null);
@@ -60,7 +61,8 @@ export class NexusStore extends Store {
 			if (
 				!this.isConnected ||
 				!this.#gamesStore.current ||
-				!this.#libraryStore.list.length
+				!this.#libraryStore.list.length ||
+				!this.#uiStateStore.isLoaded
 			)
 				return;
 			untrack(() => void this.checkUpdates());
@@ -72,12 +74,10 @@ export class NexusStore extends Store {
 		const game = this.#gamesStore.current;
 		if (!apiKey || !game || this.isChecking) return;
 		const now = Date.now();
-		if (
-			!force &&
-			now - (this.#checkedAt[game.app_id] ?? 0) < CHECK_EVERY_MS
-		)
+		const field = NexusStore.checkedAtField(game.app_id);
+		if (!force && now - this.#uiStateStore.get(field) < CHECK_EVERY_MS)
 			return;
-		this.#checkedAt[game.app_id] = now;
+		await this.#uiStateStore.set(field, now);
 		this.isChecking = true;
 		try {
 			const mods = this.#libraryStore.list.filter(
@@ -104,6 +104,14 @@ export class NexusStore extends Store {
 		} finally {
 			this.isChecking = false;
 		}
+	}
+
+	private static checkedAtField(appId: number): UiStateField<number> {
+		return {
+			key: `nexus.checked_at.${appId}`,
+			initial: 0,
+			is: (value): value is number => typeof value === 'number',
+		};
 	}
 
 	async modDetails(
