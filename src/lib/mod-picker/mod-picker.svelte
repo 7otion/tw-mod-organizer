@@ -7,6 +7,7 @@
 	import XIcon from '@lucide/svelte/icons/x';
 
 	import Drawer from '@/components/drawer.svelte';
+	import TagFilterItems from '@/components/tag-filter-items.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 	import * as InputGroup from '@/components/ui/input-group';
@@ -17,12 +18,7 @@
 	import ModCover from '@/lib/mod-table/mod-cover.svelte';
 	import ModTableView from '@/lib/mod-table/mod-table.svelte';
 	import { CHECK, icon } from '@/lib/mod-table/row-icons.svelte';
-	import {
-		GamesStore,
-		LIBRARY_SOURCES,
-		LibraryStore,
-		TagsStore,
-	} from '@/lib/store';
+	import { GamesStore, LIBRARY_SOURCES, LibraryStore } from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
 	import type { ModPicker, PickerTarget } from './mod-picker-state.svelte';
@@ -37,7 +33,6 @@
 
 	const gamesStore = GamesStore.get();
 	const libraryStore = LibraryStore.get();
-	const tagsStore = TagsStore.get();
 
 	const chipClasses = toggleVariants({ variant: 'filter', size: 'sm' });
 
@@ -131,19 +126,10 @@
 					align="start"
 					class="max-h-72 overflow-y-auto"
 				>
-					{#each tagsStore.list as tag (tag.id)}
-						<DropdownMenu.CheckboxItem
-							checked={picker.hasTag(tag.id)}
-							closeOnSelect={false}
-							onCheckedChange={() => picker.toggleTag(tag.id)}
-						>
-							{tag.name}
-						</DropdownMenu.CheckboxItem>
-					{:else}
-						<DropdownMenu.Item disabled
-							>{t('modPicker.noTags')}</DropdownMenu.Item
-						>
-					{/each}
+					<TagFilterItems
+						isSelected={(tagId) => picker.hasTag(tagId)}
+						ontoggle={(tagId) => picker.toggleTag(tagId)}
+					/>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		</div>

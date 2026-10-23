@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
 
+	import { activeDot } from '@/components/dots.svelte';
 	import { Button } from '@/components/ui/button';
 	import * as Dialog from '@/components/ui/dialog';
 
@@ -115,14 +116,7 @@
 						isActive && 'bg-fill-2 text-foreground'
 					)}
 				>
-					<span
-						class={cn(
-							'shrink-0 rounded-full',
-							isActive
-								? 'size-[7px] bg-pink'
-								: 'size-2 shadow-[inset_0_0_0_1.5px_var(--text-4)]'
-						)}
-					></span>
+					{@render activeDot(isActive)}
 					{t(section.labelKey)}
 				</Button>
 			{/each}

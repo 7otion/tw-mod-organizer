@@ -4,6 +4,7 @@
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
+	import TagColorPicker from '@/components/tag-color-picker.svelte';
 	import * as ContextMenu from '@/components/ui/context-menu';
 	import * as Dialog from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
@@ -19,8 +20,6 @@
 	import { GroupsStore } from '@/lib/store';
 	import { tagColor } from '@/lib/tag-swatches';
 	import { cn, nameError } from '@/lib/utils';
-
-	import TagColorPicker from './tag-color-picker.svelte';
 
 	const NO_COLOUR = 'none';
 

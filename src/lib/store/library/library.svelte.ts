@@ -112,12 +112,22 @@ export class LibraryStore extends ConnectionStore {
 			])
 		) as Record<number, ProfileEntry[]>
 	);
+	readonly #memberCountsByGroupId = $derived(
+		Object.fromEntries(
+			[
+				...Map.groupBy(this.#members.rows, (member) => member.group_id),
+			].map(([groupId, members]) => [groupId, members.length])
+		) as Record<number, number>
+	);
 	readonly #entryNumbers = $derived.by(() => {
 		const numbers: Record<number, number> = {};
 		for (const entries of Object.values(this.#entriesByProfileId)) {
 			let number = 0;
-			for (const entry of entries)
+			for (const entry of entries) {
 				if (entry.mod_id !== null) numbers[entry.id] = ++number;
+				else if (entry.group_id !== null)
+					number += this.#memberCountsByGroupId[entry.group_id] ?? 0;
+			}
 		}
 		return numbers;
 	});
@@ -257,6 +267,14 @@ export class LibraryStore extends ConnectionStore {
 
 	tagsOf(mod: Mod): Tag[] {
 		return this.#tagsByModId[mod.id] ?? [];
+	}
+
+	tagCountsOf(mods: readonly Mod[]): Record<number, number> {
+		const counts: Record<number, number> = {};
+		for (const mod of mods)
+			for (const tag of this.tagsOf(mod))
+				counts[tag.id] = (counts[tag.id] ?? 0) + 1;
+		return counts;
 	}
 
 	searchTextOf(mod: Mod): string {

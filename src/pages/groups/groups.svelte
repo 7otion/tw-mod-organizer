@@ -19,10 +19,12 @@
 
 	import ModDetailsPanel from '@/components/mod-details/mod-details-panel.svelte';
 	import NoticeStrip from '@/components/notices/notice-strip.svelte';
+	import TagColorPicker from '@/components/tag-color-picker.svelte';
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as InputGroup from '@/components/ui/input-group';
 	import { Kbd } from '@/components/ui/kbd';
+	import * as Popover from '@/components/ui/popover';
 
 	import DeleteGroupDialog from '@/shell/sidebar/delete-group-dialog.svelte';
 	import NewGroupDialog from '@/shell/sidebar/new-group-dialog.svelte';
@@ -35,13 +37,14 @@
 	import { ModTable } from '@/lib/mod-table/mod-table-state.svelte';
 	import ModTableView from '@/lib/mod-table/mod-table.svelte';
 	import { X, icon } from '@/lib/mod-table/row-icons.svelte';
-	import type { Group, Mod } from '@/lib/models';
+	import type { Group, Mod, TagColor } from '@/lib/models';
 	import {
 		GroupsStore,
 		LibraryStore,
 		TableLayoutStore,
 		type GroupMod,
 	} from '@/lib/store';
+	import { tagColor } from '@/lib/tag-swatches';
 
 	import { GROUPS_LAYOUT } from './groups-layout';
 
@@ -109,37 +112,13 @@
 	}
 
 	function onkeydown(event: KeyboardEvent): void {
-		if (event.ctrlKey && event.key.toLowerCase() === 'f') {
-			event.preventDefault();
-			searchInput?.focus();
-		} else if (event.key === 'Escape' && !event.defaultPrevented) {
-			onEscape(event);
-		} else if (
-			event.key === 'Delete' &&
-			!event.defaultPrevented &&
-			!isPicking &&
-			!ModTable.isTyping(event.target)
-		) {
-			event.preventDefault();
-			askRemove(selectedMods());
-		} else {
-			table.handleKeydown(event);
-		}
-	}
-
-	function onEscape(event: KeyboardEvent): void {
-		if (table.detailsMod) {
-			table.closeDetails();
-		} else if (isPicking) {
-			if (picker.isDragging) return;
-			if (picker.selection.count) picker.selection.clear();
-			else isPicking = false;
-		} else if (table.selection!.count) {
-			table.selection!.clear();
-		} else {
-			return;
-		}
-		event.preventDefault();
+		table.handlePageKeydown(event, {
+			searchInput,
+			picker,
+			isPicking: () => isPicking,
+			closePicker: () => (isPicking = false),
+			onDelete: () => askRemove(selectedMods()),
+		});
 	}
 
 	function selectedMods(): Mod[] {
@@ -156,7 +135,6 @@
 
 	async function remove(mods: readonly Mod[]): Promise<void> {
 		await groupsStore.removeMods(group!, mods);
-		for (const mod of mods) table.selection!.delete(mod.id);
 	}
 
 	async function confirmRemove(): Promise<void> {
@@ -194,6 +172,21 @@
 				<PencilIcon />
 				{t('groups.renameGroup')}
 			</Button>
+			<Popover.Root>
+				<Popover.Trigger class={buttonVariants({ variant: 'ghost' })}>
+					<span
+						class="size-3 rounded-full"
+						style:background-color={tagColor(group.color)}
+					></span>
+					{t('groups.changeColour')}
+				</Popover.Trigger>
+				<Popover.Content align="start" class="w-80 p-3">
+					<TagColorPicker
+						color={(group.color as TagColor | null) ?? 'ash'}
+						onpick={(picked) => groupsStore.recolor(group, picked)}
+					/>
+				</Popover.Content>
+			</Popover.Root>
 			<Button
 				variant="destructive-outline"
 				onclick={() => (deleting = group)}

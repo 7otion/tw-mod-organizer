@@ -56,7 +56,7 @@
 			<Icon class="size-4" />
 		</span>
 		<span class="flex min-w-0 flex-1 flex-col gap-1">
-			<span class="text-md text-foreground-2">{label}</span>
+			<span class="text-md text-orange-200">{label}</span>
 			<span
 				class={cn(
 					'break-all text-foreground',

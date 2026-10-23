@@ -5,6 +5,7 @@
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import SearchIcon from '@lucide/svelte/icons/search';
 
+	import { activeDot } from '@/components/dots.svelte';
 	import ModDetailsPanel from '@/components/mod-details/mod-details-panel.svelte';
 	import NoticeStrip from '@/components/notices/notice-strip.svelte';
 	import { Button } from '@/components/ui/button';
@@ -17,7 +18,6 @@
 	import Message from '@/lib/i18n/message.svelte';
 	import { ModTable } from '@/lib/mod-table/mod-table-state.svelte';
 	import ModTableView from '@/lib/mod-table/mod-table.svelte';
-	import type { Profile } from '@/lib/models';
 	import {
 		AppStore,
 		GamesStore,
@@ -65,7 +65,10 @@
 		},
 		scrollMemory: {
 			key: () => gamesStore.current?.app_id ?? null,
-			saved: () => layout.savedScrollOffset,
+			saved: () =>
+				gamesStore.current
+					? layout.scrollOffsetOf(gamesStore.current.app_id)
+					: null,
 			isFiltered: () => libraryFilterStore.isFiltered,
 			save: (appId, offset) => void layout.setScrollOffset(appId, offset),
 		},
@@ -79,12 +82,7 @@
 	);
 
 	function onkeydown(event: KeyboardEvent): void {
-		if (event.ctrlKey && event.key.toLowerCase() === 'f') {
-			event.preventDefault();
-			searchInput?.focus();
-		} else {
-			table.handleKeydown(event);
-		}
+		table.handlePageKeydown(event, { searchInput });
 	}
 
 	function openWorkshop(): void {
@@ -93,17 +91,6 @@
 		);
 	}
 </script>
-
-{#snippet profileDot(profile: Profile)}
-	<span
-		class={cn(
-			'size-2 shrink-0 rounded-full',
-			profile === profilesStore.active
-				? 'bg-pink'
-				: 'shadow-[inset_0_0_0_1.5px_var(--text-4)]'
-		)}
-	></span>
-{/snippet}
 
 <svelte:window {onkeydown} />
 
@@ -176,7 +163,9 @@
 				class="min-w-48 font-semibold"
 			>
 				{#if libraryFilterStore.scopeProfile}
-					{@render profileDot(libraryFilterStore.scopeProfile)}
+					{@render activeDot(
+						libraryFilterStore.scopeProfile === profilesStore.active
+					)}
 				{/if}
 				<span class="flex-1 truncate text-left">
 					{libraryFilterStore.scopeProfile?.name}
@@ -188,7 +177,7 @@
 						value={String(profile.id)}
 						label={profile.name}
 					>
-						{@render profileDot(profile)}
+						{@render activeDot(profile === profilesStore.active)}
 						<span class="flex-1">{profile.name}</span>
 						<span class="font-mono text-xs text-muted-foreground">
 							{libraryFilterStore.profileCounts[profile.id] ?? 0}

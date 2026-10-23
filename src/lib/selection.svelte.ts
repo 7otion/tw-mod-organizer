@@ -89,6 +89,15 @@ export class Selection<Key> {
 		this.#keys.delete(key);
 	}
 
+	retain(keys: readonly Key[]): void {
+		for (const key of this.#keys)
+			if (!keys.includes(key)) this.#keys.delete(key);
+		if (this.#anchor !== null && !this.#keys.has(this.#anchor))
+			this.#anchor = null;
+		if (this.#cursor !== null && !this.#keys.has(this.#cursor))
+			this.#cursor = null;
+	}
+
 	selectAll(): void {
 		for (const key of this.#order()) this.#keys.add(key);
 	}

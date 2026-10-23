@@ -13,7 +13,7 @@
 	import NewGroupDialog from '@/shell/sidebar/new-group-dialog.svelte';
 
 	import { t } from '@/lib/i18n';
-	import type { Mod, TagColor } from '@/lib/models';
+	import type { Mod } from '@/lib/models';
 	import { GroupsStore } from '@/lib/store';
 	import { tagColor } from '@/lib/tag-swatches';
 
@@ -62,9 +62,7 @@
 			>
 				<span
 					class="size-2 shrink-0 rounded-full"
-					style:background-color={group.color
-						? tagColor(group.color as TagColor)
-						: 'var(--text-4)'}
+					style:background-color={tagColor(group.color)}
 				></span>
 				{group.name}
 			</DropdownMenu.CheckboxItem>

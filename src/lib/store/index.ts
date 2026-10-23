@@ -4,6 +4,8 @@ export * from './language.svelte';
 export * from './library';
 export * from './profiles.svelte';
 export * from './groups.svelte';
+export * from './load-order.svelte';
+export * from './navigation.svelte';
 export * from './notices.svelte';
 export * from './s7forge.svelte';
 export * from './settings.svelte';

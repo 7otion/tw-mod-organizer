@@ -1,6 +1,5 @@
 import { SvelteSet } from 'svelte/reactivity';
 
-import type { Mod } from '@/lib/models';
 import type { Selection } from '@/lib/selection.svelte';
 import type { VirtualList } from '@/lib/virtual-list.svelte';
 
@@ -21,13 +20,15 @@ export type DropLine = {
 
 export type Ghost<Row> = {
 	row: Row;
-	index: number;
 	count: number;
 	width: number;
 	height: number;
 	grabOffset: Point;
-	lockedX: number | null;
-	settle: Point | null;
+};
+
+export type Lift = {
+	top: number;
+	offsets: Record<number, number>;
 };
 
 export type RowDragOptions = {
@@ -36,6 +37,8 @@ export type RowDragOptions = {
 	accepts?(payload: DragPayload): boolean;
 	insert?(payload: DragPayload, index: number): Promise<readonly number[]>;
 	onDropped?(landed: boolean): void;
+	unitOf?(key: number): readonly number[] | null;
+	canReorder?(): boolean;
 };
 
 export type DragTable<Row> = {
@@ -48,14 +51,26 @@ export type DragTable<Row> = {
 	readonly viewport: HTMLElement | null;
 	readonly virtualList: VirtualList;
 	keyOf(row: Row): number;
-	modOf(row: Row): Mod;
 	rowByKey(key: number): Row | null;
+	heightOf(row: Row): number;
+};
+
+type Slot = {
+	key: number;
+	mid: number;
+};
+
+type Block = {
+	keys: readonly number[];
+	offsets: Record<number, number>;
+	height: number;
+	grabbedOffset: number;
+	above: Slot[];
+	below: Slot[];
 };
 
 const FLASH_MS = 1200;
-const SETTLE_MS = 150;
 const PREVIEW_FALLBACK_MS = 400;
-const LIST_PADDING = 4;
 const EDGE_ZONE = 48;
 const MAX_SCROLL_STEP = 16;
 
@@ -71,10 +86,12 @@ export class RowDrag<Row> implements DragHost {
 	#viewportRect: DOMRect | null = null;
 	#lastPoint: Point | null = null;
 	#velocity = 0;
+	#block: Block | null = null;
 
 	preview = $state.raw<readonly number[] | null>(null);
 	dropLine = $state.raw<DropLine | null>(null);
 	ghost = $state.raw<Ghost<Row> | null>(null);
+	lift = $state.raw<Lift | null>(null);
 	#flashed = $state.raw<readonly number[]>([]);
 
 	constructor(table: DragTable<Row>, options: RowDragOptions) {
@@ -103,15 +120,24 @@ export class RowDrag<Row> implements DragHost {
 
 	keysFor(key: number): number[] {
 		const selection = this.#table.selection;
-		if (selection?.has(key))
-			return this.#table.keys.filter((candidate) =>
-				selection.has(candidate)
-			);
-		return [key];
+		const heads = selection?.has(key)
+			? this.#table.keys.filter((candidate) => selection.has(candidate))
+			: [key];
+		return heads.flatMap((head) => this.unitOf(head) ?? []);
+	}
+
+	unitOf(key: number): readonly number[] | null {
+		return this.#options.unitOf ? this.#options.unitOf(key) : [key];
 	}
 
 	isLifted(key: number): boolean {
 		return this.#lifted.has(key);
+	}
+
+	liftTopOf(key: number): number | null {
+		const lift = this.lift;
+		if (!lift || !(key in lift.offsets)) return null;
+		return lift.top + lift.offsets[key];
 	}
 
 	isFlashed(key: number): boolean {
@@ -123,10 +149,18 @@ export class RowDrag<Row> implements DragHost {
 		const rowElement = target?.closest<HTMLElement>('[data-row]');
 		if (!rowElement || rowElement.hasAttribute('data-disabled')) return;
 		if (this.hasHandle && !target?.closest('[data-handle]')) return;
+		if (this.#options.canReorder?.() === false) return;
 		const grabbed = Number(rowElement.dataset.row);
-		const rowTop = rowElement.getBoundingClientRect().top;
+		if (this.unitOf(grabbed) === null) return;
+		const rect = rowElement.getBoundingClientRect();
 		this.#session.arm(event, (origin) =>
-			this.payloadFor(this.keysFor(grabbed), grabbed, origin, rowTop)
+			this.payloadFor(
+				this.keysFor(grabbed),
+				grabbed,
+				origin,
+				rect.top,
+				rect.height
+			)
 		);
 	}
 
@@ -148,31 +182,22 @@ export class RowDrag<Row> implements DragHost {
 			this.#table.viewport?.getBoundingClientRect() ?? null;
 		this.#velocity = 0;
 		if (payload.source !== this) return;
-		this.#lifted.add(payload.grabbed);
-		const row = this.#table.rowByKey(payload.grabbed);
-		this.ghost = row
-			? {
-					row,
-					index: this.#table.keys.indexOf(payload.grabbed),
-					count: payload.keys.length,
-					width: payload.width,
-					height: payload.height,
-					grabOffset: payload.grabOffset,
-					lockedX: this.#options.reorder
-						? (this.#viewportRect?.left ?? null)
-						: null,
-					settle: null,
-				}
-			: null;
+		for (const key of payload.keys) this.#lifted.add(key);
+		if (this.#options.reorder) this.liftBlock(payload);
+		else this.showGhost(payload);
 	}
 
 	track(point: Point): void {
 		const payload = this.#payload;
 		const rect = this.#viewportRect;
 		const viewport = this.#table.viewport;
-		if (!payload || !rect || !viewport || !this.accepts(payload)) return;
+		if (!payload || !rect || !viewport) return;
 		this.#lastPoint = point;
-		const own = payload.source === this;
+		if (payload.source === this) {
+			if (this.#block) this.follow(payload, point, rect, viewport);
+			return;
+		}
+		if (!this.accepts(payload)) return;
 		const inside =
 			point.x >= rect.left &&
 			point.x <= rect.right &&
@@ -181,17 +206,10 @@ export class RowDrag<Row> implements DragHost {
 			RowDrag.isTopmost(viewport, point);
 		this.#velocity = inside ? RowDrag.edgeVelocity(rect, point.y) : 0;
 		if (!inside) {
-			if (!own) this.dropLine = null;
+			this.dropLine = null;
 			return;
 		}
 		const scrollTop = viewport.scrollTop;
-		if (own) {
-			const center = point.y - payload.grabOffset.y + payload.height / 2;
-			this.previewAt(
-				this.slotNearest(center - rect.top + scrollTop, payload.grabbed)
-			);
-			return;
-		}
 		this.dropLine = this.lineAt(
 			this.slotAt(point.y - rect.top + scrollTop),
 			rect,
@@ -211,10 +229,13 @@ export class RowDrag<Row> implements DragHost {
 		this.#payload = null;
 		this.#velocity = 0;
 		if (payload.source === this) {
-			const preview = this.preview;
 			this.#lifted.clear();
-			const order = preview ? RowDrag.landed(preview, payload) : null;
+			const block = this.#block;
+			this.#block = null;
+			this.lift = null;
+			const order = this.preview;
 			if (
+				!block ||
 				!order ||
 				!this.#options.reorder ||
 				RowDrag.sameOrder(order, this.#table.baseKeys)
@@ -222,7 +243,6 @@ export class RowDrag<Row> implements DragHost {
 				this.preview = null;
 				return false;
 			}
-			this.preview = order;
 			try {
 				await this.#options.reorder(order);
 			} catch (error) {
@@ -247,6 +267,8 @@ export class RowDrag<Row> implements DragHost {
 		this.#payload = null;
 		this.#velocity = 0;
 		this.#lifted.clear();
+		this.#block = null;
+		this.lift = null;
 		this.preview = null;
 		this.dropLine = null;
 		this.ghost = null;
@@ -254,32 +276,101 @@ export class RowDrag<Row> implements DragHost {
 
 	settle(landed: boolean): void {
 		this.#options.onDropped?.(landed);
-		const ghost = this.ghost;
-		if (!ghost) return;
-		const target =
-			landed && this.#options.reorder
-				? this.placeholderPoint(ghost)
-				: null;
-		if (!target) {
-			this.ghost = null;
-			return;
-		}
-		this.ghost = { ...ghost, settle: target };
-		setTimeout(() => {
-			this.ghost = null;
-		}, SETTLE_MS);
+		this.ghost = null;
 	}
 
 	private accepts(payload: DragPayload): boolean {
-		if (payload.source === this) return this.#options.reorder !== undefined;
 		return this.#options.accepts?.(payload) ?? false;
+	}
+
+	private liftBlock(payload: DragPayload): void {
+		const table = this.#table;
+		const offsets: Record<number, number> = {};
+		let height = 0;
+		for (const key of payload.keys) {
+			offsets[key] = height;
+			height += table.heightOf(table.rowByKey(key)!);
+		}
+		const above: Slot[] = [];
+		const below: Slot[] = [];
+		let start = table.virtualList.paddingStart;
+		let grabbedTop = start;
+		let isBelow = false;
+		for (const key of table.baseKeys) {
+			const rowHeight = table.heightOf(table.rowByKey(key)!);
+			if (key === payload.grabbed) {
+				grabbedTop = start;
+				isBelow = true;
+			} else if (!this.#lifted.has(key))
+				(isBelow ? below : above).push({
+					key,
+					mid: start + rowHeight / 2,
+				});
+			start += rowHeight;
+		}
+		const grabbedOffset = offsets[payload.grabbed];
+		this.#block = {
+			keys: payload.keys,
+			offsets,
+			height,
+			grabbedOffset,
+			above,
+			below,
+		};
+		this.placeBlock(grabbedTop - grabbedOffset);
+	}
+
+	private follow(
+		payload: DragPayload,
+		point: Point,
+		rect: DOMRect,
+		viewport: HTMLElement
+	): void {
+		this.#velocity = RowDrag.edgeVelocity(rect, point.y);
+		const top =
+			point.y -
+			rect.top +
+			viewport.scrollTop -
+			payload.grabOffset.y -
+			this.#block!.grabbedOffset;
+		this.placeBlock(top);
+	}
+
+	private placeBlock(top: number): void {
+		const block = this.#block!;
+		this.lift = { top, offsets: block.offsets };
+		let at = 0;
+		for (const slot of block.above) if (slot.mid <= top) at++;
+		for (const slot of block.below) if (slot.mid < top + block.height) at++;
+		const others = [...block.above, ...block.below].map((slot) => slot.key);
+		const next = [
+			...others.slice(0, at),
+			...block.keys,
+			...others.slice(at),
+		];
+		if (!this.preview || !RowDrag.sameOrder(next, this.preview))
+			this.preview = next;
+	}
+
+	private showGhost(payload: DragPayload): void {
+		const row = this.#table.rowByKey(payload.grabbed);
+		this.ghost = row
+			? {
+					row,
+					count: payload.keys.length,
+					width: payload.width,
+					height: payload.height,
+					grabOffset: payload.grabOffset,
+				}
+			: null;
 	}
 
 	private payloadFor(
 		keys: readonly number[],
 		grabbed: number,
 		origin: Point,
-		rowTop: number
+		rowTop: number,
+		height = this.#table.rowHeight
 	): DragPayload | null {
 		const viewport = this.#table.viewport;
 		if (!viewport) return null;
@@ -290,7 +381,7 @@ export class RowDrag<Row> implements DragHost {
 			grabbed,
 			grabOffset: { x: origin.x - rect.left, y: origin.y - rowTop },
 			width: rect.width,
-			height: this.#table.rowHeight,
+			height,
 		};
 	}
 
@@ -302,31 +393,6 @@ export class RowDrag<Row> implements DragHost {
 			: item.index;
 	}
 
-	private slotNearest(center: number, grabbed: number): number {
-		const height = this.#table.rowHeight;
-		const count = this.#table.keys.length;
-		const nearest = Math.min(
-			count - 1,
-			Math.max(
-				0,
-				Math.round((center - LIST_PADDING - height / 2) / height)
-			)
-		);
-		const current = this.#table.keys.indexOf(grabbed);
-		return nearest >= current ? nearest + 1 : nearest;
-	}
-
-	private previewAt(slot: number): void {
-		const current = this.#table.keys;
-		const lifted = current.filter((key) => this.#lifted.has(key));
-		const rest = current.filter((key) => !this.#lifted.has(key));
-		const at = current
-			.slice(0, slot)
-			.filter((key) => !this.#lifted.has(key)).length;
-		const next = [...rest.slice(0, at), ...lifted, ...rest.slice(at)];
-		if (!RowDrag.sameOrder(next, current)) this.preview = next;
-	}
-
 	private lineAt(
 		slot: number,
 		rect: DOMRect,
@@ -334,7 +400,7 @@ export class RowDrag<Row> implements DragHost {
 		count: number
 	): DropLine {
 		const inset = this.#table.lineInset;
-		const top = LIST_PADDING + slot * this.#table.rowHeight;
+		const top = this.#table.virtualList.offsetOf(slot);
 		return {
 			index: slot,
 			top: Math.min(
@@ -347,38 +413,12 @@ export class RowDrag<Row> implements DragHost {
 		};
 	}
 
-	private placeholderPoint(ghost: Ghost<Row>): Point | null {
-		const viewport = this.#table.viewport;
-		if (!viewport) return null;
-		const key = this.#table.keyOf(ghost.row);
-		const row = viewport.querySelector<HTMLElement>(`[data-row="${key}"]`);
-		if (!row) return null;
-		return {
-			x: viewport.getBoundingClientRect().left,
-			y: row.getBoundingClientRect().top,
-		};
-	}
-
 	private flash(keys: readonly number[]): void {
 		if (!keys.length) return;
 		this.#flashed = [...this.#flashed, ...keys];
 		setTimeout(() => {
 			this.#flashed = this.#flashed.filter((key) => !keys.includes(key));
 		}, FLASH_MS);
-	}
-
-	private static landed(
-		preview: readonly number[],
-		payload: DragPayload
-	): number[] {
-		const selected = Object.fromEntries(
-			payload.keys.map((key) => [key, true])
-		) as Record<number, true>;
-		const rest = preview.filter((key) => !(key in selected));
-		const at = preview
-			.slice(0, preview.indexOf(payload.grabbed))
-			.filter((key) => !(key in selected)).length;
-		return [...rest.slice(0, at), ...payload.keys, ...rest.slice(at)];
 	}
 
 	private static sameOrder(
@@ -396,14 +436,14 @@ export class RowDrag<Row> implements DragHost {
 	}
 
 	private static edgeVelocity(rect: DOMRect, y: number): number {
-		if (y < rect.top + EDGE_ZONE)
-			return -Math.ceil(
-				((rect.top + EDGE_ZONE - y) / EDGE_ZONE) * MAX_SCROLL_STEP
+		const step = (distance: number) =>
+			Math.min(
+				MAX_SCROLL_STEP,
+				Math.ceil((distance / EDGE_ZONE) * MAX_SCROLL_STEP)
 			);
+		if (y < rect.top + EDGE_ZONE) return -step(rect.top + EDGE_ZONE - y);
 		if (y > rect.bottom - EDGE_ZONE)
-			return Math.ceil(
-				((y - (rect.bottom - EDGE_ZONE)) / EDGE_ZONE) * MAX_SCROLL_STEP
-			);
+			return step(y - (rect.bottom - EDGE_ZONE));
 		return 0;
 	}
 }

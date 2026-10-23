@@ -3,14 +3,10 @@
 
 	import type { NoticeCategory } from '@/lib/notices/categories';
 
-	export const SHOWN_FLAGS = 3;
-
 	const DETAILS_BUTTON = [
 		buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
 		'ml-auto opacity-0 transition-opacity duration-120 group-hover:opacity-100 focus-visible:opacity-100',
 	].join(' ');
-	const FLAG =
-		'inline-grid cursor-pointer place-items-center text-(--c) outline-0 transition-colors duration-120 bg-(--c)/15 hover:bg-(--c)/28 focus-visible:bg-(--c)/28';
 	const NO_FLAGS: NoticeCategory[] = [];
 </script>
 
@@ -18,15 +14,17 @@
 	import type { Snippet } from 'svelte';
 
 	import { formatDate, formatSize, t } from '@/lib/i18n';
-	import { NOTICE_CATEGORY_SPECS } from '@/lib/notices/categories';
 	import { selectCellText } from '@/lib/select-cell-text';
 	import { LibraryScanStore, LibraryStore, NoticesStore } from '@/lib/store';
 	import { tagTextColor } from '@/lib/tag-swatches';
+	import { cn } from '@/lib/utils';
 
+	import { enableBox } from './enable-box.svelte';
+	import { flagPills } from './flag-pills.svelte';
 	import { SOURCE_ICON_SIZES, type ModColumn } from './mod-columns';
 	import { cover } from './mod-cover.svelte';
 	import { sourceIcon } from './mod-source-icon.svelte';
-	import type { ModTable, TableInset } from './mod-table-state.svelte';
+	import { ROW_INSETS, type ModTable } from './mod-table-state.svelte';
 	import {
 		GRIP_VERTICAL,
 		LINK,
@@ -45,10 +43,6 @@
 
 	const SHOWN_TAGS = 2;
 	const SHOWN_PROFILES = 2;
-	const INSET_CLASSES: Record<TableInset, string> = {
-		page: 'inset-x-6',
-		drawer: 'inset-x-2.5',
-	};
 
 	let {
 		table,
@@ -67,16 +61,19 @@
 	const key = $derived(table.keyOf(row));
 	const isSelected = $derived(table.selection?.has(key) ?? false);
 	const isLifted = $derived(table.drag?.isLifted(key) ?? false);
+	const liftTop = $derived(
+		isGhost ? null : (table.drag?.liftTopOf(key) ?? null)
+	);
 	const isFlashed = $derived(table.drag?.isFlashed(key) ?? false);
 	const isDisabled = $derived(table.isRowDisabled(row));
 	const isLocated = $derived(table.located?.key === key);
+	const isDraggable = $derived(table.isRowDraggable(row));
+	const isEnabled = $derived(table.enable?.isEnabled(row) ?? null);
+	const number = $derived(table.numberOf(row, index));
 	const flags = $derived(
 		table.hasFlags ? noticesStore.flagsOf(mod) : NO_FLAGS
 	);
-	const shownFlags = $derived(
-		flags.length > SHOWN_FLAGS ? flags.slice(0, SHOWN_FLAGS - 1) : flags
-	);
-	const hasLargeFlags = $derived(table.rowHeight >= 56);
+	const flagSize = $derived(table.rowHeight >= 56 ? 'large' : 'row');
 	const isFlagActive = $derived(
 		noticesStore.isOpen && noticesStore.filterMod === mod
 	);
@@ -93,6 +90,11 @@
 			: null
 	);
 
+	function toggleEnabled(event: MouseEvent): void {
+		event.stopPropagation();
+		void table.enable!.setEnabled([row], isEnabled !== true);
+	}
+
 	function openNotices(event: MouseEvent): void {
 		event.stopPropagation();
 		noticesStore.open({ mod });
@@ -108,71 +110,31 @@
 	const firstGroup = $derived(placement.groups[0] ?? null);
 </script>
 
-{#snippet flag(category: NoticeCategory)}
-	<button
-		type="button"
-		data-flag={category}
-		aria-label={t(`notices.categories.${category}.name`)}
-		style:--c={NOTICE_CATEGORY_SPECS[category].color}
-		class={[
-			FLAG,
-			hasLargeFlags ? 'size-6 rounded-md' : 'size-5 rounded-[5px]',
-			isFlagActive && 'shadow-[0_0_0_1.5px_var(--c)]',
-		]}
-		onclick={openNotices}
-		ondblclick={(event) => event.stopPropagation()}
-	>
-		{@render icon(
-			NOTICE_CATEGORY_SPECS[category].icon,
-			hasLargeFlags ? 'size-[15px]' : 'size-[13px]'
-		)}
-	</button>
-{/snippet}
-
-{#snippet flagsCell()}
-	<span class="flex items-center gap-[3px]">
-		{#each shownFlags as category (category)}
-			{@render flag(category)}
-		{/each}
-		{#if flags.length > SHOWN_FLAGS}
-			<button
-				type="button"
-				data-flag="more"
-				aria-label={t('notices.moreFlags', {
-					count: flags.length - shownFlags.length,
-				})}
-				class={[
-					'inline-grid cursor-pointer place-items-center bg-fill-2 font-mono text-3xs font-semibold text-foreground-2 outline-0 hover:bg-fill-3 focus-visible:bg-fill-3',
-					hasLargeFlags
-						? 'size-6 rounded-md'
-						: 'size-5 rounded-[5px]',
-				]}
-				onclick={openNotices}
-				ondblclick={(event) => event.stopPropagation()}
-			>
-				+{flags.length - shownFlags.length}
-			</button>
-		{/if}
-	</span>
-{/snippet}
-
 {#snippet cell(column: ModColumn)}
 	{#if column === 'mod'}
 		{@const coverSize = table.layout.coverSize}
 		{#if coverSize !== 'none'}
-			{@render cover(
-				mod,
-				coverSize,
-				libraryScanStore.thumbnails.get(mod.id) ?? null,
-				libraryScanStore.failedThumbnails
-			)}
+			<span
+				class={[
+					'flex',
+					isEnabled === false && 'opacity-40 grayscale-[0.8]',
+				]}
+			>
+				{@render cover(
+					mod,
+					coverSize,
+					libraryScanStore.thumbnails.get(mod.id) ?? null,
+					libraryScanStore.failedThumbnails
+				)}
+			</span>
 		{/if}
 		<span class="flex min-w-0 items-center gap-2">
 			<span
 				data-cell
 				class={[
 					'truncate font-medium text-foreground',
-					mod.problem !== null && 'text-muted-foreground',
+					(mod.problem !== null || isEnabled === false) &&
+						'text-muted-foreground',
 				]}
 			>
 				{mod.displayTitle}
@@ -277,45 +239,66 @@
 <li
 	data-row={isGhost ? undefined : key}
 	data-disabled={isDisabled || undefined}
-	class={[
-		'group absolute top-0 grid grid-cols-(--table-columns) items-center gap-x-3 rounded-md text-sm text-muted-foreground transition-[background-color,transform] duration-150 select-none hover:bg-fill-1',
-		INSET_CLASSES[table.inset],
+	class={cn(
+		'group absolute top-0 grid grid-cols-(--table-columns) items-center gap-x-3 rounded-md text-sm text-muted-foreground transition-[background-color,transform] duration-150 ease-out select-none hover:bg-fill-1',
+		ROW_INSETS[table.inset],
+		table.classOf(row),
 		table.drag && !table.drag.hasHandle && !isDisabled && 'cursor-grab',
+		liftTop !== null &&
+			'z-10 bg-surface-2 shadow-pop transition-[background-color]',
 		isSelected && 'bg-pink-tint hover:bg-pink-tint-2',
 		isFlashed && 'bg-status-ok/15',
 		isLocated && 'bg-fill-2 shadow-[inset_0_0_0_1.5px_var(--loc)]',
-		isLifted && !isGhost && 'opacity-35',
+		liftTop === null && isLifted && !isGhost && 'opacity-35',
 		isDisabled && !isGhost && 'opacity-45',
 		isGhost && 'bg-surface-2 shadow-pop',
 		table.layout.hasRowDivider &&
-			'after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-border',
-	]}
+			'after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-border'
+	)}
 	style:height="{table.rowHeight}px"
-	style:transform="translateY({top}px)"
+	style:transform="translateY({liftTop ?? top}px)"
 	style:--loc={isLocated ? table.located!.color : undefined}
 	onclick={select}
 	ondblclick={selectCellText}
 >
 	{#if table.drag?.hasHandle}
-		<span
-			data-handle
-			class={[
-				'-mx-2 grid cursor-grab place-items-center self-stretch px-2 text-foreground-4 group-hover:text-muted-foreground',
-				isDisabled && 'invisible',
-			]}
-		>
-			{@render icon(GRIP_VERTICAL, 'size-5')}
-		</span>
+		{#if isDraggable}
+			<span
+				data-handle
+				class={[
+					'-mx-2 grid cursor-grab place-items-center self-stretch px-2 text-foreground-4 group-hover:text-muted-foreground',
+					isDisabled && 'invisible',
+				]}
+			>
+				{@render icon(GRIP_VERTICAL, 'size-5')}
+			</span>
+		{:else}
+			<span
+				class="-mx-2 grid place-items-center self-stretch px-2 text-status-dep/60"
+				title={t('modTable.row.orderByGroup')}
+			>
+				{@render icon(LINK, 'size-4')}
+			</span>
+		{/if}
 	{/if}
 	{#if table.isNumbered}
-		<span class="text-center font-mono italic tabular-nums"
-			>{index + 1}</span
-		>
+		<span class="text-center font-mono italic tabular-nums">{number}</span>
+	{/if}
+	{#if table.enable}
+		<span class="grid place-items-center">
+			{#if isEnabled !== null}
+				{@render enableBox(
+					isEnabled,
+					t('modTable.row.enabled'),
+					toggleEnabled
+				)}
+			{/if}
+		</span>
 	{/if}
 	{#each table.layout.visibleColumns as column (column.key)}
 		{@render cell(column.key)}
 		{#if column.key === 'mod' && table.hasFlags}
-			{@render flagsCell()}
+			{@render flagPills(flags, flagSize, isFlagActive, openNotices)}
 		{/if}
 	{/each}
 	{#if table.hasRowActions}

@@ -105,9 +105,7 @@ export class ProfilesStore extends ConnectionStore {
 		const entries = await ProfileEntry.query()
 			.where('profile_id', from.id)
 			.toArray(tx);
-		const separatorIds = entries.flatMap((entry) =>
-			entry.separator_id === null ? [] : [entry.separator_id]
-		);
+		const separatorIds = ProfileEntry.separatorIds(entries);
 		const separators = separatorIds.length
 			? await Separator.query().whereIn('id', separatorIds).toArray(tx)
 			: [];

@@ -67,6 +67,10 @@ export class VirtualList {
 		});
 	}
 
+	get paddingStart(): number {
+		return this.#options.paddingStart ?? 0;
+	}
+
 	scrollToIndex(index: number): void {
 		this.#virtualizer.scrollToIndex(index, { align: 'auto' });
 	}
@@ -77,6 +81,14 @@ export class VirtualList {
 
 	itemAtOffset(offset: number): VirtualItem | undefined {
 		return this.#virtualizer.getVirtualItemForOffset(offset);
+	}
+
+	offsetOf(index: number): number {
+		const measurements = this.#virtualizer.measurementsCache;
+		const item = measurements[index];
+		if (item) return item.start;
+		const last = measurements.at(-1);
+		return last ? last.end : (this.#options.paddingStart ?? 0);
 	}
 
 	private refresh(): void {

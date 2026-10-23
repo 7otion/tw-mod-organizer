@@ -8,6 +8,7 @@
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
+	import { activeDot } from '@/components/dots.svelte';
 	import { Badge } from '@/components/ui/badge';
 	import { Button } from '@/components/ui/button';
 	import { Checkbox } from '@/components/ui/checkbox';
@@ -170,12 +171,7 @@
 	</span>
 
 	<span class="flex min-w-0 items-center gap-2">
-		<span
-			class={cn(
-				'size-2 shrink-0 rounded-full',
-				active ? 'bg-pink' : 'shadow-[inset_0_0_0_1.5px_var(--text-4)]'
-			)}
-		></span>
+		{@render activeDot(active)}
 		{#if isRenaming}
 			<span class="flex flex-col gap-1 py-1">
 				<Input

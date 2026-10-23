@@ -52,8 +52,10 @@ export function oneOf<T extends string>(
 	};
 }
 
+export type NameKind = 'tag' | 'profile' | 'group' | 'mod' | 'separator';
+
 export function nameError(
-	kind: 'tag' | 'profile' | 'group' | 'mod',
+	kind: NameKind,
 	name: string,
 	isTaken: boolean
 ): MessageKey | null {

@@ -4,6 +4,7 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
+	import TagColorPicker from '@/components/tag-color-picker.svelte';
 	import * as ContextMenu from '@/components/ui/context-menu';
 	import * as Dialog from '@/components/ui/dialog';
 	import { Input } from '@/components/ui/input';
@@ -22,7 +23,6 @@
 
 	import SidebarCount from './sidebar-count.svelte';
 	import SidebarItem from './sidebar-item.svelte';
-	import TagColorPicker from './tag-color-picker.svelte';
 
 	type Props = {
 		tag: Tag;

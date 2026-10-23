@@ -58,7 +58,7 @@
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content align="end" class="min-w-52">
 		<DropdownMenu.Item onSelect={onrename}>
-			{t('modDetails.menu.rename')}
+			{t('common.rename')}
 		</DropdownMenu.Item>
 		<DropdownMenu.Item onSelect={setCover}>
 			{t('modDetails.menu.setCover')}

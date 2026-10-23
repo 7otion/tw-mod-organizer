@@ -17,13 +17,14 @@
 	import S7forgeSetup from '@/pages/s7forge-setup/s7forge-setup.svelte';
 
 	import { t } from '@/lib/i18n';
-	import { AppStore, S7forgeStore } from '@/lib/store';
+	import { AppStore, NavigationStore, S7forgeStore } from '@/lib/store';
 	import { toastError } from '@/lib/utils';
 
 	let { children } = $props();
 
 	const appStore = AppStore.get();
 	const s7forgeStore = S7forgeStore.get();
+	NavigationStore.get();
 
 	$effect(() => {
 		const unlisten = listen<string>('backend-panic', (event) =>

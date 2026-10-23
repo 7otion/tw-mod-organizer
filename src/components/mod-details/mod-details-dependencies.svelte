@@ -129,7 +129,7 @@
 					</button>
 					{#if status !== 'on'}
 						<Button variant="secondary" size="sm">
-							{t('modDetails.dependencies.enable')}
+							{t('common.enable')}
 						</Button>
 					{/if}
 				</div>

@@ -1,4 +1,5 @@
 import { tick, untrack } from 'svelte';
+import type { ClassValue } from 'svelte/elements';
 
 import type { MessageKey } from '@/lib/i18n/message-key';
 import type { Mod } from '@/lib/models';
@@ -16,6 +17,7 @@ import {
 import { VirtualList } from '@/lib/virtual-list.svelte';
 
 import { ColumnLayout } from './column-layout.svelte';
+import type { EnableBoxState } from './enable-box.svelte';
 import {
 	DIVIDER_GAP,
 	MOD_COLUMN_SPECS,
@@ -39,6 +41,22 @@ export type ModTableScrollMemory<Key> = Pick<
 
 export type TableInset = 'page' | 'drawer';
 
+type EnableState = 'on' | 'off' | 'mixed' | null;
+
+type ModTableEnable<Row> = {
+	isEnabled(row: Row): EnableBoxState | null;
+	setEnabled(rows: readonly Row[], isEnabled: boolean): Promise<void>;
+	rows?: () => readonly Row[];
+};
+
+export type PageKeys = {
+	searchInput: HTMLInputElement | null;
+	picker?: { isDragging: boolean; selection: Selection<number> };
+	isPicking?: () => boolean;
+	closePicker?: () => void;
+	onDelete?: () => void;
+};
+
 export type ModTableOptions<Row, ScrollKey> = {
 	layout: TableLayout<ModColumn>;
 	settingsTitleKey: MessageKey;
@@ -47,8 +65,14 @@ export type ModTableOptions<Row, ScrollKey> = {
 	modOf: (row: Row) => Mod;
 	inset?: TableInset;
 	hasFlags?: boolean;
+	isModRow?: (row: Row) => boolean;
+	heightOf?: (row: Row) => number | null;
+	numberOf?: (row: Row) => number;
+	enable?: ModTableEnable<Row>;
+	reveal?: (modId: number) => Promise<boolean>;
 	isSelectable?: boolean;
 	isRowDisabled?: (row: Row) => boolean;
+	classOf?: (row: Row) => ClassValue | null;
 	isNumbered?: boolean;
 	rowActionsWidth?: string;
 	sort?: ModTableSort;
@@ -73,9 +97,20 @@ const OVERSCAN_PX = 240;
 const MIN_OVERSCAN = 2;
 const GRIP_WIDTH = '16px';
 const NUMBER_WIDTH = '28px';
+const ENABLE_WIDTH = '20px';
 const FLAGS_WIDTH = '68px';
 const LOCATE_MS = 1200;
 const LINE_INSETS: Record<TableInset, number> = { page: 24, drawer: 10 };
+
+export const ROW_INSETS: Record<TableInset, string> = {
+	page: 'inset-x-6',
+	drawer: 'inset-x-2.5',
+};
+
+export const HEADER_INSETS: Record<TableInset, string> = {
+	page: 'mx-6',
+	drawer: 'mx-2.5',
+};
 
 export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 	readonly #options: ModTableOptions<Row, ScrollKey>;
@@ -89,6 +124,7 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 	readonly inset: TableInset;
 	readonly lineInset: number;
 	readonly hasFlags: boolean;
+	readonly enable: ModTableEnable<Row> | null;
 	readonly isNumbered: boolean;
 	readonly hasRowActions: boolean;
 	readonly sort: ModTableSort | null;
@@ -111,13 +147,14 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 		this.inset = options.inset ?? 'page';
 		this.lineInset = LINE_INSETS[this.inset];
 		this.hasFlags = options.hasFlags ?? this.inset === 'page';
+		this.enable = options.enable ?? null;
 		this.isNumbered = options.isNumbered ?? false;
 		this.hasRowActions = options.rowActionsWidth !== undefined;
 		this.sort = options.sort ?? null;
 		this.selection = options.isSelectable
 			? new Selection<number>(() => this.selectableKeys)
 			: null;
-		this.drag = options.drag ? new RowDrag(this, options.drag) : null;
+		this.drag = options.drag ? new RowDrag<Row>(this, options.drag) : null;
 		this.columnLayout = new ColumnLayout<ModColumn>({
 			layout: options.layout,
 			specs: MOD_COLUMN_SPECS,
@@ -126,6 +163,7 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 			leadingWidths: [
 				...(this.drag?.hasHandle ? [GRIP_WIDTH] : []),
 				...(this.isNumbered ? [NUMBER_WIDTH] : []),
+				...(this.enable ? [ENABLE_WIDTH] : []),
 			],
 			trailingWidths: options.rowActionsWidth
 				? [options.rowActionsWidth]
@@ -135,13 +173,13 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 		this.virtualList = new VirtualList({
 			count: () => this.rows.length,
 			scrollElement: () => this.viewport,
-			itemSize: () => this.rowHeight,
+			itemSize: (index) => this.heightOf(this.rows[index]),
 			itemKey: (index) => {
 				const row = this.rows[index];
 				return row === undefined ? index : options.keyOf(row);
 			},
 			sizeKey: () =>
-				`${options.layout.coverSize}:${options.layout.hasRowDivider}`,
+				`${options.layout.coverSize}:${options.layout.hasRowDivider}:${this.#heightsKey}`,
 			paddingStart: LIST_PADDING,
 			paddingEnd: LIST_PADDING,
 			endInset: () => this.#bulkBarInset,
@@ -183,11 +221,34 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 	});
 	readonly keys = $derived.by(() => this.rows.map(this.#options.keyOf));
 	readonly selectableKeys = $derived.by((): readonly number[] => {
-		const isDisabled = this.#options.isRowDisabled;
-		if (!isDisabled) return this.keys;
+		const { isRowDisabled, isModRow } = this.#options;
+		if (!isRowDisabled && !isModRow) return this.keys;
 		return this.rows
-			.filter((row) => !isDisabled(row))
+			.filter((row) => this.isRowSelectable(row))
 			.map(this.#options.keyOf);
+	});
+	readonly enableState = $derived.by((): EnableState => {
+		const enable = this.enable;
+		if (!enable) return null;
+		let on = 0;
+		let total = 0;
+		let hasMixed = false;
+		for (const row of enable.rows?.() ?? this.rows) {
+			const state = enable.isEnabled(row);
+			if (state === null) continue;
+			total++;
+			if (state === true) on++;
+			else if (state === 'mixed') hasMixed = true;
+		}
+		if (!total) return null;
+		if (hasMixed) return 'mixed';
+		if (on === 0) return 'off';
+		return on === total ? 'on' : 'mixed';
+	});
+	readonly #heightsKey = $derived.by(() => {
+		const heightOf = this.#options.heightOf;
+		if (!heightOf) return '';
+		return this.rows.map((row) => heightOf(row) ?? '').join(',');
 	});
 	readonly rowHeight = $derived.by(
 		() =>
@@ -240,6 +301,54 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 		return this.#options.isRowDisabled?.(row) ?? false;
 	}
 
+	classOf(row: Row): ClassValue | null {
+		return this.#options.classOf?.(row) ?? null;
+	}
+
+	isRowSelectable(row: Row): boolean {
+		return this.isModRow(row) && !this.isRowDisabled(row);
+	}
+
+	isModRow(row: Row): boolean {
+		return this.#options.isModRow?.(row) ?? true;
+	}
+
+	isRowDraggable(row: Row): boolean {
+		return (
+			!this.drag || this.drag.unitOf(this.#options.keyOf(row)) !== null
+		);
+	}
+
+	heightOf(row: Row | undefined): number {
+		if (row === undefined) return this.rowHeight;
+		return this.#options.heightOf?.(row) ?? this.rowHeight;
+	}
+
+	numberOf(row: Row, index: number): number {
+		return this.#options.numberOf ? this.#options.numberOf(row) : index + 1;
+	}
+
+	async toggleAllEnabled(): Promise<void> {
+		const enable = this.enable!;
+		const rows = (enable.rows?.() ?? this.rows).filter(
+			(row) => enable.isEnabled(row) !== null
+		);
+		await enable.setEnabled(rows, this.enableState !== 'on');
+	}
+
+	selectedRows(): Row[] {
+		const selection = this.selection;
+		if (!selection?.count) return [];
+		return this.rows.filter((row) =>
+			selection.has(this.#options.keyOf(row))
+		);
+	}
+
+	modByKey(key: number): Mod | null {
+		const row = this.rowByKey(key);
+		return row && this.isModRow(row) ? this.#options.modOf(row) : null;
+	}
+
 	rowByKey(key: number): Row | null {
 		return (
 			this.#baseRows.find((row) => this.#options.keyOf(row) === key) ??
@@ -256,10 +365,16 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 		this.#detailsModId = null;
 	}
 
-	locate(modId: number, color: string): boolean {
-		const index = this.rows.findIndex(
-			(row) => this.#options.modOf(row).id === modId
-		);
+	async locate(modId: number, color: string): Promise<boolean> {
+		let index = this.indexOfMod(modId);
+		if (
+			index < 0 &&
+			this.#options.reveal &&
+			(await this.#options.reveal(modId))
+		) {
+			await tick();
+			index = this.indexOfMod(modId);
+		}
 		if (index < 0) return false;
 		this.virtualList.scrollToIndex(index);
 		this.located = { key: this.#options.keyOf(this.rows[index]), color };
@@ -268,16 +383,57 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 		return true;
 	}
 
+	scrollToKey(key: number): void {
+		const index = this.keys.indexOf(key);
+		if (index >= 0) this.virtualList.scrollToIndex(index);
+	}
+
 	register(): () => void {
 		if (!this.hasFlags) return () => {};
 		this.#noticesStore.registerTable(this);
 		return () => this.#noticesStore.unregisterTable(this);
 	}
 
+	handlePageKeydown(event: KeyboardEvent, page: PageKeys): void {
+		if (event.ctrlKey && event.key.toLowerCase() === 'f') {
+			event.preventDefault();
+			page.searchInput?.focus();
+			return;
+		}
+		if (event.defaultPrevented) return;
+		const isPicking = page.isPicking?.() ?? false;
+		if (
+			event.key === 'Escape' &&
+			isPicking &&
+			this.#detailsModId === null
+		) {
+			const picker = page.picker!;
+			if (picker.isDragging) return;
+			if (picker.selection.count) picker.selection.clear();
+			else page.closePicker?.();
+			event.preventDefault();
+			return;
+		}
+		if (
+			event.key === 'Delete' &&
+			page.onDelete &&
+			!isPicking &&
+			!ModTable.isTyping(event.target)
+		) {
+			event.preventDefault();
+			page.onDelete();
+			return;
+		}
+		this.handleKeydown(event);
+	}
+
 	handleKeydown(event: KeyboardEvent): void {
 		if (event.defaultPrevented || this.drag?.isSource) return;
 		if (event.key === 'Escape') {
 			if (this.#detailsModId !== null) this.closeDetails();
+			else if (this.#noticesStore.detailsMod)
+				this.#noticesStore.closeDetails();
+			else if (this.#noticesStore.isOpen) this.#noticesStore.close();
 			else if (this.selection?.count) this.selection.clear();
 			else return;
 			event.preventDefault();
@@ -290,13 +446,27 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 			event.preventDefault();
 			this.selection.selectAll();
 		} else if (
+			event.key === ' ' &&
+			this.enable &&
+			this.selection?.count &&
+			!ModTable.isTyping(event.target) &&
+			!ModTable.isInteractive(event.target)
+		) {
+			event.preventDefault();
+			const rows = this.selectedRows();
+			const isAllOn = rows.every((row) => {
+				const state = this.enable!.isEnabled(row);
+				return state === null || state === true;
+			});
+			void this.enable.setEnabled(rows, !isAllOn);
+		} else if (
 			event.key === 'F2' &&
 			this.selection?.only !== null &&
 			this.selection?.only !== undefined &&
 			!ModTable.isTyping(event.target)
 		) {
 			event.preventDefault();
-			this.renamingMod = this.#libraryStore.modById(this.selection.only);
+			this.renamingMod = this.modByKey(this.selection.only);
 		} else if (
 			(event.key === 'ArrowDown' || event.key === 'ArrowUp') &&
 			this.selection &&
@@ -317,12 +487,24 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 		void tick().then(() => this.virtualList.scrollToIndex(index));
 	}
 
+	private indexOfMod(modId: number): number {
+		return this.rows.findIndex(
+			(row) => this.isModRow(row) && this.#options.modOf(row).id === modId
+		);
+	}
+
 	private followSelection(selection: Selection<number>): void {
+		$effect(() => {
+			const keys = this.selectableKeys;
+			untrack(() => selection.retain(keys));
+		});
 		$effect(() => {
 			const only = selection.only;
 			if (only === null) return;
 			untrack(() => {
-				if (this.#detailsModId !== null) this.#detailsModId = only;
+				if (this.#detailsModId === null) return;
+				const mod = this.modByKey(only);
+				if (mod) this.#detailsModId = mod.id;
 			});
 		});
 	}
@@ -346,6 +528,14 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 			added: '72px',
 			version: '64px',
 		};
+	}
+
+	private static isInteractive(target: EventTarget | null): boolean {
+		return (
+			target instanceof Element &&
+			target.closest('button, a, [role="button"], [role="checkbox"]') !==
+				null
+		);
 	}
 
 	static isTyping(target: EventTarget | null): boolean {

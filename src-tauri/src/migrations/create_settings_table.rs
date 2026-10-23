@@ -12,9 +12,7 @@ impl Migration for CreateSettingsTable {
             table.text("mods_dir");
             table.text("downloads_dir");
             table.text("rpfm_path").nullable();
-            table.boolean("confirm_dependency_changes").default(true);
             table.boolean("preview_auto_sort").default(true);
-            table.text("new_mods_placement").default("end_of_list");
             table.text("date_format").default("system");
             table.text("language").default("system");
             table

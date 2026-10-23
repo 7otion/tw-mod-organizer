@@ -44,13 +44,25 @@ export class ProfileEntry extends Model<typeof ProfileEntry.schema> {
 			}
 		},
 		'delete:after': async (written, tx) => {
-			const separatorIds = written.flatMap(([entry]) =>
-				entry.separator_id === null ? [] : [entry.separator_id]
+			const separatorIds = ProfileEntry.separatorIds(
+				written.map(([entry]) => entry)
 			);
 			if (!separatorIds.length) return;
 			await Separator.query().whereIn('id', separatorIds).delete(tx);
 		},
 	};
+
+	static separatorIds(entries: readonly ProfileEntry[]): number[] {
+		return entries.flatMap((entry) =>
+			entry.separator_id === null ? [] : [entry.separator_id]
+		);
+	}
+
+	static groupIds(entries: readonly ProfileEntry[]): number[] {
+		return entries.flatMap((entry) =>
+			entry.group_id === null ? [] : [entry.group_id]
+		);
+	}
 
 	get kind(): EntryKind {
 		if (this.mod_id !== null) return 'mod';

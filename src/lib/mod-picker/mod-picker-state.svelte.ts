@@ -11,11 +11,9 @@ import {
 
 import { PICKER_LAYOUT } from './picker-layout';
 
-export type PickerTarget = {
-	kind: 'group' | 'profile';
-	name: string;
-	linkedCount: number;
-};
+export type PickerTarget =
+	| { kind: 'group'; name: string; linkedCount: number }
+	| { kind: 'profile'; name: string };
 
 export type PickerRow = {
 	mod: Mod;

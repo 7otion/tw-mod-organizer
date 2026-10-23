@@ -1,4 +1,4 @@
-import { isTagPreset, type TagColor, type TagPreset } from '@/lib/models';
+import { isTagPreset, type TagPreset } from '@/lib/models';
 
 const PRESET_VALUES: Record<TagPreset, string> = {
 	ash: 'var(--text-3)',
@@ -12,11 +12,11 @@ const PRESET_VALUES: Record<TagPreset, string> = {
 	amethyst: 'var(--st-dep)',
 };
 
-export function tagColor(color: TagColor | null): string {
+export function tagColor(color: string | null): string {
 	if (color === null) return PRESET_VALUES.ash;
 	return isTagPreset(color) ? PRESET_VALUES[color] : color;
 }
 
-export function tagTextColor(color: TagColor | null): string | undefined {
+export function tagTextColor(color: string | null): string | undefined {
 	return color === null || color === 'ash' ? undefined : tagColor(color);
 }

@@ -27,9 +27,7 @@
 
 	function isAt(path: string): boolean {
 		const location = page.url.pathname;
-		return path === '/'
-			? location === '/'
-			: location === path || location.startsWith(path + '/');
+		return location === path || location.startsWith(path + '/');
 	}
 
 	const active = $derived(navRoutes.find((route) => isAt(route.path)));

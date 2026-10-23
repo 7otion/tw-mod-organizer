@@ -1,6 +1,8 @@
 <script lang="ts">
 	import PlusIcon from '@lucide/svelte/icons/plus';
 
+	import { activeDot } from '@/components/dots.svelte';
+
 	import { t } from '@/lib/i18n';
 	import type { MessageKey } from '@/lib/i18n/message-key';
 	import type { Tag } from '@/lib/models';
@@ -48,22 +50,13 @@
 	let deleting = $state<Tag | null>(null);
 </script>
 
-{#snippet dot(isPressed: boolean)}
-	<span
-		class={cn(
-			'size-2 shrink-0 rounded-full',
-			isPressed ? 'bg-pink' : 'shadow-[inset_0_0_0_1.5px_var(--text-4)]'
-		)}
-	></span>
-{/snippet}
-
 {#snippet stateItem(state: ModState)}
 	{@const isPressed = libraryFilterStore.states.includes(state)}
 	<SidebarItem
 		active={isPressed}
 		onclick={() => libraryFilterStore.toggleState(state)}
 	>
-		{@render dot(isPressed)}
+		{@render activeDot(isPressed)}
 		<span class={cn('min-w-0 flex-1 truncate', STATE_CLASSES[state])}>
 			{t(STATE_NAMES[state])}
 		</span>
@@ -88,7 +81,7 @@
 				active={isPressed}
 				onclick={() => libraryFilterStore.toggleSource(source)}
 			>
-				{@render dot(isPressed)}
+				{@render activeDot(isPressed)}
 				<span class="min-w-0 flex-1 truncate"
 					>{t(SOURCE_NAMES[source])}</span
 				>
@@ -113,7 +106,7 @@
 			{@render stateItem(state)}
 			{#if state === 'has-notices'}
 				<SidebarItem>
-					{@render dot(false)}
+					{@render activeDot(false)}
 					<span class="min-w-0 flex-1 truncate">
 						{t('sidebar.library.states.downloading')}
 					</span>
@@ -147,7 +140,7 @@
 				<TagFacet {tag} ondelete={() => (deleting = tag)} />
 			{:else}
 				<li class="px-4 text-sm text-muted-foreground">
-					{t('sidebar.library.noTags')}
+					{t('common.noTags')}
 				</li>
 			{/each}
 		</ul>

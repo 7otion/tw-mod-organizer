@@ -2,7 +2,7 @@ import { ConnectionStore, Model } from '@7otion-tauri/orm';
 
 import { COVER_SIZES, type CoverSize } from '@/lib/mod-table/mod-columns';
 import { UiColumn } from '@/lib/models';
-import { GamesStore, UiStateStore, type UiStateField } from '@/lib/store';
+import { UiStateStore, type UiStateField } from '@/lib/store';
 
 export type TableLayoutSpec<Column extends string> = {
 	key: string;
@@ -20,7 +20,6 @@ export class TableLayout<Column extends string> {
 	readonly #spec: TableLayoutSpec<Column>;
 	readonly #rows: () => readonly UiColumn[];
 	readonly #uiStateStore = UiStateStore.get();
-	readonly #gamesStore = GamesStore.get();
 	readonly #coverSizeField: UiStateField<CoverSize>;
 	readonly #rowDividerField: UiStateField<boolean>;
 
@@ -43,12 +42,6 @@ export class TableLayout<Column extends string> {
 		};
 	}
 
-	readonly savedScrollOffset = $derived.by((): number | null => {
-		const game = this.#gamesStore.current;
-		return this.#uiStateStore.isLoaded && game
-			? this.#uiStateStore.get(this.scrollOffsetField(game.app_id))
-			: null;
-	});
 	readonly coverSize = $derived.by(() =>
 		this.#uiStateStore.get(this.#coverSizeField)
 	);
@@ -79,9 +72,15 @@ export class TableLayout<Column extends string> {
 		this.columns.filter((column) => column.isVisible)
 	);
 
-	async setScrollOffset(appId: number, offset: number): Promise<void> {
+	scrollOffsetOf(key: number): number | null {
+		return this.#uiStateStore.isLoaded
+			? this.#uiStateStore.get(this.scrollOffsetField(key))
+			: null;
+	}
+
+	async setScrollOffset(key: number, offset: number): Promise<void> {
 		await this.#uiStateStore.set(
-			this.scrollOffsetField(appId),
+			this.scrollOffsetField(key),
 			Math.round(offset)
 		);
 	}
@@ -130,9 +129,9 @@ export class TableLayout<Column extends string> {
 		);
 	}
 
-	private scrollOffsetField(appId: number): UiStateField<number> {
+	private scrollOffsetField(key: number): UiStateField<number> {
 		return {
-			key: `${this.#spec.key}.scroll_offset.${appId}`,
+			key: `${this.#spec.key}.scroll_offset.${key}`,
 			initial: 0,
 			is: (value): value is number => typeof value === 'number',
 		};

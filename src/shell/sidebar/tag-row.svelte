@@ -2,6 +2,7 @@
 	import { Count } from '@7otion-tauri/orm';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
+	import TagColorPicker from '@/components/tag-color-picker.svelte';
 	import { Button } from '@/components/ui/button';
 	import { Input } from '@/components/ui/input';
 	import * as Popover from '@/components/ui/popover';
@@ -11,8 +12,6 @@
 	import { TagsStore } from '@/lib/store';
 	import { tagColor } from '@/lib/tag-swatches';
 	import { nameError } from '@/lib/utils';
-
-	import TagColorPicker from './tag-color-picker.svelte';
 
 	let { tag, ondelete }: { tag: Tag; ondelete: () => void } = $props();
 

@@ -25,6 +25,7 @@
 	} from '@/lib/notices/categories';
 	import {
 		GamesStore,
+		LibraryScanStore,
 		NoticesStore,
 		type Notice,
 		type NoticesTab,
@@ -42,6 +43,7 @@
 
 	const gamesStore = GamesStore.get();
 	const noticesStore = NoticesStore.get();
+	const scanStore = LibraryScanStore.get();
 
 	const chipClasses = toggleVariants({ variant: 'filter', size: 'sm' });
 
@@ -113,7 +115,7 @@
 		t(`notices.empty.${scopeValues.key}`, scopeValues.values)
 	);
 	const checkedText = $derived.by(() => {
-		if (noticesStore.isChecking) return t('notices.checking');
+		if (scanStore.isScanning) return t('notices.checking');
 		const checkedAt = noticesStore.checkedAt;
 		return checkedAt
 			? t('notices.checked', { time: timeAgo(checkedAt) })
@@ -347,11 +349,11 @@
 			<Button
 				variant="ghost"
 				size="xs"
-				disabled={noticesStore.isChecking}
-				onclick={() => noticesStore.checkNow()}
+				disabled={scanStore.isScanning}
+				onclick={() => scanStore.scan()}
 			>
 				<RefreshCwIcon
-					class={noticesStore.isChecking ? 'animate-spin' : undefined}
+					class={scanStore.isScanning ? 'animate-spin' : undefined}
 				/>
 				{t('notices.checkNow')}
 			</Button>

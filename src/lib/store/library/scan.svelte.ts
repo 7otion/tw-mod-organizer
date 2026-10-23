@@ -5,7 +5,7 @@ import { untrack } from 'svelte';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 import { Mod, ModDependency, ModTag, Tag, type ModSource } from '@/lib/models';
-import { GamesStore, type GameEntry } from '@/lib/store';
+import { GamesStore, LoadOrderStore, type GameEntry } from '@/lib/store';
 import { unixNow } from '@/lib/utils';
 
 import { WorkshopDownloadsStore } from './workshop-downloads.svelte';
@@ -263,7 +263,7 @@ export class LibraryScanStore extends ConnectionStore {
 			}
 			await Mod.updateMany(known, tx);
 			const added = [...scanned.values()].map(([mod]) => mod);
-			await Mod.createMany(
+			const created = await Mod.createMany(
 				added.map((mod) => ({
 					game_id: game.app_id,
 					source: mod.source === 'steam' ? 'steam' : 'manual',
@@ -274,6 +274,13 @@ export class LibraryScanStore extends ConnectionStore {
 				})),
 				tx
 			);
+			const activeProfileId = game.row!.active_profile_id;
+			if (activeProfileId !== null && game.row!.scanned_at !== null)
+				await LoadOrderStore.get().appendMods(
+					activeProfileId,
+					created,
+					tx
+				);
 			for (const mod of added)
 				if (mod.source === 'steam') createdRefs.add(mod.source_ref);
 			await game.row!.update({ scanned_at: now }, tx);

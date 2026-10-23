@@ -8,11 +8,12 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 
+	import LinkGroupMenu from '@/components/link-group-menu.svelte';
 	import { Button } from '@/components/ui/button';
 
 	import { t } from '@/lib/i18n';
 	import type { MessageKey } from '@/lib/i18n/message-key';
-	import { AppStore } from '@/lib/store';
+	import { AppStore, LoadOrderStore } from '@/lib/store';
 
 	import ForceUpdateDialog from './force-update-dialog.svelte';
 	import ImportCollectionDialog from './import-collection-dialog.svelte';
@@ -27,7 +28,12 @@
 		onclick?: () => void;
 	};
 
+	const SHELL_BUTTON = 'h-7 gap-1.5 rounded-shell px-3 text-sm font-semibold';
+	const SHELL_PRIMARY = 'bg-pink-deep/70 text-bone hover:bg-pink-deep/50';
+	const SHELL_SECONDARY = 'bg-raised hover:bg-active aria-expanded:bg-active';
+
 	const appStore = AppStore.get();
+	const loadOrderStore = LoadOrderStore.get();
 
 	let isImporting = $state(false);
 	let isForceUpdating = $state(false);
@@ -37,9 +43,18 @@
 			labelKey: 'header.loadOrder.addMods',
 			icon: PlusIcon,
 			isPrimary: true,
+			onclick: () =>
+				(loadOrderStore.isPicking = !loadOrderStore.isPicking),
 		},
-		{ labelKey: 'header.loadOrder.separator', icon: PanelTopIcon },
-		{ labelKey: 'header.loadOrder.linkGroup', icon: LayersIcon },
+		{
+			labelKey: 'header.loadOrder.separator',
+			icon: PanelTopIcon,
+			opensDialog: true,
+			onclick: () => (loadOrderStore.isCreatingSeparator = true),
+		},
+	];
+
+	const LOAD_ORDER_TAIL: HeaderAction[] = [
 		{
 			labelKey: 'header.loadOrder.sort',
 			icon: ArrowDownWideNarrowIcon,
@@ -69,30 +84,39 @@
 		},
 	];
 
-	const actions = $derived(
-		page.url.pathname.startsWith('/library')
-			? LIBRARY_ACTIONS
-			: LOAD_ORDER_ACTIONS
-	);
+	const isLibrary = $derived(page.url.pathname.startsWith('/library'));
+	const isLoadOrder = $derived(page.url.pathname.startsWith('/load-order'));
 </script>
 
+{#snippet actionButton(action: HeaderAction)}
+	<Button
+		variant={action.isPrimary ? 'default' : 'secondary'}
+		aria-haspopup={action.opensDialog ? 'dialog' : undefined}
+		class={[
+			SHELL_BUTTON,
+			action.isPrimary ? SHELL_PRIMARY : SHELL_SECONDARY,
+		]}
+		onclick={action.onclick}
+	>
+		<action.icon class="size-3.5" />
+		{t(action.labelKey)}
+	</Button>
+{/snippet}
+
 <div class="clickable-content flex items-center gap-1.5 self-center">
-	{#each actions as action (action.labelKey)}
-		<Button
-			variant={action.isPrimary ? 'default' : 'secondary'}
-			aria-haspopup={action.opensDialog ? 'dialog' : undefined}
-			class={[
-				'h-7 gap-1.5 rounded-shell px-3 text-sm font-semibold',
-				action.isPrimary
-					? 'bg-pink-deep/70 text-bone hover:bg-pink-deep/50'
-					: 'bg-raised hover:bg-active aria-expanded:bg-active',
-			]}
-			onclick={action.onclick}
-		>
-			<action.icon class="size-3.5" />
-			{t(action.labelKey)}
-		</Button>
-	{/each}
+	{#if isLibrary}
+		{#each LIBRARY_ACTIONS as action (action.labelKey)}
+			{@render actionButton(action)}
+		{/each}
+	{:else if isLoadOrder}
+		{#each LOAD_ORDER_ACTIONS as action (action.labelKey)}
+			{@render actionButton(action)}
+		{/each}
+		<LinkGroupMenu class="{SHELL_BUTTON} {SHELL_SECONDARY}" />
+		{#each LOAD_ORDER_TAIL as action (action.labelKey)}
+			{@render actionButton(action)}
+		{/each}
+	{/if}
 </div>
 
 <InstallModDialog />

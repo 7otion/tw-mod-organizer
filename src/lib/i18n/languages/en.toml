@@ -40,6 +40,16 @@ close = "Close"
 error = "Error"
 clear = "Clear"
 undo = "Undo"
+enable = "Enable"
+disable = "Disable"
+on = "On"
+off = "Off"
+all = "All"
+tag = "Tag"
+colour = "Colour"
+editGroup = "Edit group"
+removeFromProfile = "Remove from profile"
+noTags = "No tags yet"
 
 [app]
 backendCrashed = "Backend crashed: {error}"
@@ -87,6 +97,8 @@ notOpened = "Not opened yet"
 addMods = "Add mods"
 separator = "Separator"
 linkGroup = "Link group"
+linkGroupAllLinked = "Every group is linked already"
+linkGroupNone = "No groups yet"
 sort = "Sort"
 
 [header.library]
@@ -138,11 +150,16 @@ taken = "A group with this name already exists."
 empty = "A mod needs a title."
 taken = "A mod with this title already exists."
 
+[names.separator]
+empty = "A separator needs a title."
+taken = "A separator with this title already exists."
+
 # Section headings in the sidebar. They are shown in capital letters.
 [sidebar.outline]
 title = "Outline"
 collapseAll = "Collapse all"
-collapseAllTooltip = "Collapse all separators"
+collapseAllTooltip = "Collapse all separators and groups"
+empty = "No separators or groups yet."
 
 [sidebar.profiles]
 title = "Profiles"
@@ -173,7 +190,6 @@ source = "Source"
 state = "State"
 tags = "Tags"
 newTagTooltip = "New tag"
-noTags = "No tags yet."
 
 [sidebar.library.sources]
 steam = "Steam Workshop"
@@ -376,6 +392,72 @@ block = "The whole {group} block moves in the {profile} profile."
 entry = "The order of the {profile} profile changes."
 confirm = "Move"
 
+# The Load order page: the active profile's list.
+[loadOrder]
+tags = "Tags"
+noMatch = "No mod in this profile matches."
+dropHere = "Drop mods here, or add them from the library."
+
+[loadOrder.stats]
+entries = { one = "{count} entry", other = "{count} entries" }
+enabled = "{count} enabled"
+
+[loadOrder.search]
+placeholder = { one = "Search {count} entry by title, author or tag", other = "Search {count} entries by title, author or tag" }
+label = "Search profile"
+
+[loadOrder.filter]
+label = "Enabled"
+
+[loadOrder.table]
+title = "Table · Load order"
+
+[loadOrder.empty]
+title = "This profile is empty"
+description = { one = "A profile holds only the mods you add to it. Everything else waits in your library, {count} mod.", other = "A profile holds only the mods you add to it. Everything else waits in your library, {count} mods." }
+addMods = "Add mods from library"
+quickStart = "Quick start"
+tagged = "All mods tagged {name}"
+group = "Group {name}"
+add = "Add"
+link = "Link"
+dragHint = "or drag mods here from the library"
+
+[loadOrder.band]
+mods = { one = "{count} mod", other = "{count} mods" }
+allOn = "all on"
+someOn = "{count} on"
+range = "No. {first}–{last}"
+group = "Group"
+groupMeta = "{on} of {count} on · order set in Groups"
+collapse = "Collapse"
+expand = "Expand"
+editSeparator = "Edit separator"
+
+[loadOrder.menu]
+addTag = "Add tag"
+details = "Details"
+deleteSeparator = "Delete separator"
+unlinkGroup = "Unlink from profile"
+
+[loadOrder.move]
+menu = "Move to"
+priority = "Priority…"
+priorityTitle = "Move to priority"
+priorityDescription = "The first selected mod takes this number and the rest follow it. 1 to {max}."
+priorityLabel = "No."
+confirm = "Move"
+separator = "Separator"
+top = "Top of the list"
+
+[loadOrder.separator]
+title = "New separator"
+description = "Mods below it belong to it until the next separator."
+label = "Title"
+create = "Add separator"
+editTitle = "Edit separator"
+save = "Save"
+
 # The drag-only library picker shared by Groups and Load order.
 [modPicker]
 title = "Library"
@@ -385,7 +467,6 @@ hideAdded = "Hide added"
 unplaced = "Not in any profile"
 source = "Source"
 tags = "Tags"
-noTags = "No tags yet"
 listLabel = "Library mods"
 available = { one = "{count} available", other = "{count} available" }
 noMatch = "No mods match “{query}”"
@@ -531,19 +612,10 @@ description = "Where installed mods go"
 title = "Downloads folder"
 description = "Nexus downloads, kept until installed or hidden"
 
-[settings.loadOrder.confirmDependencies]
-title = "Confirm dependency changes"
-description = "Ask before enabling a mod also enables what it needs, or disabling one disables what needs it"
-
 [settings.loadOrder.previewSort]
 title = "Preview before Auto-sort"
 description = "Show the before / after list instead of sorting straight away"
 
-[settings.loadOrder.newMods]
-title = "New mods go to"
-description = "Where mods added from the library land"
-endOfList = "End of list"
-selectedSection = "Selected section"
 
 [settings.display.dateFormat]
 title = "Date format"
@@ -831,6 +903,9 @@ manual = "Manual"
 
 [modTable.row]
 version = "v{version}"
+enabled = "Enabled"
+enableAll = "Enable or disable every mod shown"
+orderByGroup = "Order set by the group"
 profileOff = "{name} (off)"
 viaGroup = { one = "via {group} · {count} profile", other = "via {group} · {count} profiles" }
 openDetails = "Open details"
@@ -869,15 +944,14 @@ title = "Table · Library"
 addToProfile = "Add to profile"
 addToGroup = "Add to group"
 newGroup = "New group…"
-tag = "Tag"
 newTag = "New tag…"
-remove = "Unsubscribe / remove…"
+remove = "Remove…"
+unsubscribe = "Unsubscribe…"
 
 [library.newTag]
 title = "New tag"
 description = { one = "Added to {count} selected mod.", other = "Added to {count} selected mods." }
 name = "Name"
-colour = "Colour"
 create = "Create tag"
 
 [library.subscribeConfirm]
@@ -980,7 +1054,6 @@ browser = "Open in browser"
 
 [modDetails.menu]
 label = "More actions"
-rename = "Rename"
 setCover = "Set cover image…"
 imageFilter = "Images"
 copySteamId = "Copy Steam ID"
@@ -1010,8 +1083,7 @@ dependencies = "Dependencies"
 [modDetails.overview]
 noDescription = "No description."
 inProfiles = "In profiles"
-numberOn = "No. {number} · on"
-numberOff = "No. {number} · off"
+number = "No. {number}"
 viaGroup = "via this group in {profiles}"
 noProfiles = "Not in any profile."
 
@@ -1038,7 +1110,6 @@ requiredBy = "Required by"
 notInLibrary = "Not in library · Steam"
 unknownTitle = "Workshop item {id}"
 subscribe = "Subscribe"
-enable = "Enable"
 noRequirements = "This mod doesn't list any requirements."
 notRequired = "No mod in your library requires this one."
 hint = "Requirements are suggestions from the author. You can still play without them, but the mod may crash or do nothing."

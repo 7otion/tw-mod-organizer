@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import { ConnectionStore, Model, type Transaction } from '@7otion-tauri/orm';
 
 import {
@@ -61,6 +62,11 @@ export class GroupsStore extends ConnectionStore {
 		this.#selectedId = group?.id ?? null;
 	}
 
+	open(group: Group): void {
+		this.select(group);
+		void goto('/groups');
+	}
+
 	membersOf(group: Group): GroupMember[] {
 		return this.#membersByGroup.get(group.id) ?? [];
 	}
@@ -106,7 +112,7 @@ export class GroupsStore extends ConnectionStore {
 		name: string,
 		mods: readonly Mod[] = [],
 		options: {
-			color?: TagColor | null;
+			color?: string | null;
 			steamCollectionId?: string | null;
 		} = {}
 	): Promise<Group> {
@@ -147,7 +153,7 @@ export class GroupsStore extends ConnectionStore {
 			name = `${group.name} copy ${number}`;
 		const mods = this.modsOf(group).map(({ mod }) => mod);
 		await this.create(name, mods, {
-			color: group.color as TagColor | null,
+			color: group.color,
 		});
 	}
 

@@ -18,7 +18,7 @@ export type NavRoute = {
 export const navRoutes: NavRoute[] = [
 	{
 		id: 'load-order',
-		path: '/',
+		path: '/load-order',
 		labelKey: 'nav.loadOrder',
 		shortcutKey: '1',
 		icon: ListOrderedIcon,
@@ -39,14 +39,14 @@ export const navRoutes: NavRoute[] = [
 	},
 	{
 		id: 'saves',
-		path: '/',
+		path: '/load-order',
 		labelKey: 'nav.saves',
 		shortcutKey: '4',
 		icon: SaveIcon,
 	},
 	{
 		id: 'downloads',
-		path: '/',
+		path: '/load-order',
 		labelKey: 'nav.downloads',
 		shortcutKey: '5',
 		icon: DownloadIcon,

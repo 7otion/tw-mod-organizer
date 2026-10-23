@@ -17,6 +17,7 @@
 	import {
 		GroupsStore,
 		LibraryStore,
+		LoadOrderStore,
 		NoticesStore,
 		type Notice,
 	} from '@/lib/store';
@@ -34,6 +35,7 @@
 
 	const groupsStore = GroupsStore.get();
 	const libraryStore = LibraryStore.get();
+	const loadOrderStore = LoadOrderStore.get();
 	const noticesStore = NoticesStore.get();
 
 	let isConfirmingMove = $state(false);
@@ -51,7 +53,7 @@
 	);
 	const moveText = $derived.by(() => {
 		if (notice.category !== 'order') return '';
-		const move = noticesStore.moveOf(notice);
+		const move = loadOrderStore.moveOf(notice.mod, notice.requirement);
 		if (!move) return '';
 		switch (move.kind) {
 			case 'group':
@@ -232,7 +234,11 @@
 			<AlertDialog.Footer>
 				<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
 				<AlertDialog.Action
-					onclick={() => noticesStore.moveToFix(notice)}
+					onclick={() =>
+						loadOrderStore.moveAfter(
+							notice.mod,
+							notice.requirement
+						)}
 				>
 					{t('notices.moveToFix.confirm')}
 				</AlertDialog.Action>

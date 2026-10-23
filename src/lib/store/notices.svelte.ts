@@ -2,30 +2,22 @@ import { goto } from '$app/navigation';
 import { page } from '$app/state';
 import { ConnectionStore } from '@7otion-tauri/orm';
 import { tick } from 'svelte';
-import { SvelteSet } from 'svelte/reactivity';
 import { toast } from 'svelte-sonner';
+import { SvelteSet } from 'svelte/reactivity';
 
 import { t } from '@/lib/i18n';
-import {
-	ProfileGroupDisabled,
-	type Group,
-	type Mod,
-	type ModDependency,
-	type Profile,
-	type ProfileEntry,
-} from '@/lib/models';
+import type { Group, Mod, ModDependency, Profile } from '@/lib/models';
 import {
 	NOTICE_CATEGORIES,
 	NOTICE_CATEGORY_SPECS,
 	type NoticeCategory,
 	type NoticeGroup,
 } from '@/lib/notices/categories';
-import { keyBetween } from '@/lib/position';
 import {
 	GamesStore,
 	GroupsStore,
-	LibraryScanStore,
 	LibraryStore,
+	LoadOrderStore,
 	ProfilesStore,
 	WorkshopDownloadsStore,
 } from '@/lib/store';
@@ -71,22 +63,8 @@ export type NoticesOpening = {
 	mod?: Mod;
 };
 
-export type MoveTarget = {
-	kind: 'group' | 'block' | 'entry';
-	group: Group | null;
-	profile: Profile;
-};
-
 export type LocateTarget = {
-	locate(modId: number, color: string): boolean;
-};
-
-type OrderSlot = {
-	mod: Mod;
-	number: number;
-	entry: ProfileEntry;
-	group: Group | null;
-	isEnabled: boolean;
+	locate(modId: number, color: string): Promise<boolean>;
 };
 
 type PendingLocate = {
@@ -102,14 +80,8 @@ export class NoticesStore extends ConnectionStore {
 	readonly #libraryStore = LibraryStore.get();
 	readonly #profilesStore = ProfilesStore.get();
 	readonly #groupsStore = GroupsStore.get();
-	readonly #scanStore = LibraryScanStore.get();
 	readonly #downloadsStore = WorkshopDownloadsStore.get();
-	readonly #disabled = this.query(() =>
-		ProfileGroupDisabled.query().where(
-			'profile_id',
-			this.#profilesStore.active?.id ?? 0
-		)
-	);
+	readonly #loadOrderStore = LoadOrderStore.get();
 
 	#filterModId = $state<number | null>(null);
 	#detailsModId = $state<number | null>(null);
@@ -121,55 +93,6 @@ export class NoticesStore extends ConnectionStore {
 	search = $state('');
 	readonly collapsed = new SvelteSet<NoticeCategory>();
 
-	readonly #slots = $derived.by((): OrderSlot[] => {
-		const profile = this.#profilesStore.active;
-		if (!profile) return [];
-		const disabled = Object.fromEntries(
-			this.#disabled.rows.map((row) => [
-				`${row.group_id}:${row.mod_id}`,
-				true,
-			])
-		) as Record<string, true>;
-		const slots: OrderSlot[] = [];
-		for (const entry of this.#libraryStore.entriesOf(profile)) {
-			if (entry.mod_id !== null) {
-				const mod = this.#libraryStore.modById(entry.mod_id);
-				if (mod)
-					slots.push({
-						mod,
-						number: slots.length + 1,
-						entry,
-						group: null,
-						isEnabled: entry.enabled,
-					});
-			} else if (entry.group_id !== null) {
-				const group = this.#groupsStore.list.find(
-					(group) => group.id === entry.group_id
-				);
-				if (!group) continue;
-				for (const { mod } of this.#groupsStore.modsOf(group))
-					slots.push({
-						mod,
-						number: slots.length + 1,
-						entry,
-						group,
-						isEnabled:
-							entry.enabled &&
-							!(`${group.id}:${mod.id}` in disabled),
-					});
-			}
-		}
-		return slots;
-	});
-	readonly #slotsByModId = $derived.by(() => {
-		const slots: Record<number, OrderSlot> = {};
-		for (const slot of this.#slots) {
-			const known = slots[slot.mod.id];
-			if (!known || (!known.isEnabled && slot.isEnabled))
-				slots[slot.mod.id] = slot;
-		}
-		return slots;
-	});
 	readonly #missing = $derived.by((): MissingNotice[] =>
 		this.#libraryStore.list.flatMap((mod) => {
 			if (NoticesStore.isBroken(mod)) return [];
@@ -200,8 +123,8 @@ export class NoticesStore extends ConnectionStore {
 		)
 	);
 	readonly #order = $derived.by((): OrderNotice[] => {
-		const slots = this.#slotsByModId;
-		return this.#slots.flatMap((slot) => {
+		const slots = this.#loadOrderStore.slotsByModId;
+		return this.#loadOrderStore.modRows.flatMap((slot) => {
 			if (!slot.isEnabled || slots[slot.mod.id] !== slot) return [];
 			return this.#libraryStore
 				.dependenciesOf(slot.mod)
@@ -293,7 +216,7 @@ export class NoticesStore extends ConnectionStore {
 			}
 			case 'profile': {
 				if (!scope.profile) return [];
-				const slots = this.#slotsByModId;
+				const slots = this.#loadOrderStore.slotsByModId;
 				return inScope.filter((notice) => notice.mod.id in slots);
 			}
 		}
@@ -337,7 +260,6 @@ export class NoticesStore extends ConnectionStore {
 	readonly checkedAt = $derived(
 		this.#gamesStore.current?.row?.scanned_at ?? null
 	);
-	readonly isChecking = $derived(this.#scanStore.isScanning);
 
 	noticesOf(mod: Mod): readonly Notice[] {
 		return this.#byModId.get(mod.id) ?? NO_NOTICES;
@@ -403,9 +325,9 @@ export class NoticesStore extends ConnectionStore {
 		void tick().then(() => table.locate(pending.modId, pending.color));
 	}
 
-	locate(notice: Notice): void {
+	async locate(notice: Notice): Promise<void> {
 		const color = NOTICE_CATEGORY_SPECS[notice.category].color;
-		if (this.#pageTable?.locate(notice.mod.id, color)) return;
+		if (await this.#pageTable?.locate(notice.mod.id, color)) return;
 		this.#pendingLocate = { modId: notice.mod.id, color };
 		void goto('/library');
 	}
@@ -456,44 +378,6 @@ export class NoticesStore extends ConnectionStore {
 				notice.category === 'steam' ? [notice.mod] : []
 			)
 		);
-	}
-
-	moveOf(notice: OrderNotice): MoveTarget | null {
-		const moved = this.#slotsByModId[notice.mod.id];
-		const target = this.#slotsByModId[notice.requirement.id];
-		const profile = this.#profilesStore.active;
-		if (!moved || !target || !profile) return null;
-		if (moved.group && moved.group === target.group)
-			return { kind: 'group', group: moved.group, profile };
-		if (moved.group) return { kind: 'block', group: moved.group, profile };
-		return { kind: 'entry', group: null, profile };
-	}
-
-	async moveToFix(notice: OrderNotice): Promise<void> {
-		const moved = this.#slotsByModId[notice.mod.id];
-		const target = this.#slotsByModId[notice.requirement.id];
-		if (!moved || !target) return;
-		if (moved.group && moved.group === target.group) {
-			const ids = this.#groupsStore
-				.modsOf(moved.group)
-				.map(({ mod }) => mod.id)
-				.filter((id) => id !== moved.mod.id);
-			ids.splice(ids.indexOf(target.mod.id) + 1, 0, moved.mod.id);
-			await this.#groupsStore.reorder(moved.group, ids);
-			return;
-		}
-		if (moved.entry === target.entry) return;
-		const entries = this.#libraryStore
-			.entriesOf(this.#profilesStore.active!)
-			.filter((entry) => entry !== moved.entry);
-		const next = entries[entries.indexOf(target.entry) + 1];
-		await moved.entry.update({
-			position: keyBetween(target.entry.position, next?.position ?? null),
-		});
-	}
-
-	async checkNow(): Promise<void> {
-		await this.#scanStore.scan();
 	}
 
 	private static isBroken(mod: Mod): boolean {

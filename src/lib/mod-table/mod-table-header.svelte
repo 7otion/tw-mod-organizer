@@ -8,19 +8,20 @@
 	import { t } from '@/lib/i18n';
 	import { cn } from '@/lib/utils';
 
+	import { enableBox } from './enable-box.svelte';
 	import { MOD_COLUMN_SPECS, type ModSort } from './mod-columns';
-	import type { ModTable, TableInset } from './mod-table-state.svelte';
-
-	const INSET_CLASSES: Record<TableInset, string> = {
-		page: 'mx-6',
-		drawer: 'mx-2.5',
-	};
+	import { HEADER_INSETS, type ModTable } from './mod-table-state.svelte';
 
 	let { table }: { table: ModTable<Row, ScrollKey> } = $props();
 
 	const SortIcon = $derived(
 		table.sort?.isDescending ? ArrowDownIcon : ArrowUpIcon
 	);
+	const enableAll = $derived.by(() => {
+		const state = table.enableState;
+		if (state === 'mixed') return 'mixed';
+		return state === 'on';
+	});
 </script>
 
 {#snippet sortButton(
@@ -49,7 +50,7 @@
 <div
 	class={cn(
 		'grid h-8 shrink-0 grid-cols-(--table-columns) items-center gap-x-3 border-b text-sm font-semibold text-muted-foreground',
-		INSET_CLASSES[table.inset]
+		HEADER_INSETS[table.inset]
 	)}
 	oncontextmenu={() => (table.isSettingsOpen = true)}
 >
@@ -58,6 +59,17 @@
 	{/if}
 	{#if table.isNumbered}
 		<span class="text-center">{t('modTable.columns.number')}</span>
+	{/if}
+	{#if table.enable}
+		<span class="grid place-items-center">
+			{#if table.enableState}
+				{@render enableBox(
+					enableAll,
+					t('modTable.row.enableAll'),
+					() => void table.toggleAllEnabled()
+				)}
+			{/if}
+		</span>
 	{/if}
 	{#each table.layout.visibleColumns as column (column.key)}
 		{@const spec = MOD_COLUMN_SPECS[column.key]}

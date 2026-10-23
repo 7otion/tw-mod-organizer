@@ -3,6 +3,7 @@
 	import LinkIcon from '@lucide/svelte/icons/link';
 
 	import AddToGroupMenu from '@/components/add-to-group-menu.svelte';
+	import { activeDot } from '@/components/dots.svelte';
 
 	import { t } from '@/lib/i18n';
 	import type { Mod } from '@/lib/models';
@@ -110,48 +111,55 @@
 {/if}
 
 <section>
-	<h3 class="mb-1.5 text-sm font-semibold text-muted-foreground">
+	<h3 class="mb-2 text-sm font-semibold text-muted-foreground">
 		{t('modDetails.overview.inProfiles')}
 	</h3>
-	{#each placement.profiles as { profile, isEnabled, number } (profile.id)}
-		<div
-			class="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5 text-sm"
-		>
-			<span
-				class={cn(
-					'size-2 shrink-0 rounded-full',
-					profile === profilesStore.active
-						? 'bg-pink'
-						: 'shadow-[inset_0_0_0_1.5px_var(--text-4)]'
-				)}
-			></span>
-			<span class="flex min-w-0 flex-1 flex-col leading-snug">
-				<b class="truncate font-semibold">{profile.name}</b>
-				<span class="text-xs text-muted-foreground">
-					{isEnabled
-						? t('modDetails.overview.numberOn', { number })
-						: t('modDetails.overview.numberOff', { number })}
+	<ul class="flex flex-col gap-1">
+		{#each placement.profiles as { profile, isEnabled, number } (profile.id)}
+			<li
+				class="flex h-9 items-center gap-2.5 rounded-lg bg-fill-1 pr-1.5 pl-3 text-md"
+			>
+				{@render activeDot(profile === profilesStore.active)}
+				<span
+					class="min-w-0 flex-1 truncate font-semibold text-foreground"
+				>
+					{profile.name}
 				</span>
-			</span>
-		</div>
-	{/each}
-	{#each placement.groups as { group, profiles } (group.id)}
-		<div
-			class="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5 text-sm"
-		>
-			<LinkIcon class="size-3.5 shrink-0 text-muted-foreground" />
-			<span class="flex min-w-0 flex-1 flex-col leading-snug">
-				<b class="truncate font-semibold">{group.name}</b>
-				<span class="text-xs text-muted-foreground">
+				<span
+					class="rounded-md px-2 py-0.5 font-mono text-orange-100 tabular-nums"
+				>
+					{t('modDetails.overview.number', { number })}
+				</span>
+				<span
+					class={cn(
+						'min-w-11 rounded-md px-2 py-0.5 text-center text-sm font-semibold',
+						isEnabled
+							? 'bg-status-ok/15 text-status-ok'
+							: 'bg-fill-2 text-muted-foreground'
+					)}
+				>
+					{isEnabled ? t('common.on') : t('common.off')}
+				</span>
+			</li>
+		{/each}
+		{#each placement.groups as { group, profiles } (group.id)}
+			<li
+				class="flex h-9 items-center gap-2.5 rounded-lg bg-fill-1 pr-3 pl-3 text-md"
+			>
+				<LinkIcon class="size-3.5 shrink-0 text-status-dep" />
+				<span class="min-w-0 truncate font-semibold text-foreground">
+					{group.name}
+				</span>
+				<span class="min-w-0 flex-1 truncate text-sm text-foreground-2">
 					{t('modDetails.overview.viaGroup', {
 						profiles: profiles
 							.map((profile) => profile.name)
 							.join(', '),
 					})}
 				</span>
-			</span>
-		</div>
-	{/each}
+			</li>
+		{/each}
+	</ul>
 	{#if !placement.profiles.length && !placement.groups.length}
 		<p class="text-sm text-muted-foreground">
 			{t('modDetails.overview.noProfiles')}

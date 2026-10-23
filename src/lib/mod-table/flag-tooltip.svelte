@@ -23,7 +23,7 @@
 	import { NOTICE_CATEGORY_SPECS } from '@/lib/notices/categories';
 	import { NoticesStore, ProfilesStore } from '@/lib/store';
 
-	import { SHOWN_FLAGS } from './mod-row.svelte';
+	import { SHOWN_FLAGS } from './flag-pills.svelte';
 
 	let { target }: { target: FlagTarget | null } = $props();
 

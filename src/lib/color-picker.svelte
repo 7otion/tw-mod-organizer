@@ -102,20 +102,20 @@
 </script>
 
 <div class="flex flex-col gap-3">
-	<div class="grid w-fit grid-cols-5 gap-1">
+	<div class="grid grid-cols-10 gap-1">
 		{#each presets as preset (preset.value)}
 			<button
 				type="button"
 				aria-label={preset.label}
 				aria-pressed={!isCustom && preset.value === color}
 				class={cn(
-					'grid size-7 place-items-center rounded-full hover:bg-fill-2',
+					'grid aspect-square w-full place-items-center rounded-full hover:bg-fill-2',
 					!isCustom && preset.value === color && 'bg-fill-3'
 				)}
 				onclick={() => pickPreset(preset.value)}
 			>
 				<span
-					class="size-3 rounded-full"
+					class="size-3.5 rounded-full"
 					style:background-color={preset.color}
 				></span>
 			</button>
@@ -125,16 +125,18 @@
 			aria-label={t('colorPicker.custom')}
 			aria-pressed={isCustom}
 			class={cn(
-				'grid size-7 place-items-center rounded-full hover:bg-fill-2',
+				'grid aspect-square w-full place-items-center rounded-full hover:bg-fill-2',
 				isCustom && 'bg-fill-3'
 			)}
 			onclick={openCustom}
 		>
 			{#if isCustom}
-				<span class="size-3 rounded-full" style:background-color={draft}
+				<span
+					class="size-3.5 rounded-full"
+					style:background-color={draft}
 				></span>
 			{:else}
-				<PlusIcon class="size-3.5 text-muted-foreground" />
+				<PlusIcon class="size-4 text-muted-foreground" />
 			{/if}
 		</button>
 	</div>
