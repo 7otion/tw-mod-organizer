@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
 
@@ -16,6 +16,12 @@ pub struct GameInfo {
     pub series: &'static str,
     pub title: &'static str,
     pub cover: &'static str,
+}
+
+#[derive(Deserialize)]
+pub struct LaunchMod {
+    pub folder: PathBuf,
+    pub game_ref: String,
 }
 
 pub struct ModInfo {
@@ -87,6 +93,15 @@ pub trait GameSupport: Sync {
     fn local_source_ref(&self, folder_name: &str) -> String;
 
     fn ignored_steam_tags(&self) -> &'static [&'static str];
+
+    fn process_name(&self) -> &'static str;
+
+    fn launch(
+        &self,
+        install_path: &Path,
+        mods: &[LaunchMod],
+        save: Option<&str>,
+    ) -> Result<(), AppError>;
 }
 
 pub static GAMES: [&dyn GameSupport; 3] = [

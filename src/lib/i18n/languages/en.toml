@@ -402,6 +402,16 @@ dropHere = "Drop mods here, or add them from the library."
 entries = { one = "{count} entry", other = "{count} entries" }
 enabled = "{count} enabled"
 
+[loadOrder.play]
+play = "Play"
+inGame = "In game {time}"
+forceQuit = "Force quit"
+
+[loadOrder.play.quitConfirm]
+title = "Force quit {title}?"
+description = "The game is closed without saving. Unsaved progress is lost."
+confirm = "Force quit"
+
 [loadOrder.search]
 placeholder = { one = "Search {count} entry by title, author or tag", other = "Search {count} entries by title, author or tag" }
 label = "Search profile"

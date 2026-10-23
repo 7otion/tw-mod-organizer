@@ -2,6 +2,7 @@ mod archive;
 mod error;
 mod games;
 mod languages;
+mod launch;
 mod library;
 mod migrations;
 mod paths;
@@ -75,6 +76,9 @@ pub fn run() {
             languages::install_language_pack::install_language_pack,
             languages::list_language_packs::list_language_packs,
             languages::read_language_file::read_language_file,
+            launch::force_quit_game::force_quit_game,
+            launch::launch_game::launch_game,
+            launch::watch_game::watch_game,
             library::cancel_install::cancel_install,
             library::cancel_library_scan::cancel_library_scan,
             library::fetch_collection::fetch_collection,

@@ -41,6 +41,7 @@
 	import { LOAD_ORDER_LAYOUT } from './load-order-layout';
 	import LoadOrderRowMenu from './load-order-row-menu.svelte';
 	import MoveToPriorityDialog from './move-to-priority-dialog.svelte';
+	import PlayButton from './play-button.svelte';
 	import SeparatorDialog from './separator-dialog.svelte';
 
 	type EnabledFilter = 'all' | 'on' | 'off';
@@ -268,6 +269,7 @@
 					></InputGroup.Addon
 				>
 			</InputGroup.Root>
+			<PlayButton />
 		</div>
 
 		<div class="flex items-center gap-2 px-9 pb-5">

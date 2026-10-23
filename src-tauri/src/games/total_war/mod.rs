@@ -1,9 +1,13 @@
 use std::fs;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
+#[cfg(windows)]
+use std::process::Command;
 
 use super::{
-    Candidate, Fact, GameInfo, GameSupport, InstallInputs, Installable, ModInfo, Selection,
-    SourceEntry,
+    Candidate, Fact, GameInfo, GameSupport, InstallInputs, Installable, LaunchMod, ModInfo,
+    Selection, SourceEntry,
 };
 use crate::error::AppError;
 use crate::paths::{extension_of, file_name_of, stem_of};
@@ -24,6 +28,9 @@ const INSTALL_INPUTS: InstallInputs = InstallInputs {
     folders: false,
 };
 const PATCH_SUFFIX: &str = "_patch";
+const LAUNCH_LIST: &str = "tw_mod_organizer_used_mods.txt";
+#[cfg(windows)]
+const CREATE_BREAKAWAY_FROM_JOB: u32 = 0x0100_0000;
 
 pub struct TotalWar {
     info: GameInfo,
@@ -123,6 +130,70 @@ impl GameSupport for TotalWar {
 
     fn ignored_steam_tags(&self) -> &'static [&'static str] {
         &IGNORED_STEAM_TAGS
+    }
+
+    #[cfg(windows)]
+    fn process_name(&self) -> &'static str {
+        self.exe
+    }
+
+    #[cfg(not(windows))]
+    fn process_name(&self) -> &'static str {
+        unimplemented!("naming the game process on this platform")
+    }
+
+    #[cfg(windows)]
+    fn launch(
+        &self,
+        install_path: &Path,
+        mods: &[LaunchMod],
+        save: Option<&str>,
+    ) -> Result<(), AppError> {
+        fs::write(install_path.join(LAUNCH_LIST), TotalWar::launch_list(mods))?;
+        let mut command = Command::new(install_path.join(self.exe));
+        command
+            .current_dir(install_path)
+            .raw_arg(format!("{LAUNCH_LIST};"));
+        if let Some(save) = save {
+            command.raw_arg(format!("game_startup_mode campaign_load \"{save}\";"));
+        }
+        command.creation_flags(CREATE_BREAKAWAY_FROM_JOB);
+        if command.spawn().is_ok() {
+            return Ok(());
+        }
+        command.creation_flags(0);
+        command.spawn()?;
+        Ok(())
+    }
+
+    #[cfg(not(windows))]
+    fn launch(
+        &self,
+        _install_path: &Path,
+        _mods: &[LaunchMod],
+        _save: Option<&str>,
+    ) -> Result<(), AppError> {
+        unimplemented!("launching the game on this platform")
+    }
+}
+
+impl TotalWar {
+    fn launch_list(mods: &[LaunchMod]) -> String {
+        let mut folders: Vec<String> = Vec::new();
+        for item in mods {
+            let folder = item.folder.to_string_lossy().replace('\\', "/");
+            if !folders.contains(&folder) {
+                folders.push(folder);
+            }
+        }
+        let mut list = String::new();
+        for folder in folders {
+            list.push_str(&format!("add_working_directory \"{folder}\";\n"));
+        }
+        for item in mods {
+            list.push_str(&format!("mod \"{}\";\n", item.game_ref));
+        }
+        list
     }
 }
 
