@@ -39,8 +39,8 @@
 		onSelect={() => loadOrderStore.setCollapsed(row, !row.entry.collapsed)}
 	>
 		{row.entry.collapsed
-			? t('loadOrder.band.expand')
-			: t('loadOrder.band.collapse')}
+			? t('modTable.band.expand')
+			: t('modTable.band.collapse')}
 	</ContextMenu.Item>
 {/snippet}
 

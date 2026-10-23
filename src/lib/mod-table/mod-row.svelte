@@ -240,7 +240,7 @@
 	data-row={isGhost ? undefined : key}
 	data-disabled={isDisabled || undefined}
 	class={cn(
-		'group absolute top-0 grid grid-cols-(--table-columns) items-center gap-x-3 rounded-md text-sm text-muted-foreground transition-[background-color,transform] duration-150 ease-out select-none hover:bg-fill-1',
+		'group absolute top-0 grid grid-cols-(--table-columns) items-center gap-x-3 text-sm text-muted-foreground transition-[background-color,transform] duration-150 ease-out select-none hover:bg-fill-1',
 		ROW_INSETS[table.inset],
 		table.classOf(row),
 		table.drag && !table.drag.hasHandle && !isDisabled && 'cursor-grab',

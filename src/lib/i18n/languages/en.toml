@@ -428,10 +428,7 @@ mods = { one = "{count} mod", other = "{count} mods" }
 allOn = "all on"
 someOn = "{count} on"
 range = "No. {first}–{last}"
-group = "Group"
 groupMeta = "{on} of {count} on · order set in Groups"
-collapse = "Collapse"
-expand = "Expand"
 editSeparator = "Edit separator"
 
 [loadOrder.menu]
@@ -900,6 +897,11 @@ steam = "Steam"
 nexus = "Nexus"
 base = "Base"
 manual = "Manual"
+
+[modTable.band]
+group = "Group"
+collapse = "Collapse"
+expand = "Expand"
 
 [modTable.row]
 version = "v{version}"
