@@ -22,6 +22,13 @@
 		mods.filter((mod) => !mod.isMissing && mod.source !== 'steam').length
 	);
 	const missingCount = $derived(mods.filter((mod) => mod.isMissing).length);
+	const kind = $derived(
+		steamCount && !localCount && !missingCount
+			? 'unsubscribe'
+			: steamCount
+				? 'mixed'
+				: 'remove'
+	);
 
 	async function remove(): Promise<void> {
 		await libraryStore.remove(mods);
@@ -33,7 +40,7 @@
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>
-				{t('library.remove.title', { count: mods.length })}
+				{t(`library.remove.title.${kind}`, { count: mods.length })}
 			</AlertDialog.Title>
 			<AlertDialog.Description>
 				<ul class="flex list-disc flex-col gap-1 pl-4">
@@ -60,7 +67,7 @@
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
 			<AlertDialog.Action variant="destructive" onclick={remove}>
-				{t('library.remove.confirm')}
+				{t(`library.remove.confirm.${kind}`)}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>

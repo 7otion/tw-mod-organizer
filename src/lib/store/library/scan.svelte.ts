@@ -368,7 +368,7 @@ export class LibraryScanStore extends ConnectionStore {
 				detailed.map(({ mod }) => mod),
 				tx
 			);
-			await LibraryScanStore.applySteamTags(
+			await LibraryScanStore.applyTags(
 				gameId,
 				detailed
 					.filter(({ mod }) => createdRefs.has(mod.source_ref))
@@ -479,7 +479,7 @@ export class LibraryScanStore extends ConnectionStore {
 		};
 	}
 
-	private static async applySteamTags(
+	static async applyTags(
 		gameId: number,
 		tagged: readonly { mod: Mod; names: readonly string[] }[],
 		tx: Transaction

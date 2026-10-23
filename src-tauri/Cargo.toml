@@ -36,9 +36,14 @@ rayon = "1"
 zip = { version = "9", default-features = false, features = ["deflate", "deflate64", "bzip2", "zstd", "lzma", "aes-crypto"] }
 sevenz-rust2 = { version = "0.24", default-features = false, features = ["aes256", "bzip2", "ppmd", "zstd"] }
 unrar = "0.5"
+tauri-plugin-deep-link = "2"
+tokio-tungstenite = { version = "0.30.0", features = ["native-tls"] }
+futures-util = "0.3.34"
+uuid = { version = "1.29.0", features = ["v4"] }
+tokio = { version = "1.54.1", features = ["time"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-single-instance = "2"
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-window-state = "2"
 
 [profile.dev]

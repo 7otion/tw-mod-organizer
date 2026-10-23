@@ -64,7 +64,7 @@ export const NOTICE_CATEGORY_SPECS: Record<NoticeCategory, NoticeCategorySpec> =
 			icon: CIRCLE_ARROW_UP,
 			color: 'var(--st-dep)',
 			isCounted: true,
-			isPlanned: true,
+			isPlanned: false,
 		},
 		steam: {
 			group: 'know',

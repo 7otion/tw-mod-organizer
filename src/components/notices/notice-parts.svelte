@@ -84,6 +84,11 @@
 				{/if}
 			{/snippet}
 		</Message>
+	{:else if notice.category === 'nexus'}
+		{t('notices.reason.nexus', {
+			version: notice.version ?? '?',
+			installed: notice.installedVersion ?? '?',
+		})}
 	{:else}
 		{t('notices.reason.steam', { when: formatWhen(notice.updatedAt) })}
 	{/if}

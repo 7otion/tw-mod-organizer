@@ -21,6 +21,8 @@ export class Settings extends Model<typeof Settings.schema> {
 			mods_dir: Column.text(),
 			downloads_dir: Column.text(),
 			rpfm_path: Column.text().nullable(),
+			nexus_api_key: Column.text().nullable(),
+			nexus_user_name: Column.text().nullable(),
 			preview_auto_sort: Column.boolean(),
 			date_format: Column.text<DateFormat>(),
 			language: Column.text(),

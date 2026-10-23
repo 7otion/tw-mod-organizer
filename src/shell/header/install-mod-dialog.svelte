@@ -23,7 +23,12 @@
 	import { formatSize, t } from '@/lib/i18n';
 	import type { MessageKey } from '@/lib/i18n/message-key';
 	import Message from '@/lib/i18n/message.svelte';
-	import { AppStore, GamesStore, ProfilesStore } from '@/lib/store';
+	import {
+		AppStore,
+		GamesStore,
+		NexusDownloadsStore,
+		ProfilesStore,
+	} from '@/lib/store';
 	import { cn } from '@/lib/utils';
 
 	import {
@@ -51,6 +56,7 @@
 	};
 
 	const appStore = AppStore.get();
+	const downloadsStore = NexusDownloadsStore.get();
 	const gamesStore = GamesStore.get();
 	const profilesStore = ProfilesStore.get();
 	const install = new ModInstall();
@@ -160,6 +166,10 @@
 
 	function finish(count: number): void {
 		if (!count) return;
+		void downloadsStore.linkInstalled(
+			install.inspection?.source.path ?? null,
+			install.installedFolders
+		);
 		appStore.isInstallingMod = false;
 		install.reset();
 		addToProfile = false;

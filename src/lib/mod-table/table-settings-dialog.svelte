@@ -3,6 +3,7 @@
 	import { RestrictToElement } from '@dnd-kit/dom/modifiers';
 	import { DragDropProvider } from '@dnd-kit/svelte';
 	import RotateCcwIcon from '@lucide/svelte/icons/rotate-ccw';
+	import { toast } from 'svelte-sonner';
 
 	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
@@ -26,6 +27,12 @@
 	let { open = $bindable(false), layout, title }: Props = $props();
 
 	let isConfirmingReset = $state(false);
+
+	async function reset(): Promise<void> {
+		isConfirmingReset = false;
+		await layout.reset();
+		toast.success(t('modTable.settings.resetDone', { title }));
+	}
 
 	const order = new DragOrder(
 		() => layout.columns,
@@ -131,7 +138,7 @@
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={() => layout.reset()}>
+			<AlertDialog.Action onclick={reset}>
 				{t('modTable.settings.resetConfirm.confirm')}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>

@@ -144,6 +144,7 @@ export class TableLayout<Column extends string> {
 				.where('table_key', tableKey)
 				.toArray(tx);
 			await UiColumn.deleteMany(existing, tx);
+			if (!columns.length) return;
 			await UiColumn.createMany(
 				columns.map((column, index) => ({
 					table_key: tableKey,

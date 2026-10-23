@@ -1,4 +1,4 @@
-import { ConnectionStore, Model } from '@7otion-tauri/orm';
+import { ConnectionStore } from '@7otion-tauri/orm';
 import { invoke } from '@tauri-apps/api/core';
 import { openUrl } from '@tauri-apps/plugin-opener';
 
@@ -19,7 +19,6 @@ import {
 	ProfilesStore,
 	TagsStore,
 } from '@/lib/store';
-import { unixNow } from '@/lib/utils';
 
 type RemovedMods = {
 	unsubscribed: number[];
@@ -220,21 +219,13 @@ export class LibraryStore extends ConnectionStore {
 			item_ids: steam.map((mod) => Number(mod.source_ref)),
 			folders: local.flatMap((mod) => mod.folder ?? []),
 		});
-		const now = unixNow();
 		const unsubscribed = steam.filter((mod) =>
 			removed.unsubscribed.includes(Number(mod.source_ref))
 		);
 		const trashed = local.filter(
 			(mod) => mod.folder !== null && removed.trashed.includes(mod.folder)
 		);
-		for (const mod of unsubscribed)
-			mod.fill({ missing_since: now, problem: 'unsubscribed' });
-		for (const mod of trashed)
-			mod.fill({ missing_since: now, problem: 'folder_removed' });
-		await Model.database.transaction(async (tx) => {
-			await Mod.updateMany([...unsubscribed, ...trashed], tx);
-			await Mod.deleteMany(missing, tx);
-		});
+		await Mod.deleteMany([...unsubscribed, ...trashed, ...missing]);
 		if (removed.failures.length)
 			throw new Error(
 				t('library.remove.failed', {

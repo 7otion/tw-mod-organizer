@@ -12,6 +12,8 @@ impl Migration for CreateSettingsTable {
             table.text("mods_dir");
             table.text("downloads_dir");
             table.text("rpfm_path").nullable();
+            table.text("nexus_api_key").nullable();
+            table.text("nexus_user_name").nullable();
             table.boolean("preview_auto_sort").default(true);
             table.text("date_format").default("system");
             table.text("language").default("system");

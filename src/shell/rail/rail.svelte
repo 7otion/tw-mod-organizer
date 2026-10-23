@@ -12,14 +12,13 @@
 
 	import { t } from '@/lib/i18n';
 	import { navRoutes } from '@/lib/nav-routes';
-	import { LibraryScanStore } from '@/lib/store';
+	import { LibraryScanStore, NexusDownloadsStore } from '@/lib/store';
 
 	import NoticesRailButton from './notices-rail-button.svelte';
 	import RailAction from './rail-action.svelte';
 	import RailButton from './rail-button.svelte';
 
-	const ACTIVE_DOWNLOADS = 2;
-
+	const downloadsStore = NexusDownloadsStore.get();
 	const libraryScanStore = LibraryScanStore.get();
 
 	let isManagingTags = $state(false);
@@ -42,7 +41,9 @@
 			<RailButton
 				{route}
 				active={route === active}
-				badge={route.id === 'downloads' ? ACTIVE_DOWNLOADS : undefined}
+				badge={route.id === 'downloads'
+					? downloadsStore.active.length
+					: undefined}
 			/>
 		{/each}
 		<div class="flex-1"></div>

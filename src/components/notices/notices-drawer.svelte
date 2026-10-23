@@ -26,6 +26,7 @@
 	import {
 		GamesStore,
 		LibraryScanStore,
+		NexusStore,
 		NoticesStore,
 		type Notice,
 		type NoticesTab,
@@ -43,6 +44,7 @@
 
 	const gamesStore = GamesStore.get();
 	const noticesStore = NoticesStore.get();
+	const nexusStore = NexusStore.get();
 	const scanStore = LibraryScanStore.get();
 
 	const chipClasses = toggleVariants({ variant: 'filter', size: 'sm' });
@@ -350,7 +352,10 @@
 				variant="ghost"
 				size="xs"
 				disabled={scanStore.isScanning}
-				onclick={() => scanStore.scan()}
+				onclick={() => {
+					void scanStore.scan();
+					void nexusStore.checkUpdates(true);
+				}}
 			>
 				<RefreshCwIcon
 					class={scanStore.isScanning ? 'animate-spin' : undefined}

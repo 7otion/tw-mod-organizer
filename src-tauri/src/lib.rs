@@ -1,10 +1,12 @@
 mod archive;
+mod downloads;
 mod error;
 mod games;
 mod languages;
 mod launch;
 mod library;
 mod migrations;
+mod nexus;
 mod paths;
 #[cfg(windows)]
 mod process;
@@ -12,7 +14,7 @@ mod s7forge;
 mod settings;
 mod steam;
 
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_window_state::StateFlags;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::fmt;
@@ -43,12 +45,16 @@ pub fn run() {
     tracing::info!("Starting {APP_IDENTIFIER}");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            tracing::debug!("A second instance was refused: {args:?}");
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_focus();
+            }
+        }))
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
-        .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {
-            tracing::debug!("A second instance was refused");
-        }))
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_state_flags(StateFlags::SIZE | StateFlags::POSITION | StateFlags::MAXIMIZED)
@@ -71,6 +77,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             games::check_game_folder::check_game_folder,
             games::detect_games::detect_games,
+            downloads::discard_download_file::discard_download_file,
+            downloads::pause_download::pause_download,
+            downloads::start_download::start_download,
             games::list_games::list_games,
             languages::export_language_template::export_language_template,
             languages::install_language_pack::install_language_pack,
@@ -96,6 +105,11 @@ pub fn run() {
             library::scan_library::scan_library,
             library::set_cover_image::set_cover_image,
             library::subscribe_mods::subscribe_mods,
+            nexus::connect_nexus::connect_nexus,
+            nexus::nexus_download_url::nexus_download_url,
+            nexus::nexus_mod_details::nexus_mod_details,
+            nexus::resolve_nxm_link::resolve_nxm_link,
+            nexus::set_nxm_handler::set_nxm_handler,
             s7forge::install_s7forge::install_s7forge,
             s7forge::latest_s7forge_version::latest_s7forge_version,
             s7forge::s7forge_installed::s7forge_installed,

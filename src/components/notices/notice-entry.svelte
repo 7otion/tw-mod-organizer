@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { openUrl } from '@tauri-apps/plugin-opener';
 	import ArrowUpDownIcon from '@lucide/svelte/icons/arrow-up-down';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import DownloadIcon from '@lucide/svelte/icons/download';
+	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
 	import LoaderCircleIcon from '@lucide/svelte/icons/loader-circle';
 	import LocateIcon from '@lucide/svelte/icons/locate';
@@ -41,8 +43,11 @@
 	let isConfirmingMove = $state(false);
 
 	const mod = $derived(notice.mod);
-	const isSeen = $derived(isResolved && notice.category === 'steam');
-	const isFixed = $derived(isResolved && notice.category !== 'steam');
+	const isSeenKind = $derived(
+		notice.category === 'steam' || notice.category === 'nexus'
+	);
+	const isSeen = $derived(isResolved && isSeenKind);
+	const isFixed = $derived(isResolved && !isSeenKind);
 	const isWorking = $derived(
 		notice.category === 'missing' && noticesStore.isWorking(notice)
 	);
@@ -84,6 +89,8 @@
 				});
 			case 'steam':
 				return t('notices.resolved.steam');
+			case 'nexus':
+				return t('notices.resolved.nexus');
 		}
 	});
 </script>
@@ -96,7 +103,7 @@
 		isFixed && 'bg-status-ok/9',
 	]}
 >
-	{#if notice.category === 'steam' && !isResolved}
+	{#if isSeenKind && !isResolved}
 		<span
 			class="absolute top-4 -left-px size-1.5 rounded-full bg-status-update"
 		></span>
@@ -193,6 +200,25 @@
 					>
 						<ArrowUpDownIcon />
 						{t('notices.actions.moveToFix')}
+					</Button>
+				{:else if notice.category === 'nexus'}
+					<Button
+						variant="secondary"
+						size="xs"
+						class="h-6.5"
+						onclick={() => mod.page_url && openUrl(mod.page_url)}
+					>
+						<ExternalLinkIcon />
+						{t('notices.actions.openOnNexus')}
+					</Button>
+					<Button
+						variant="ghost"
+						size="xs"
+						class="h-6.5"
+						onclick={() => noticesStore.markSeen(mod)}
+					>
+						<CheckIcon />
+						{t('notices.actions.seen')}
 					</Button>
 				{:else}
 					<Button

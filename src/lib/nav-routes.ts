@@ -46,7 +46,7 @@ export const navRoutes: NavRoute[] = [
 	},
 	{
 		id: 'downloads',
-		path: '/load-order',
+		path: '/downloads',
 		labelKey: 'nav.downloads',
 		shortcutKey: '5',
 		icon: DownloadIcon,

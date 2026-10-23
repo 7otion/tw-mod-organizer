@@ -9,8 +9,8 @@ description = "The language of TMO's interface."
 # {name} is the language System picked.
 system = "System · {name}"
 translated = "{percent}% translated"
-addFile = "Add file…"
-exportTemplate = "Export template…"
+addFile = "Add file"
+exportTemplate = "Export template"
 fileFilter = "TMO language files"
 added = "{name} is ready to use."
 exported = "English template saved."
@@ -26,16 +26,16 @@ add = "Add"
 cancel = "Cancel"
 done = "Done"
 rename = "Rename"
-renameEllipsis = "Rename…"
+renameEllipsis = "Rename"
 clone = "Clone"
 delete = "Delete"
-deleteEllipsis = "Delete…"
+deleteEllipsis = "Delete"
 selectAll = "Select all"
 selectItem = "Select {name}"
 clearSelection = "Clear selection"
 selectedCount = "{count} selected"
-changeEllipsis = "Change…"
-chooseEllipsis = "Choose…"
+changeEllipsis = "Change"
+chooseEllipsis = "Choose"
 close = "Close"
 error = "Error"
 clear = "Clear"
@@ -87,7 +87,7 @@ filter = "Filter games"
 current = "Current"
 pinned = "Pinned"
 recent = "Recent"
-all = "All games…"
+all = "All games"
 close = "Close game"
 opened = "Opened {time}"
 notOpened = "Not opened yet"
@@ -177,7 +177,7 @@ notLinked = "not linked"
 title = "Linked in"
 
 [sidebar.loadOrder]
-rebuildFromSave = "Rebuild profile from a save…"
+rebuildFromSave = "Rebuild profile from a save"
 
 [sidebar.summary]
 holds = { one = "Library holds {count} mod", other = "Library holds {count} mods" }
@@ -219,7 +219,7 @@ sapphire = "Sapphire"
 amethyst = "Amethyst"
 
 [colorPicker]
-custom = "Custom…"
+custom = "Custom"
 hex = "Hex"
 hue = "Hue"
 lightness = "Lightness"
@@ -358,6 +358,7 @@ broken = "Can't be used · {problem}"
 order = "Must load after {title} {number}"
 orderPosition = "It sits at No. {position}."
 steam = "Steam updated it {when}"
+nexus = "v{version} is on Nexus, you have v{installed}"
 subscribing = "Subscribing to {title}"
 
 [notices.resolved]
@@ -365,6 +366,7 @@ missing = "Resolved, the requirement is in your library"
 broken = "Resolved"
 order = "Fixed, now loads after {title}"
 steam = "Marked as seen"
+nexus = "Marked as seen"
 
 [notices.actions]
 subscribe = { one = "Subscribe", other = "Subscribe to {count}" }
@@ -376,6 +378,7 @@ moveToFix = "Move to fix"
 seen = "Seen"
 markAllSeen = "Mark all as seen"
 showInTable = "Show in table"
+openOnNexus = "Open on Nexus"
 
 [notices.steam]
 seenToast = "{title} marked as seen"
@@ -449,7 +452,7 @@ unlinkGroup = "Unlink from profile"
 
 [loadOrder.move]
 menu = "Move to"
-priority = "Priority…"
+priority = "Priority"
 priorityTitle = "Move to priority"
 priorityDescription = "The first selected mod takes this number and the rest follow it. 1 to {max}."
 priorityLabel = "No."
@@ -548,7 +551,7 @@ create = "Create profile"
 title = "Manage profiles"
 description = { one = "{game} · {count} profile · the active one launches with Play", other = "{game} · {count} profiles · the active one launches with Play" }
 filter = "Filter profiles"
-new = "New profile…"
+new = "New profile"
 noMatch = "No profile matches “{query}”."
 activeSelected = "The active profile is selected; it can’t be deleted"
 dragHint = "Drag to reorder the sidebar"
@@ -652,8 +655,93 @@ notRunning = "Installed · not running"
 notFound = "Not found"
 
 [settings.accounts.nexus]
-account = "{name} · free account"
-disconnect = "Disconnect…"
+account = "Connected as {name}"
+notConnected = "“Mod Manager Download” buttons on Nexus can send files to TMO"
+connect = "Connect"
+disconnect = "Disconnect"
+
+[settings.accounts.nexus.disconnectConfirm]
+title = "Disconnect Nexus Mods?"
+description = "TMO forgets the API key and stops handling nxm:// links. Your mods stay as they are."
+confirm = "Disconnect"
+
+[downloads]
+title = "Downloads"
+search = "Search downloads"
+keptHint = "Finished downloads are kept until you install or hide them."
+empty = "Nothing downloaded yet. “Mod Manager Download” buttons on Nexus send files here."
+notConnected = "Connect Nexus Mods to receive downloads."
+
+[downloads.columns]
+file = "File"
+status = "Status"
+actions = "Actions"
+
+[downloads.stats]
+active = { one = "{count} active", other = "{count} active" }
+ready = { one = "{count} ready to install", other = "{count} ready to install" }
+speed = "{speed}/s"
+
+[downloads.filters]
+all = "All"
+active = "Active & queued"
+paused = "Paused"
+failed = "Failed"
+ready = "Ready to install"
+hidden = "Hidden"
+
+[downloads.status]
+downloading = "Downloading {percent}%"
+queued = "Queued"
+queuedNext = "Queued · next"
+paused = "Paused at {percent}%"
+failed = "Failed"
+completed = "Downloaded · not installed"
+installed = "Installed · in library"
+bytes = "{received} / {total}"
+left = "{speed}/s · {left} left"
+
+[downloads.actions]
+pause = "Pause"
+resume = "Resume"
+retry = "Retry"
+remove = "Remove"
+install = "Install"
+hide = "Hide"
+show = "Show"
+openOnNexus = "Open on Nexus"
+
+[downloads.errors]
+expired = "Link expired. Click “Download” on Nexus again to get a fresh link."
+unsupportedGame = "That link is for a game TMO doesn't support."
+notConnected = "Connect Nexus Mods first, then click the link again."
+
+[downloads.toasts]
+queued = "Queued {title}"
+queuedFor = "Queued {title} for {game}"
+done = "{title} downloaded"
+
+[sidebar.downloads]
+show = "Show"
+nexus = "Nexus Mods"
+connected = "Connected"
+hint = "“Mod Manager Download” links on Nexus open in TMO."
+connect = "Connect Nexus Mods"
+steamHint = "Steam Workshop items download through Steam; their progress shows in Library and Load order."
+
+[nexus.connect]
+title = "Connect Nexus Mods"
+point1 = "“Mod Manager Download” buttons on Nexus send files to TMO"
+point2 = "TMO tells you when your Nexus mods update"
+point3 = "Free accounts work"
+notNow = "Not now"
+continue = "Continue in browser"
+waitingTitle = "Waiting for Nexus…"
+waitingHint = "Approve “TW Mod Organizer” in the browser tab that just opened."
+copyLink = "Didn't open? Copy the link"
+copied = "Link copied"
+connectedTitle = "Connected as {name}"
+connectedHint = "You can disconnect in Settings › Accounts & tools."
 
 [settings.accounts.s7forge]
 description = "Talks to Steam for workshop features, without keeping your game marked as running"
@@ -668,7 +756,7 @@ clear = "Forget the RPFM path"
 fileFilter = "Programs"
 
 [settings.import]
-import = "Import…"
+import = "Import"
 
 [settings.import.tmoV1]
 title = "Import from TMO v1"
@@ -681,7 +769,7 @@ description = "Presets become profiles"
 [settings.about]
 version = "TMO {version}"
 available = "Version {version} is available"
-whatsNew = "What's new…"
+whatsNew = "What's new"
 updateRestart = "Update & restart"
 licences = "Licences"
 
@@ -712,7 +800,7 @@ dropHere = "Drop a file here"
 orChoose = "or choose one from your computer"
 accepted = "Accepted for this game:"
 acceptedFilter = "Mods and archives"
-chooseFile = "Choose file…"
+chooseFile = "Choose file"
 note = "The mod is copied into TMO's mods folder for this game; your original file stays where it is."
 unsupportedDrop = "Drop one of: {formats}"
 # Under the source name: "118 MB · from Downloads".
@@ -761,7 +849,7 @@ addingDone = "Added to library"
 title = "Nothing to install"
 description = "TMO couldn't find a mod {game} can load in “{file}”."
 expects = "What {game} expects"
-pickAnother = "Pick another file…"
+pickAnother = "Pick another file"
 
 [library.installMod.duplicate]
 title = "Already installed"
@@ -925,7 +1013,7 @@ openDetails = "Open details"
 [library.empty]
 scanning = "Scanning…"
 title = "Your library is empty"
-install = "Install mod…"
+install = "Install mod"
 workshop = "Open Steam Workshop"
 
 [modTable.settings]
@@ -934,6 +1022,7 @@ rowDivider = "Row divider"
 rowDividerHint = "A line between rows."
 columns = "Columns"
 reset = "Reset to default"
+resetDone = "{title} reset to its defaults"
 show = "Show {column}"
 
 [modTable.settings.resetConfirm]
@@ -955,10 +1044,10 @@ title = "Table · Library"
 [library.bulk]
 addToProfile = "Add to profile"
 addToGroup = "Add to group"
-newGroup = "New group…"
-newTag = "New tag…"
-remove = "Remove…"
-unsubscribe = "Unsubscribe…"
+newGroup = "New group"
+newTag = "New tag"
+remove = "Remove"
+unsubscribe = "Unsubscribe"
 
 [library.newTag]
 title = "New tag"
@@ -972,13 +1061,21 @@ description = "Steam adds them to your subscriptions and downloads them. They jo
 confirm = "Subscribe"
 
 [library.remove]
-title = { one = "Unsubscribe / remove {count} mod?", other = "Unsubscribe / remove {count} mods?" }
-steam = { one = "{count} Steam mod: unsubscribed. It stays in the library as missing, so profiles keep its place.", other = "{count} Steam mods: unsubscribed. They stay in the library as missing, so profiles keep their place." }
-local = { one = "{count} local mod: the folder goes to the Recycle Bin. It stays in the library as missing.", other = "{count} local mods: the folder goes to the Recycle Bin. They stay in the library as missing." }
+steam = { one = "{count} Steam mod: unsubscribed and removed from the library, and from every profile and group that lists it.", other = "{count} Steam mods: unsubscribed and removed from the library, and from every profile and group that lists them." }
+local = { one = "{count} local mod: the folder goes to the Recycle Bin and the mod leaves the library, and every profile and group that lists it.", other = "{count} local mods: the folders go to the Recycle Bin and the mods leave the library, and every profile and group that lists them." }
 missing = { one = "{count} missing mod: removed from the library and from every profile and group that lists it.", other = "{count} missing mods: removed from the library and from every profile and group that lists them." }
-confirm = "Unsubscribe / remove"
 # {failures} lists each item that failed, with the reason from the system.
 failed = "Couldn't remove everything: {failures}"
+
+[library.remove.title]
+unsubscribe = { one = "Unsubscribe from {count} mod?", other = "Unsubscribe from {count} mods?" }
+remove = { one = "Remove {count} mod?", other = "Remove {count} mods?" }
+mixed = { one = "Unsubscribe and remove {count} mod?", other = "Unsubscribe and remove {count} mods?" }
+
+[library.remove.confirm]
+unsubscribe = "Unsubscribe"
+remove = "Remove"
+mixed = "Unsubscribe and remove"
 
 [gameSelector]
 back = "Back to {game}"
@@ -1009,7 +1106,7 @@ notOpened = "not opened yet"
 [gameSelector.row]
 notFound = "Not found in your Steam libraries"
 notInstalled = "Not installed"
-setFolder = "Set game folder…"
+setFolder = "Set game folder"
 getOnSteam = "Get on Steam"
 
 # The first-run screen that downloads s7forge, TMO's Steam helper.
@@ -1066,13 +1163,13 @@ browser = "Open in browser"
 
 [modDetails.menu]
 label = "More actions"
-setCover = "Set cover image…"
+setCover = "Set cover image"
 imageFilter = "Images"
 copySteamId = "Copy Steam ID"
 steamIdCopied = "Steam ID copied."
 removeFromProfile = "Remove from profile"
-unsubscribe = "Unsubscribe…"
-remove = "Remove…"
+unsubscribe = "Unsubscribe"
+remove = "Remove"
 
 [modDetails.update]
 text = "Updated {updated} · seen {seen}"

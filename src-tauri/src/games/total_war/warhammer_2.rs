@@ -7,6 +7,7 @@ pub const WARHAMMER_2: TotalWar = TotalWar {
         series: "Total War",
         title: "Warhammer II",
         cover: "/tww2.jpg",
+        nexus_domain: "totalwarwarhammer2",
     },
     mods_folder_name: "warhammer2",
     #[cfg(windows)]

@@ -7,6 +7,8 @@ export * from './profiles.svelte';
 export * from './groups.svelte';
 export * from './load-order.svelte';
 export * from './navigation.svelte';
+export * from './nexus-downloads.svelte';
+export * from './nexus.svelte';
 export * from './notices.svelte';
 export * from './s7forge.svelte';
 export * from './settings.svelte';

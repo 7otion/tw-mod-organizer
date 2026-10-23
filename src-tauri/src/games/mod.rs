@@ -16,6 +16,7 @@ pub struct GameInfo {
     pub series: &'static str,
     pub title: &'static str,
     pub cover: &'static str,
+    pub nexus_domain: &'static str,
 }
 
 #[derive(Deserialize)]

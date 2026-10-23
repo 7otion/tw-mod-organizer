@@ -5,19 +5,23 @@
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 	import XIcon from '@lucide/svelte/icons/x';
 
+	import NexusConnectDialog from '@/components/nexus-connect-dialog.svelte';
+	import * as AlertDialog from '@/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as Card from '@/components/ui/card';
 	import { Progress } from '@/components/ui/progress';
 
 	import { t } from '@/lib/i18n';
-	import { S7forgeStore, SettingsStore } from '@/lib/store';
+	import { NexusStore, S7forgeStore, SettingsStore } from '@/lib/store';
 
 	import SettingRow from './setting-row.svelte';
 
-	const NEXUS_ACCOUNT = 'ar3_modder';
-
+	const nexusStore = NexusStore.get();
 	const s7forgeStore = S7forgeStore.get();
 	const settingsStore = SettingsStore.get();
+
+	let isConnectingNexus = $state(false);
+	let isDisconnectingNexus = $state(false);
 
 	const steam = $derived(settingsStore.steamStatus);
 
@@ -83,14 +87,30 @@
 		<SettingRow
 			title="Nexus Mods"
 			titleClass="text-orange-400"
-			description={t('settings.accounts.nexus.account', {
-				name: NEXUS_ACCOUNT,
-			})}
+			description={nexusStore.isConnected
+				? t('settings.accounts.nexus.account', {
+						name: nexusStore.userName ?? '',
+					})
+				: t('settings.accounts.nexus.notConnected')}
 		>
-			<Button variant="ghost" size="sm">
-				<LogOutIcon />
-				{t('settings.accounts.nexus.disconnect')}
-			</Button>
+			{#if nexusStore.isConnected}
+				<Button
+					variant="ghost"
+					size="sm"
+					onclick={() => (isDisconnectingNexus = true)}
+				>
+					<LogOutIcon />
+					{t('settings.accounts.nexus.disconnect')}
+				</Button>
+			{:else}
+				<Button
+					variant="pink"
+					size="sm"
+					onclick={() => (isConnectingNexus = true)}
+				>
+					{t('settings.accounts.nexus.connect')}
+				</Button>
+			{/if}
 		</SettingRow>
 		<SettingRow
 			title="s7forge"
@@ -152,3 +172,27 @@
 		</SettingRow>
 	</Card.Content>
 </Card.Root>
+
+<NexusConnectDialog bind:open={isConnectingNexus} />
+
+<AlertDialog.Root bind:open={isDisconnectingNexus}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>
+				{t('settings.accounts.nexus.disconnectConfirm.title')}
+			</AlertDialog.Title>
+			<AlertDialog.Description>
+				{t('settings.accounts.nexus.disconnectConfirm.description')}
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>{t('common.cancel')}</AlertDialog.Cancel>
+			<AlertDialog.Action
+				variant="destructive"
+				onclick={() => nexusStore.disconnect()}
+			>
+				{t('settings.accounts.nexus.disconnectConfirm.confirm')}
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

@@ -518,11 +518,11 @@ export class ModTable<Row, ScrollKey = never> implements LocateTarget {
 			(mod) => !this.#libraryStore.isUnused(mod)
 		);
 		return {
-			author: '120px',
-			tags: hasTags ? '170px' : '2.5rem',
+			author: 'minmax(0,1fr)',
+			tags: hasTags ? 'minmax(0,1.3fr)' : '2.5rem',
 			source: `${SOURCE_ICON_SIZES[this.layout.coverSize]}px`,
-			mod: 'minmax(0,1fr)',
-			profiles: hasProfiles ? '196px' : '5rem',
+			mod: 'minmax(0,4fr)',
+			profiles: hasProfiles ? 'minmax(0,1.5fr)' : '5rem',
 			size: '64px',
 			updated: '80px',
 			added: '72px',

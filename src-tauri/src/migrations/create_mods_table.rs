@@ -18,6 +18,7 @@ impl Migration for CreateModsTable {
             table.text("author_name").nullable();
             table.text("author_ref").nullable();
             table.text("version").nullable();
+            table.text("remote_version").nullable();
             table.text("page_url").nullable();
             table.text("preview_url").nullable();
             table.text("preview_file").nullable();

@@ -7,6 +7,7 @@ pub const THREE_KINGDOMS: TotalWar = TotalWar {
         series: "Total War",
         title: "Three Kingdoms",
         cover: "/tw3k.jpg",
+        nexus_domain: "totalwarthreekingdoms",
     },
     mods_folder_name: "threekingdoms",
     #[cfg(windows)]

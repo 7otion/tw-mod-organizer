@@ -49,7 +49,14 @@ export type SteamNotice = NoticeBase & {
 	updatedAt: Date;
 };
 
-export type Notice = MissingNotice | BrokenNotice | OrderNotice | SteamNotice;
+export type NexusNotice = NoticeBase & {
+	category: 'nexus';
+	version: string | null;
+	installedVersion: string | null;
+};
+
+export type Notice =
+	MissingNotice | BrokenNotice | OrderNotice | SteamNotice | NexusNotice;
 
 export type NoticesTab = 'all' | NoticeGroup;
 
@@ -149,9 +156,28 @@ export class NoticesStore extends ConnectionStore {
 				});
 		});
 	});
+	readonly #nexus = $derived.by((): NexusNotice[] =>
+		this.#libraryStore.list.flatMap((mod) =>
+			mod.source === 'nexus' &&
+			mod.hasUnseenUpdate &&
+			!NoticesStore.isBroken(mod)
+				? [
+						{
+							key: `nexus:${mod.id}`,
+							category: 'nexus',
+							mod,
+							version: mod.remote_version,
+							installedVersion: mod.version,
+						},
+					]
+				: []
+		)
+	);
 	readonly #steam = $derived.by((): SteamNotice[] =>
 		this.#libraryStore.list.flatMap((mod) =>
-			mod.hasUnseenUpdate && !NoticesStore.isBroken(mod)
+			mod.source === 'steam' &&
+			mod.hasUnseenUpdate &&
+			!NoticesStore.isBroken(mod)
 				? [
 						{
 							key: `steam:${mod.id}`,
@@ -168,6 +194,7 @@ export class NoticesStore extends ConnectionStore {
 		...this.#missing,
 		...this.#broken,
 		...this.#order,
+		...this.#nexus,
 		...this.#steam,
 	]);
 	readonly scope = $derived.by((): NoticesScope => {
@@ -375,7 +402,9 @@ export class NoticesStore extends ConnectionStore {
 	async markAllSeen(): Promise<void> {
 		await this.#libraryStore.markSeen(
 			this.list.flatMap((notice) =>
-				notice.category === 'steam' ? [notice.mod] : []
+				notice.category === 'steam' || notice.category === 'nexus'
+					? [notice.mod]
+					: []
 			)
 		);
 	}

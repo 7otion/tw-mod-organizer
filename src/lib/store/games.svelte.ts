@@ -10,6 +10,7 @@ export type SupportedGame = {
 	series: string;
 	title: string;
 	cover: string;
+	nexus_domain: string;
 	detected_path: string | null;
 };
 

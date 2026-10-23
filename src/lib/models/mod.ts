@@ -28,6 +28,7 @@ export class Mod extends Model<typeof Mod.schema> {
 			author_name: Column.text().nullable(),
 			author_ref: Column.text().nullable(),
 			version: Column.text().nullable(),
+			remote_version: Column.text().nullable(),
 			page_url: Column.text().nullable(),
 			preview_url: Column.text().nullable(),
 			preview_file: Column.text().nullable(),

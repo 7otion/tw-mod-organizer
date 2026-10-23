@@ -74,6 +74,7 @@ export class ModInstall {
 	step = $state<InstallStep>('pick');
 	inputs = $state.raw<AcceptedInputs | null>(null);
 	inspection = $state.raw<Inspection | null>(null);
+	installedFolders = $state.raw<readonly string[]>([]);
 	name = $state('');
 	isNameEdited = $state(false);
 	error = $state<string | null>(null);
@@ -295,6 +296,7 @@ export class ModInstall {
 					})),
 				},
 			});
+			this.installedFolders = result.installed;
 			if (result.installed.length) await this.#scanStore.scan();
 			if (result.problem)
 				this.error = t('library.installMod.problem', {
